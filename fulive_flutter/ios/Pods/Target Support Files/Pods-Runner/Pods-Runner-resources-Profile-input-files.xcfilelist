@@ -1,0 +1,16 @@
+${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/graphics/body_slim.bundle
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/graphics/controller_cpp.bundle
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/graphics/face_beautification.bundle
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/graphics/face_makeup.bundle
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/graphics/fuzzytoonfilter.bundle
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/graphics/fxaa.bundle
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/graphics/tongue.bundle
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/model/ai_bgseg_green.bundle
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/model/ai_face_processor.bundle
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/model/ai_face_processor_lite.bundle
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/model/ai_hairseg.bundle
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/model/ai_hand_processor.bundle
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/model/ai_human_processor.bundle
+${PODS_ROOT}/FURenderKit/FURenderKit-v7.4.1/Resources/model/ai_human_processor_mb_fast.bundle
+${PODS_CONFIGURATION_BUILD_DIR}/fulive_plugin/fulive_plugin.bundle

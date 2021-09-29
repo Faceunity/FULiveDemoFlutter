@@ -1,0 +1,167 @@
+[
+	[{
+		"itemType": "FULiveModelTypeBeautifyFace",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "美颜",
+		"conpareCode": 0,
+		"modules": [1],
+		"items": [],
+		"imagePath": "resource/images/homeView/beautyIcon.png"
+	}, {
+		"itemType": "FULiveModelTypeMakeUp",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "美妆",
+		"conpareCode": 0,
+		"modules": [524288],
+		"items": [],
+		"imagePath": "resource/images/homeView/makeUpIcon.png"
+	}, {
+		"itemType": "FULiveModelTypeItems",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "道具贴纸",
+		"conpareCode": 0,
+		"modules": [110],
+		"items": ["resetItem", "CatSparks", "fu_zh_fenshu", "sdlr", "xlong_zh_fu", "newy1", "redribbt", "DaisyPig", "sdlu"],
+		"imagePath": "resource/images/homeView/stickerIcon.png"
+	}, {
+		"itemType": "FULiveModelTypeAnimoji",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "Animoji",
+		"conpareCode": 0,
+		"modules": [16],
+		"items": ["resetItem", "cartoon_princess_Animoji", "qgirl_Animoji", "kaola_Animoji", "wuxia_Animoji", "baihu_Animoji", "frog_Animoji", "huangya_Animoji", "hetun_Animoji", "douniuquan_Animoji", "hashiqi_Animoji", "baimao_Animoji", "kuloutou_Animoji"],
+		"imagePath": "resource/images/homeView/animojiIcon.png"
+	}, {
+		"itemType": "FULiveModelTypeHair",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "美发",
+		"conpareCode": 0,
+		"modules": [1048576],
+		"items": ["resetItem", "icon_gradualchangehair_01", "icon_gradualchangehair_02", "icon_gradualchangehair_03", "icon_gradualchangehair_04", "icon_gradualchangehair_05", "hair_color_1", "hair_color_2", "hair_color_3", "hair_color_4", "hair_color_5", "hair_color_6", "hair_color_7", "hair_color_8"],
+		"imagePath": "resource/images/homeView/hairIcon.png"
+	}, {
+		"itemType": "FULiveModelTypeLightMakeup",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "轻美妆",
+		"conpareCode": 1,
+		"modules": [8],
+		"items": [],
+		"imagePath": "resource/images/homeView/lightMakeUpIcon.png"
+	}, {
+		"itemType": "FULiveModelTypeARMarsk",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "AR面具",
+		"conpareCode": 0,
+		"modules": [96],
+		"items": ["resetItem", "bluebird", "lanhudie", "fenhudie", "tiger_huang", "tiger_bai", "baozi", "tiger", "xiongmao"],
+		"imagePath": "resource/images/homeView/ARMaskIcon.png"
+	}, {
+		"itemType": "FULiveModelTypeHilarious",
+		"maxFace": 1,
+		"enable": false,
+		"itemName": "搞笑大头",
+		"conpareCode": 1,
+		"modules": [32768],
+		"items": ["resetItem", "big_head_facewarp1", "big_head_facewarp2", "big_head_facewarp4", "big_head_facewarp5", "big_head_facewarp6", "big_head_facewarp3"],
+		"imagePath": "resource/images/homeView/bigHeaderIcon.png"
+	}, {
+		"itemType": "FULiveModelTypePoster",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "海报换脸",
+		"conpareCode": 0,
+		"modules": [8388608],
+		"items": ["poster1", "poster2", "poster3", "poster4", "poster5", "poster6", "poster7", "poster8"],
+		"imagePath": "resource/images/homeView/posterIcon.png"
+	}, {
+		"itemType": "FULiveModelTypeExpressionRecognition",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "表情识别",
+		"conpareCode": 0,
+		"modules": [2058],
+		"items": ["resetItem", "future_warrior", "jet_mask", "sdx2", "luhantongkuan_ztt_fu", "qingqing_ztt_fu", "xiaobianzi_zh_fu", "xiaoxueshen_ztt_fu"],
+		"imagePath": "resource/images/homeView/expressionIcon.png"
+	}, {
+		"itemType": "FULiveModelTypeMusicFilter",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "音乐滤镜",
+		"conpareCode": 0,
+		"modules": [131072],
+		"items": ["resetItem", "douyin_01", "douyin_02"],
+		"imagePath": "resource/images/homeView/musicIcon.png"
+	}, {
+		"itemType": "FULiveModelTypeHahaMirror",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "哈哈镜",
+		"conpareCode": 0,
+		"modules": [65536],
+		"items": ["resetItem", "facewarp2", "facewarp3", "facewarp4", "facewarp5", "facewarp6"],
+		"imagePath": "resource/images/homeView/hahajingIcon.png"
+	}],
+	[{
+		"itemType": "FULiveModelTypeBody",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "美体",
+		"conpareCode": 1,
+		"modules": [32],
+		"items": [],
+		"imagePath": "resource/images/homeView/bodyIcon.png"
+	}, {
+		"itemType": "FULiveModelTypeWholeAvatar",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "全身Avatar",
+		"conpareCode": 1,
+		"modules": [448],
+		"items": ["avatar_nan_image", "avatar_nv_image"],
+		"imagePath": "resource/images/homeView/avatarIcon.png"
+	}, {
+		"itemType": "FULiveModelTypeBGSegmentation",
+		"maxFace": 1,
+		"enable": false,
+		"itemName": "人像分割",
+		"conpareCode": 0,
+		"modules": [256],
+		"items": ["human_outline", "boyfriend1", "boyfriend3", "boyfriend2", "hez_ztt_fu", "gufeng_zh_fu", "xiandai_ztt_fu", "sea_lm_fu", "ice_lm_fu"],
+		"imagePath": "resource/images/homeView/portraitIcon.png"
+	}, {
+		"itemType": "FULiveModelTypeGestureRecognition",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "手势识别",
+		"conpareCode": 0,
+		"modules": [512],
+		"items": ["resetItem", "ctrl_rain", "ctrl_snow", "ctrl_flower", "ssd_thread_korheart", "ssd_thread_six", "ssd_thread_cute"],
+		"imagePath": "resource/images/homeView/gestureIcon.png"
+	}, {
+		"maxFace": 4,
+		"itemName": "绿幕抠像",
+		"itemType": "FULiveModelTypeLvMu",
+		"conpareCode": 1,
+		"enable": false,
+		"modules": [512],
+		"imagePath": "resource/images/homeView/greenIcon.png"
+	}],
+	[{
+		"itemType": "FULiveModelTypeQSTickers",
+		"maxFace": 4,
+		"animationIcon": true,
+		"itemName": "精品贴纸",
+		"enable": false,
+		"animationNamed": "tiezhi_data",
+		"conpareCode": 0,
+		"modules": [110],
+		"items": []
+	}]
+]

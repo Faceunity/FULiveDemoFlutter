@@ -1,0 +1,22 @@
+PODS:
+  - Flutter (1.0.0)
+  - fulive_plugin (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - fulive_plugin (from `.symlinks/plugins/fulive_plugin/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  fulive_plugin:
+    :path: ".symlinks/plugins/fulive_plugin/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  fulive_plugin: 6c2642cc6cb9a6cf358b15416f44ef8701455f90
+
+PODFILE CHECKSUM: 8e679eca47255a8ca8067c4c67aab20e64cb974d
+
+COCOAPODS: 1.10.1

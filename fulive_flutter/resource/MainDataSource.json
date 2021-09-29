@@ -1,0 +1,12 @@
+[
+	[{
+		"itemType": "FULiveModelTypeBeautifyFace",
+		"maxFace": 4,
+		"enable": false,
+		"itemName": "美颜",
+		"conpareCode": 0,
+		"modules": [1],
+		"items": [],
+		"imagePath": "resource/images/homeView/beautyIcon.png"
+	}]
+]
