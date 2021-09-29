@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">FuLiveDemo</string>
+
+    <string name="fu_live_demo">FU Live Demo 特效版</string>
+
+    <string name="main_classification_face">人脸特效</string>
+    <string name="main_classification_human">人体特效</string>
+    <string name="main_content_service">内容服务</string>
+    <string name="home_function_name_beauty">美颜</string>
+    <string name="home_function_name_light_makeup">轻美妆</string>
+    <string name="home_function_name_animoji">Animoji</string>
+    <string name="home_function_name_sticker">道具贴纸</string>
+    <string name="home_function_name_ar">AR 面具</string>
+    <string name="home_function_name_big_head">搞笑大头</string>
+    <string name="home_function_name_hair">美发</string>
+    <string name="home_function_name_expression">表情识别</string>
+    <string name="home_function_name_poster_face">海报换脸</string>
+    <string name="home_function_name_music_filter">音乐滤镜</string>
+    <string name="home_function_name_portrait_segment">人像分割</string>
+    <string name="home_function_name_gesture">手势识别</string>
+    <string name="home_function_name_face_warp">哈哈镜</string>
+    <string name="home_function_name_makeup">美妆</string>
+    <string name="home_function_name_beauty_body">美体</string>
+    <string name="home_function_name_human_avatar">全身 Avatar</string>
+    <string name="home_function_name_action_recognition">动作识别</string>
+    <string name="home_function_name_green_curtain">绿幕抠像</string>
+    <string name="home_function_name_fine_sticker">精品贴纸</string>
+
+    <string name="resolution_480p">480x640</string>
+    <string name="resolution_720p">720x1280</string>
+    <string name="resolution_1080p">1080x1920</string>
+</resources>

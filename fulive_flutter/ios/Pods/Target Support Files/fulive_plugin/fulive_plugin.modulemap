@@ -1,0 +1,6 @@
+framework module fulive_plugin {
+  umbrella header "fulive_plugin-umbrella.h"
+
+  export *
+  module * { export * }
+}

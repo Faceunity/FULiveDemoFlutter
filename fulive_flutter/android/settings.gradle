@@ -1,0 +1,9 @@
+include ':fu_core'
+include ':app'
+rootProject.name = "FuLiveDemo"
+setBinding(new Binding([gradle: this]))
+evaluate(new File('../.android/include_flutter.groovy'))
+include ':fulive_flutter'
+project(':fulive_flutter').projectDir = new File('../../fulive_flutter')
+include ':flutter'
+project(':flutter').projectDir = new File('../.android/Flutter')

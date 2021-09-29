@@ -1,0 +1,48 @@
+{
+  "name": "fulive_plugin",
+  "version": "0.0.1",
+  "summary": "A new flutter plugin project.",
+  "description": "A new flutter plugin project.",
+  "homepage": "http://example.com",
+  "license": {
+    "file": "../LICENSE"
+  },
+  "authors": {
+    "Your Company": "email@example.com"
+  },
+  "source": {
+    "path": "."
+  },
+  "source_files": [
+    "Classes/**/*"
+  ],
+  "public_header_files": "Classes/**/*.h",
+  "dependencies": {
+    "Flutter": [
+
+    ],
+    "FURenderKit": [
+
+    ],
+    "SVProgressHUD": [
+
+    ],
+    "MJExtension": [
+      "3.0.15.1"
+    ]
+  },
+  "static_framework": true,
+  "resource_bundles": {
+    "fulive_plugin": [
+      "Assets/*.json",
+      "**/*.{png,bundle,json}"
+    ]
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "pod_target_xcconfig": {
+    "DEFINES_MODULE": "YES",
+    "EXCLUDED_ARCHS[sdk=iphonesimulator*]": "i386"
+  }
+}

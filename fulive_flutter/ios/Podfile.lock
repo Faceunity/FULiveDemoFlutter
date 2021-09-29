@@ -1,0 +1,55 @@
+PODS:
+  - Flutter (1.0.0)
+  - FlutterPluginRegistrant (0.0.1):
+    - Flutter
+    - fluttertoast
+    - fulive_plugin
+  - fluttertoast (0.0.2):
+    - Flutter
+    - Toast
+  - fulive_plugin (0.0.1):
+    - Flutter
+    - FURenderKit
+    - MJExtension (= 3.0.15.1)
+    - SVProgressHUD
+  - FURenderKit (7.4.1)
+  - MJExtension (3.0.15.1)
+  - SVProgressHUD (2.2.5)
+  - Toast (4.0.0)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - FlutterPluginRegistrant (from `Flutter/FlutterPluginRegistrant`)
+  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - fulive_plugin (from `.symlinks/plugins/fulive_plugin/ios`)
+
+SPEC REPOS:
+  trunk:
+    - FURenderKit
+    - MJExtension
+    - SVProgressHUD
+    - Toast
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  FlutterPluginRegistrant:
+    :path: Flutter/FlutterPluginRegistrant
+  fluttertoast:
+    :path: ".symlinks/plugins/fluttertoast/ios"
+  fulive_plugin:
+    :path: ".symlinks/plugins/fulive_plugin/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  FlutterPluginRegistrant: 782c06a15bcbf5d52e44128e5726d778f2028768
+  fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
+  fulive_plugin: 085f82a5c42fca1242aa8955718ac0e79dff56cf
+  FURenderKit: 53174f25ab4e7d006b6b3ec285493721dff8bd60
+  MJExtension: 19bc33ce2eee2d319760f5622562cf581a6ff756
+  SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
+  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
+
+PODFILE CHECKSUM: f87e366f0a7d6ad46f7bf9f642e116c85edfd616
+
+COCOAPODS: 1.10.2
