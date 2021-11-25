@@ -45,6 +45,5 @@ dependencies {
     implementation ('com.google.android.exoplayer:exoplayer-core:2.11.3'){
         exclude group: 'androidx.annotation', module:'annotation'
     }
-    implementation files('libs\\nama.jar')
 
 }

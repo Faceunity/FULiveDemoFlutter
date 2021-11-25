@@ -123,7 +123,15 @@ class Makeup(controlBundle: FUBundleData) : SimpleMakeup(controlBundle) {
             updateAttributesBackground(MakeupParam.SHADOW_INTENSITY, value)
         }
 
+    /* 新的组合妆容 -> 滤镜程度 */
+    var filterIntensity = 0.0   //范围0~1 0表示不显示滤镜
+        set(value) {
+            field = value * currentFilterScale
+            updateAttributes(MakeupParam.FILTER_INTENSITY, field)
+        }
 
+    /* 当前滤镜的比率 例子 某个值为 X * scale = 真实值 */
+    var currentFilterScale = 1.0
     //endregion
 
 
@@ -131,6 +139,13 @@ class Makeup(controlBundle: FUBundleData) : SimpleMakeup(controlBundle) {
     /**
      * 项目
      */
+    /* 口红bundle  */
+    var lipBundle: FUBundleData? = null
+        set(value) {
+            updateMakeupBundle(MakeupParam.TEX_LIP, value)
+            field = value
+        }
+
     /* 口红类型 */
     var lipType = MakeupLipEnum.FOG
         set(value) {
@@ -150,6 +165,27 @@ class Makeup(controlBundle: FUBundleData) : SimpleMakeup(controlBundle) {
         set(value) {
             field = value
             updateAttributesBackground(MakeupParam.MAKEUP_LIP_COLOR, value.toScaleColorArray())
+        }
+
+    /*口红调色参数*/
+    var lipColorV2 = FUColorRGBData(0.0, 0.0, 0.0, 0.0)
+        set(value) {
+            field = value
+            updateAttributesBackground(MakeupParam.MAKEUP_LIP_COLOR_V2, value.toScaleColorArray())
+        }
+
+    /*口红高光开关*/
+    var lipHighLightEnable = false
+        set(value) {
+            field = value
+            updateAttributesBackground(MakeupParam.MAKEUP_LIP_HIGH_LIGHT_ENABLE, if (value) 1.0 else 0.0)
+        }
+
+    /*口红高光强度*/
+    var lipHighLightStrength = 0.0
+        set(value) {
+            field = value
+            updateAttributesBackground(MakeupParam.MAKEUP_LIP_HIGH_LIGHT_STRENGTH, value)
         }
 
     /*口红调色参数*/
@@ -445,6 +481,8 @@ class Makeup(controlBundle: FUBundleData) : SimpleMakeup(controlBundle) {
         /*业务*/
         params[MakeupParam.LIP_TYPE] = lipType
         params[MakeupParam.IS_TWO_COLOR] = if (enableTwoLipColor) 1.0 else 0.0
+        params[MakeupParam.MAKEUP_LIP_HIGH_LIGHT_ENABLE] = if (lipHighLightEnable) 1.0 else 0.0
+        params[MakeupParam.MAKEUP_LIP_HIGH_LIGHT_STRENGTH] = lipHighLightStrength
         params[MakeupParam.BROW_WARP] = if (enableBrowWarp) 1.0 else 0.0
         params[MakeupParam.BROW_WARP_TYPE] = browWarpType
         /*强度*/
@@ -460,6 +498,7 @@ class Makeup(controlBundle: FUBundleData) : SimpleMakeup(controlBundle) {
         params[MakeupParam.HIGHLIGHT_INTENSITY] = heightLightIntensity
         params[MakeupParam.SHADOW_INTENSITY] = shadowIntensity
         /*子项妆容贴图*/
+        lipBundle?.let { params[MakeupParam.TEX_LIP] = it }
         eyeBrowBundle?.let { params[MakeupParam.TEX_EYE_BROW] = it }
         eyeShadowBundle?.let { params[MakeupParam.TEX_EYE_SHADOW] = it }
         eyeShadowBundle2?.let { params[MakeupParam.TEX_EYE_SHADOW2] = it }
@@ -475,6 +514,7 @@ class Makeup(controlBundle: FUBundleData) : SimpleMakeup(controlBundle) {
         shadowBundle?.let { params[MakeupParam.TEX_SHADOW] = it }
         /*子项妆容颜色*/
         params[MakeupParam.MAKEUP_LIP_COLOR] = lipColor.toScaleColorArray()
+        params[MakeupParam.MAKEUP_LIP_COLOR_V2] = lipColorV2.toScaleColorArray()
         params[MakeupParam.MAKEUP_LIP_COLOR2] = lipColor2.toScaleColorArray()
         params[MakeupParam.MAKEUP_EYE_LINER_COLOR] = eyeLinerColor.toScaleColorArray()
         params[MakeupParam.MAKEUP_EYE_LASH_COLOR] = eyeLashColor.toScaleColorArray()
@@ -507,6 +547,8 @@ class Makeup(controlBundle: FUBundleData) : SimpleMakeup(controlBundle) {
     private fun resetMakeup() {
         /*业务*/
         lipType = MakeupLipEnum.FOG
+        lipHighLightEnable = false
+        lipHighLightStrength = 0.0
         enableTwoLipColor = false
         enableBrowWarp = false
         browWarpType = MakeupBrowWarpEnum.WILLOW
@@ -524,6 +566,7 @@ class Makeup(controlBundle: FUBundleData) : SimpleMakeup(controlBundle) {
         heightLightIntensity = 0.0
         shadowIntensity = 0.0
         /*子项妆容贴图*/
+        lipBundle = null
         eyeBrowBundle = null
         eyeShadowBundle = null
         eyeShadowBundle2 = null
@@ -539,6 +582,7 @@ class Makeup(controlBundle: FUBundleData) : SimpleMakeup(controlBundle) {
         shadowBundle = null
         /*子项妆容颜色*/
         lipColor = FUColorRGBData(0.0, 0.0, 0.0, 0.0)
+        lipColorV2 = FUColorRGBData(0.0, 0.0, 0.0, 0.0)
         lipColor2 = FUColorRGBData(0.0, 0.0, 0.0, 0.0)
         eyeLinerColor = FUColorRGBData(0.0, 0.0, 0.0, 0.0)
         eyeLashColor = FUColorRGBData(0.0, 0.0, 0.0, 0.0)

@@ -6,14 +6,15 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.opengl.EGLConfig
 import android.opengl.GLES11Ext
 import android.opengl.GLES20
-import android.opengl.GLSurfaceView
 import android.opengl.Matrix
 import android.view.MotionEvent
 import com.faceunity.core.camera.FUCamera
 import com.faceunity.core.camera.FUCameraPreviewData
 import com.faceunity.core.entity.FUCameraConfig
+import com.faceunity.core.entity.FURenderFrameData
 import com.faceunity.core.entity.FURenderInputData
 import com.faceunity.core.enumeration.*
 import com.faceunity.core.faceunity.FURenderManager
@@ -25,10 +26,10 @@ import com.faceunity.core.media.photo.PhotoRecordHelper
 import com.faceunity.core.program.ProgramTextureOES
 import com.faceunity.core.utils.DecimalUtils
 import com.faceunity.core.utils.GlUtil
+import com.faceunity.core.utils.LimitFpsUtil
+import com.faceunity.core.weight.GLTextureView
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import javax.microedition.khronos.egl.EGLConfig
-import javax.microedition.khronos.opengles.GL10
 import kotlin.math.abs
 
 
@@ -39,8 +40,8 @@ import kotlin.math.abs
  *
  */
 
-class CameraRenderer(gLSurfaceView: GLSurfaceView?, private val cameraConfig: FUCameraConfig, glRendererListener: OnGlRendererListener?) :
-    BaseFURenderer(gLSurfaceView, glRendererListener), ICameraRenderer {
+class CameraRenderer(gLTextureView: GLTextureView?, private val cameraConfig: FUCameraConfig, glRendererListener: OnGlRendererListener?) :
+    BaseFURenderer(gLTextureView, glRendererListener), ICameraRenderer {
 
     /**相机**/
     var fUCamera: FUCamera = FUCamera.getInstance()
@@ -60,9 +61,9 @@ class CameraRenderer(gLSurfaceView: GLSurfaceView?, private val cameraConfig: FU
         externalInputType = FUExternalInputEnum.EXTERNAL_INPUT_TYPE_CAMERA
         inputTextureType = FUInputTextureEnum.FU_ADM_FLAG_EXTERNAL_OES_TEXTURE
         inputBufferType = FUInputBufferEnum.FU_FORMAT_NV21_BUFFER
-        gLSurfaceView?.setEGLContextClientVersion(2)
-        gLSurfaceView?.setRenderer(this)
-        gLSurfaceView?.renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
+        gLTextureView?.setEGLContextClientVersion(2)
+        gLTextureView?.setRenderer(this)
+        gLTextureView?.renderMode = GLTextureView.RENDERMODE_WHEN_DIRTY
     }
 
     /**
@@ -107,7 +108,7 @@ class CameraRenderer(gLSurfaceView: GLSurfaceView?, private val cameraConfig: FU
                     }
                 isCameraPreviewFrame = true
             }
-            gLSurfaceView?.requestRender()
+            gLTextureView?.requestRender()
         }
     }
 
@@ -120,7 +121,7 @@ class CameraRenderer(gLSurfaceView: GLSurfaceView?, private val cameraConfig: FU
     override fun onResume() {
         mSensorManager.registerListener(mSensorEventListener, mSensor, SensorManager.SENSOR_DELAY_NORMAL)
         if (isActivityPause) {
-            gLSurfaceView?.onResume()
+            gLTextureView?.onResume()
         }
         isActivityPause = false
     }
@@ -132,7 +133,7 @@ class CameraRenderer(gLSurfaceView: GLSurfaceView?, private val cameraConfig: FU
         mSensorManager.unregisterListener(mSensorEventListener)
         fUCamera.closeCamera()
         val countDownLatch = CountDownLatch(1)
-        gLSurfaceView?.queueEvent {
+        gLTextureView?.queueEvent {
             cacheLastBitmap()
             destroyGlSurface()
             countDownLatch.countDown()
@@ -142,36 +143,37 @@ class CameraRenderer(gLSurfaceView: GLSurfaceView?, private val cameraConfig: FU
         } catch (e: InterruptedException) {
             // ignored
         }
-        gLSurfaceView?.onPause()
+        gLTextureView?.onPause()
     }
 
     /**Activity onDestroy**/
     override fun onDestroy() {
         mCacheBitmap = null
         glRendererListener = null
-        gLSurfaceView = null
+        gLTextureView = null
     }
 
 
     //endregion 生命周期调用
 
 
-    //region  GLSurfaceView.Renderer相关
+    //region  GLTextureView.Renderer相关
 
 
-    override fun surfaceCreated(gl: GL10?, config: EGLConfig?) {
+    override fun surfaceCreated(config: EGLConfig?) {
         originalTextId = GlUtil.createTextureObject(GLES11Ext.GL_TEXTURE_EXTERNAL_OES)
         mProgramTextureOES = ProgramTextureOES()
         isCameraPreviewFrame = false
         fUCamera.openCamera(cameraConfig, originalTextId, getFUCameraListener())
+        LimitFpsUtil.setTargetFps(LimitFpsUtil.DEFAULT_FPS)
     }
 
-    override fun surfaceChanged(gl: GL10?, width: Int, height: Int) {
+    override fun surfaceChanged(width: Int, height: Int) {
         defaultFUMvpMatrix = GlUtil.changeMvpMatrixCrop(width.toFloat(), height.toFloat(), originalHeight.toFloat(), originalWidth.toFloat())
     }
 
 
-    override fun prepareRender(gl: GL10?): Boolean {
+    override fun prepareRender(): Boolean {
         if (!isCameraPreviewFrame) {
             drawCacheBitmap()
             return false
@@ -191,12 +193,26 @@ class CameraRenderer(gLSurfaceView: GLSurfaceView?, private val cameraConfig: FU
 
     override fun buildFURenderInputData(): FURenderInputData {
         synchronized(mFURenderInputDataLock) {
-            return currentFURenderInputData.clone()
+            currentFURenderInputData.clone()
+            //切换相机的时候忽略几帧不处理，
+            if (openCameraIgnoreFrame > 0) {
+                openCameraIgnoreFrame--
+                currentFURenderInputData.imageBuffer = null
+                currentFURenderInputData.texture = null
+            }
+            return currentFURenderInputData
         }
     }
 
+    override fun onRenderBefore(input: FURenderInputData ,fuRenderFrameData: FURenderFrameData) {
+        if (input.imageBuffer?.inputBufferType == FUInputBufferEnum.FU_FORMAT_YUV_BUFFER && input.renderConfig.isNeedBufferReturn) {
+            fuRenderFrameData.texMatrix = TEXTURE_MATRIX_CCRO_FLIPV_0.copyOf()
+            input.renderConfig.outputMatrix = FUTransformMatrixEnum.CCROT0_FLIPVERTICAL
+            input.renderConfig.outputMatrixEnable = true
+        }
+    }
 
-    override fun drawRenderFrame(gl: GL10?) {
+    override fun drawRenderFrame() {
         if (faceUnity2DTexId > 0 && renderSwitch) {
             programTexture2d!!.drawFrame(faceUnity2DTexId, currentFUTexMatrix, currentFUMvpMatrix)
         } else if (originalTextId > 0) {
@@ -207,6 +223,7 @@ class CameraRenderer(gLSurfaceView: GLSurfaceView?, private val cameraConfig: FU
             mProgramTextureOES!!.drawFrame(originalTextId, originTexMatrix, smallViewMatrix)
             GLES20.glViewport(0, 0, surfaceViewWidth, surfaceViewHeight)
         }
+        LimitFpsUtil.limitFrameRate()
     }
 
 
@@ -306,9 +323,15 @@ class CameraRenderer(gLSurfaceView: GLSurfaceView?, private val cameraConfig: FU
     }
 
     /**
+     * 开启camera时过滤的帧数
+     */
+    var openCameraIgnoreFrame:Int = 0
+
+    /**
      * 切换相机
      */
     override fun switchCamera() {
+        openCameraIgnoreFrame = 2
         fUCamera.switchCamera()
     }
 

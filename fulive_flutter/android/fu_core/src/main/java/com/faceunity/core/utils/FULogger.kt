@@ -34,7 +34,8 @@ object FULogger {
     /**
      * 打印任务堆栈信息
      */
-    internal fun printCallStack() {
+    @JvmStatic
+    fun printCallStack() {
         val ex = Throwable()
         val stackElements = ex.stackTrace
         for (i in stackElements.indices) {
@@ -52,7 +53,8 @@ object FULogger {
      * @param tag String
      * @param msg String
      */
-    internal fun t(tag: String, msg: String) {
+    @JvmStatic
+    fun t(tag: String, msg: String) {
         if (_logLevel.ordinal <= LogLevel.TRACE.ordinal) {
             Log.v(tag, msg)
         }
@@ -63,7 +65,8 @@ object FULogger {
      * @param tag String
      * @param msg String
      */
-    internal fun d(tag: String, msg: String) {
+    @JvmStatic
+    fun d(tag: String, msg: String) {
         if (_logLevel.ordinal <= LogLevel.DEBUG.ordinal) {
             Log.d(tag, msg)
         }
@@ -74,7 +77,8 @@ object FULogger {
      * @param tag String
      * @param msg String
      */
-    internal fun i(tag: String, msg: String) {
+    @JvmStatic
+    fun i(tag: String, msg: String) {
         if (_logLevel.ordinal <= LogLevel.INFO.ordinal) {
             Log.i(tag, msg)
         }
@@ -85,7 +89,8 @@ object FULogger {
      * @param tag String
      * @param msg String
      */
-    internal fun w(tag: String, msg: String) {
+    @JvmStatic
+    fun w(tag: String, msg: String) {
         if (_logLevel.ordinal <= LogLevel.WARN.ordinal) {
             Log.w(tag, msg)
         }
@@ -96,7 +101,8 @@ object FULogger {
      * @param tag String
      * @param msg String
      */
-    internal fun e(tag: String, msg: String) {
+    @JvmStatic
+    fun e(tag: String, msg: String) {
         if (_logLevel.ordinal <= LogLevel.ERROR.ordinal) {
             Log.e(tag, msg)
         }
@@ -107,7 +113,8 @@ object FULogger {
      * @param tag String
      * @param msg String
      */
-    internal fun c(tag: String, msg: String) {
+    @JvmStatic
+    fun c(tag: String, msg: String) {
         if (_logLevel.ordinal <= LogLevel.CRITICAL.ordinal) {
             Log.e(tag, msg)
         }

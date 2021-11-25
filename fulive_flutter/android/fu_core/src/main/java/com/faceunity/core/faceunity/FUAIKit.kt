@@ -3,11 +3,9 @@ package com.faceunity.core.faceunity
 import com.faceunity.core.enumeration.FUAITypeEnum
 import com.faceunity.core.enumeration.FUFaceProcessorDetectModeEnum
 import com.faceunity.core.enumeration.FUInputBufferEnum
-import com.faceunity.core.support.FURenderBridge
 import com.faceunity.core.support.SDKController
 import com.faceunity.core.utils.FULogger
 import com.faceunity.core.utils.FileUtils
-import com.faceunity.wrapper.faceunity
 import java.util.concurrent.ConcurrentHashMap
 
 
@@ -214,6 +212,13 @@ class FUAIKit private constructor() {
         SDKController.setMaxFaces(maxFaces)
     }
 
+    /**
+     * 设置Landmark算法精度
+     * @param ratio Int 0 1 2
+     */
+    fun faceProcessorSetFaceLandmarkQuality(ratio: Int) {
+        SDKController.faceProcessorSetFaceLandmarkQuality(ratio)
+    }
 
     /**
      * 设置人脸检测距离的接口
@@ -222,6 +227,8 @@ class FUAIKit private constructor() {
     fun faceProcessorSetMinFaceRatio(ratio: Float) {
         SDKController.faceProcessorSetMinFaceRatio(ratio)
     }
+
+
 
 
     /**

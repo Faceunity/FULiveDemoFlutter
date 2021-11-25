@@ -4,7 +4,6 @@ import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.util.Log;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class MediaAudioFileEncoder extends MediaEncoder {
@@ -22,38 +21,43 @@ public class MediaAudioFileEncoder extends MediaEncoder {
     }
 
     @Override
-    protected void prepare() throws IOException {
-        if (DEBUG) {
-            Log.v(TAG, "prepare:");
-        }
-        mTrackIndex = -1;
-        mMuxerStarted = mIsEOS = false;
-        mMediaExtractor = new MediaExtractor();
-        mMediaExtractor.setDataSource(mFilepath);
+    protected void prepare() {
+        try {
+            if (DEBUG) {
+                Log.v(TAG, "prepare:");
+            }
+            mTrackIndex = -1;
+            mMuxerStarted = mIsEOS = false;
+            mMediaExtractor = new MediaExtractor();
+            mMediaExtractor.setDataSource(mFilepath);
 
-        MediaMuxerWrapper muxer = mWeakMuxer.get();
-        //分离出音轨和视轨
-        int trackCount = mMediaExtractor.getTrackCount();
-        if (DEBUG) {
-            Log.d(TAG, "getTrackCount: " + trackCount);
-        }
-        for (int i = 0; i < trackCount; i++) {
-            MediaFormat format = mMediaExtractor.getTrackFormat(i);
-            String mime = format.getString(MediaFormat.KEY_MIME);
-            if (mime.startsWith(AUDIO)) {
-                int maxInputSize = format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE);
-                mInputBuffer = ByteBuffer.allocate(maxInputSize);
-                mMediaExtractor.selectTrack(i);
-                mTrackIndex = muxer.addTrack(format);
-                break;
+            MediaMuxerWrapper muxer = mWeakMuxer.get();
+            //分离出音轨和视轨
+            int trackCount = mMediaExtractor.getTrackCount();
+            if (DEBUG) {
+                Log.d(TAG, "getTrackCount: " + trackCount);
             }
-        }
-        if (mListener != null) {
-            try {
-                mListener.onPrepared(this);
-            } catch (final Exception e) {
-                Log.e(TAG, "prepare:", e);
+            for (int i = 0; i < trackCount; i++) {
+                MediaFormat format = mMediaExtractor.getTrackFormat(i);
+                String mime = format.getString(MediaFormat.KEY_MIME);
+                if (mime.startsWith(AUDIO)) {
+                    int maxInputSize = format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE);
+                    mInputBuffer = ByteBuffer.allocate(maxInputSize);
+                    mMediaExtractor.selectTrack(i);
+                    mTrackIndex = muxer.addTrack(format);
+                    break;
+                }
             }
+            if (mListener != null) {
+                try {
+                    mListener.onPrepared(this);
+                } catch (final Exception e) {
+                    Log.e(TAG, "prepare:", e);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            release();
         }
     }
 

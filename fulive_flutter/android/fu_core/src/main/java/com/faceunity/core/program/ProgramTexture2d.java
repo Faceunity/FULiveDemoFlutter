@@ -34,7 +34,7 @@ public class ProgramTexture2d extends Program {
                     "varying vec2 vTextureCoord;\n" +
                     "void main() {\n" +
                     "    gl_Position = uMVPMatrix * aPosition;\n" +
-                    "    vTextureCoord = (uTexMatrix * aTextureCoord).xy;\n" +
+                    "    vTextureCoord = (uTexMatrix * (aTextureCoord - 0.5) + 0.5).xy;\n" +
                     "}\n";
 
     // Simple fragment shader for use with "normal" 2D textures.

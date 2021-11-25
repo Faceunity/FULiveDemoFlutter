@@ -1,19 +1,21 @@
 package com.faceunity.core.renderer
 
 import android.graphics.Bitmap
+import android.opengl.EGLConfig
 import android.opengl.GLES20
-import android.opengl.GLSurfaceView
 import android.opengl.Matrix
 import com.faceunity.core.entity.FURenderInputData
 import com.faceunity.core.enumeration.*
 import com.faceunity.core.faceunity.FURenderManager
 import com.faceunity.core.infe.IPhotoRenderer
 import com.faceunity.core.listener.OnGlRendererListener
-import com.faceunity.core.utils.*
+import com.faceunity.core.utils.BitmapUtils
+import com.faceunity.core.utils.FileUtils
+import com.faceunity.core.utils.GlUtil
+import com.faceunity.core.utils.LimitFpsUtil
+import com.faceunity.core.weight.GLTextureView
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import javax.microedition.khronos.egl.EGLConfig
-import javax.microedition.khronos.opengles.GL10
 
 
 /**
@@ -23,7 +25,7 @@ import javax.microedition.khronos.opengles.GL10
  *
  */
 
-class PhotoRenderer(gLSurfaceView: GLSurfaceView?, private val photoPath: String, glRendererListener: OnGlRendererListener?) : BaseFURenderer(gLSurfaceView, glRendererListener), IPhotoRenderer {
+class PhotoRenderer(gLTextureView: GLTextureView?, private val photoPath: String, glRendererListener: OnGlRendererListener?) : BaseFURenderer(gLTextureView, glRendererListener), IPhotoRenderer {
 
     /**  加载本地文件保存初始大小 */
     private val requestPhotoWidth = 1080
@@ -46,9 +48,9 @@ class PhotoRenderer(gLSurfaceView: GLSurfaceView?, private val photoPath: String
             }
         }
         externalInputType = FUExternalInputEnum.EXTERNAL_INPUT_TYPE_IMAGE
-        gLSurfaceView?.setEGLContextClientVersion(GlUtil.getSupportGlVersion(FURenderManager.mContext))
-        gLSurfaceView?.setRenderer(this)
-        gLSurfaceView?.renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
+        gLTextureView?.setEGLContextClientVersion(GlUtil.getSupportGlVersion(FURenderManager.mContext))
+        gLTextureView?.setRenderer(this)
+        gLTextureView?.renderMode = GLTextureView.RENDERMODE_WHEN_DIRTY
     }
 
 
@@ -58,7 +60,7 @@ class PhotoRenderer(gLSurfaceView: GLSurfaceView?, private val photoPath: String
     /**Activity onResume**/
     override fun onResume() {
         if (isActivityPause) {
-            gLSurfaceView?.onResume()
+            gLTextureView?.onResume()
         }
         isActivityPause = false
     }
@@ -68,7 +70,7 @@ class PhotoRenderer(gLSurfaceView: GLSurfaceView?, private val photoPath: String
     override fun onPause() {
         isActivityPause = true
         val count = CountDownLatch(1)
-        gLSurfaceView?.queueEvent(Runnable {
+        gLTextureView?.queueEvent(Runnable {
             destroyGlSurface()
             count.countDown()
         })
@@ -77,31 +79,31 @@ class PhotoRenderer(gLSurfaceView: GLSurfaceView?, private val photoPath: String
         } catch (e: InterruptedException) {
             // ignored
         }
-        gLSurfaceView?.onPause()
+        gLTextureView?.onPause()
     }
 
     /**Activity onDestroy**/
     override fun onDestroy() {
         glRendererListener = null
-        gLSurfaceView = null
+        gLTextureView = null
     }
 
 
     //endregion 生命周期调用
 
-    //region  GLSurfaceView.Renderer相关
+    //region  GLTextureView.Renderer相关
 
-    override fun surfaceCreated(gl: GL10?, config: EGLConfig?) {
+    override fun surfaceCreated(config: EGLConfig?) {
         val bitmap: Bitmap? = FileUtils.loadBitmapFromExternal(photoPath, requestPhotoWidth, requestPhotoHeight)
         bitmap?.let {
-            originalTextId = GlUtil.createImageTexture(bitmap)
-            currentFURenderInputData.texture?.texId = originalTextId
+            originalTextId = GlUtil.createImageTexture(it)
             originalWidth = bitmap.width
             originalHeight = bitmap.height
             currentFURenderInputData.apply {
                 width = originalWidth
                 height = originalHeight
                 imageBuffer?.buffer = BitmapUtils.getNV21(originalWidth, originalHeight, bitmap)
+                texture?.texId = originalTextId
             }
             LimitFpsUtil.setTargetFps(LimitFpsUtil.DEFAULT_FPS)
         }
@@ -113,21 +115,21 @@ class PhotoRenderer(gLSurfaceView: GLSurfaceView?, private val photoPath: String
      * @param width Int
      * @param height Int
      */
-    override fun surfaceChanged(gl: GL10?, width: Int, height: Int) {
+    override fun surfaceChanged(width: Int, height: Int) {
         defaultFUMvpMatrix = GlUtil.changeMvpMatrixInside(width.toFloat(), height.toFloat(), originalWidth.toFloat(), originalHeight.toFloat())
         smallViewMatrix = GlUtil.changeMvpMatrixCrop(90f, 160f, originalHeight.toFloat(), originalWidth.toFloat())
         originMvpMatrix = defaultFUMvpMatrix.copyOf()
         Matrix.scaleM(originMvpMatrix, 0, 1f, -1f, 1f)
     }
 
-    override fun prepareRender(gl: GL10?) = (programTexture2d != null)
+    override fun prepareRender() = (programTexture2d != null)
 
     override fun buildFURenderInputData(): FURenderInputData {
         return currentFURenderInputData
     }
 
 
-    override fun drawRenderFrame(gl: GL10? ) {
+    override fun drawRenderFrame() {
         if (faceUnity2DTexId > 0 && renderSwitch) {
             programTexture2d!!.drawFrame(faceUnity2DTexId, currentFUTexMatrix, currentFUMvpMatrix)
         } else if (originalTextId > 0) {
@@ -141,6 +143,6 @@ class PhotoRenderer(gLSurfaceView: GLSurfaceView?, private val photoPath: String
     }
 
 
-    //endregion  GLSurfaceView.Renderer相关
+    //endregion  GLTextureView.Renderer相关
 
 }

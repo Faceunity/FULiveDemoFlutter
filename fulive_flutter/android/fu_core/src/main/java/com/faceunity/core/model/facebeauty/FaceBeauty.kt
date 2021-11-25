@@ -13,10 +13,9 @@ import com.faceunity.core.support.FURenderBridge
  *
  */
 class FaceBeauty(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
+    override fun getModelController() = mFaceBeautyController
 
-
-    override fun getModelController() = FURenderBridge.getInstance().mFaceBeautyController
-
+    private val mFaceBeautyController by lazy { FURenderBridge.getInstance().mFaceBeautyController }
 
     //region 滤镜
     /* 滤镜名称 */
@@ -334,8 +333,6 @@ class FaceBeauty(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
             field = value
             updateAttributes(FaceBeautyParam.EYE_CIRCLE_INTENSITY, value)
         }
-
-
 //endregion
 
     override fun buildParams(): java.util.LinkedHashMap<String, Any> {
@@ -381,6 +378,9 @@ class FaceBeauty(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
         params[FaceBeautyParam.PHILTRUM_INTENSITY] = philtrumIntensity
         params[FaceBeautyParam.SMILE_INTENSITY] = smileIntensity
         params[FaceBeautyParam.EYE_CIRCLE_INTENSITY] = eyeCircleIntensity
+
+        //设置旧的参数
+        params[FaceBeautyParam.EYE_ENLARGING_INTENSITY] = eyeEnlargingIntensity
         return params
     }
 }
