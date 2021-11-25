@@ -1,6 +1,5 @@
 package com.faceunity.core.faceunity
 
-import com.faceunity.core.avatar.AvatarContainer
 import com.faceunity.core.entity.FURenderInputData
 import com.faceunity.core.entity.FURenderOutputData
 import com.faceunity.core.model.action.ActionRecognition
@@ -99,11 +98,10 @@ class FURenderKit private constructor() {
             propContainer.removeAllProp()
         }
         mFURenderBridge.mPropContainerController.release()
-
-        if (avatarContainer.getAllSceneModel().isNotEmpty()) {
-            avatarContainer.removeAllScene()
+        if (sceneManager.getAllScene().isNotEmpty()) {
+            sceneManager.removeAllScene()
+            mFURenderBridge.mAvatarController.release()
         }
-        mFURenderBridge.mAvatarController.release()
 
         mFURenderBridge.onDestroy(isSafe)
     }
@@ -250,7 +248,7 @@ class FURenderKit private constructor() {
     val propContainer by lazy { PropContainer.getInstance() }
 
     /*avatar容器*/
-    val avatarContainer by lazy { AvatarContainer.getInstance() }
+    val sceneManager by lazy { FUSceneKit.getInstance() }
     //endregion业务模型
     //region 渲染
 

@@ -28,14 +28,11 @@ import android.media.MediaCodecList;
 import android.media.MediaFormat;
 import android.opengl.EGLContext;
 import android.opengl.GLES20;
-import android.opengl.GLUtils;
 import android.util.Log;
 import android.view.Surface;
 
 import com.faceunity.core.program.ProgramTexture2d;
 import com.faceunity.core.utils.GlUtil;
-
-import java.io.IOException;
 
 public class MediaVideoEncoder extends MediaEncoder {
     private static final boolean DEBUG = false;    // TODO set false on release
@@ -107,38 +104,43 @@ public class MediaVideoEncoder extends MediaEncoder {
     }
 
     @Override
-    protected void prepare() throws IOException {
-        if (DEBUG) Log.i(TAG, "prepare: ");
-        mTrackIndex = -1;
-        mMuxerStarted = mIsEOS = false;
+    protected void prepare() {
+        try {
+            if (DEBUG) Log.i(TAG, "prepare: ");
+            mTrackIndex = -1;
+            mMuxerStarted = mIsEOS = false;
 
-        final MediaCodecInfo videoCodecInfo = selectVideoCodec(MIME_TYPE);
-        if (videoCodecInfo == null) {
-            Log.e(TAG, "Unable to find an appropriate codec for " + MIME_TYPE);
-            return;
-        }
-        if (DEBUG) Log.i(TAG, "selected codec: " + videoCodecInfo.getName());
-
-        final MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
-        format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);    // API >= 18
-        format.setInteger(MediaFormat.KEY_BIT_RATE, calcBitRate());
-        format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
-        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
-        if (DEBUG) Log.i(TAG, "format: " + format);
-
-        mMediaCodec = MediaCodec.createEncoderByType(MIME_TYPE);
-        mMediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-        // get Surface for encoder input
-        // this method only can call between #configure and #start
-        mSurface = mMediaCodec.createInputSurface();    // API >= 18
-        mMediaCodec.start();
-        if (DEBUG) Log.i(TAG, "prepare finishing");
-        if (mListener != null) {
-            try {
-                mListener.onPrepared(this);
-            } catch (final Exception e) {
-                Log.e(TAG, "prepare:", e);
+            final MediaCodecInfo videoCodecInfo = selectVideoCodec(MIME_TYPE);
+            if (videoCodecInfo == null) {
+                Log.e(TAG, "Unable to find an appropriate codec for " + MIME_TYPE);
+                return;
             }
+            if (DEBUG) Log.i(TAG, "selected codec: " + videoCodecInfo.getName());
+
+            final MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);    // API >= 18
+            format.setInteger(MediaFormat.KEY_BIT_RATE, calcBitRate());
+            format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
+            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
+            if (DEBUG) Log.i(TAG, "format: " + format);
+
+            mMediaCodec = MediaCodec.createEncoderByType(MIME_TYPE);
+            mMediaCodec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            // get Surface for encoder input
+            // this method only can call between #configure and #start
+            mSurface = mMediaCodec.createInputSurface();    // API >= 18
+            mMediaCodec.start();
+            if (DEBUG) Log.i(TAG, "prepare finishing");
+            if (mListener != null) {
+                try {
+                    mListener.onPrepared(this);
+                } catch (final Exception e) {
+                    Log.e(TAG, "prepare:", e);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            release();
         }
     }
 

@@ -4,7 +4,7 @@ import com.faceunity.core.controller.makeup.MakeupParam
 import com.faceunity.core.entity.FUBundleData
 import com.faceunity.core.model.BaseSingleModel
 import com.faceunity.core.support.FURenderBridge
-import java.util.LinkedHashMap
+import java.util.*
 
 
 /**
@@ -57,6 +57,14 @@ open class SimpleMakeup(controlBundle: FUBundleData) : BaseSingleModel(controlBu
      */
     protected fun updateMakeupBundle(key: String, bundle: FUBundleData?) {
         updateCustomUnit(key) { mMakeupController.updateItemBundle(getCurrentSign(), key, bundle) }
+    }
+
+    /**
+     * 添加道具
+     * @param fuFeaturesData FUFeaturesData
+     */
+    private fun applyAddProp(bundle: FUBundleData) {
+        mMakeupController.applyAddProp(bundle)
     }
 
 

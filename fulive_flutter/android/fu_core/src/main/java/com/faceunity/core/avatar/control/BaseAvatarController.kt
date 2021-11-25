@@ -2,12 +2,13 @@ package com.faceunity.core.avatar.control
 
 import android.os.Handler
 import android.os.HandlerThread
-import android.util.Log
 import com.faceunity.core.bundle.BundleManager
+import com.faceunity.core.entity.FUBundleData
+import com.faceunity.core.entity.FUGroupAnimationData
 import com.faceunity.core.support.FURenderBridge
 import com.faceunity.core.utils.FULogger
 import java.io.File
-import java.util.concurrent.CountDownLatch
+import java.util.concurrent.*
 
 
 /**
@@ -20,95 +21,62 @@ open class BaseAvatarController {
     protected val TAG = "KIT_AvatarController"
 
     protected val mBundleManager by lazy { BundleManager.getInstance() }
-    protected val mFURenderBridge by lazy { FURenderBridge.getInstance() }
+    private val mFURenderBridge by lazy { FURenderBridge.getInstance() }
 
     /*  当前控制道具id */
     protected var mControllerBundleHandle = -1
 
     /*已加载道具引用计数*/
-    protected var handleReferenceCountMap = LinkedHashMap<String, Int>(16)
-
-    /*已加载道具句柄映射关系*/
-    protected var handleBundleIdMap = HashMap<String, Int>(16)
+    protected var handleReferenceCountMap = ConcurrentHashMap<String, Int>(16)
 
     /*场景映射关系*/
-    protected var sceneIdMap = HashMap<Long, Int>(16)
+    protected var sceneIdMap = ConcurrentHashMap<Long, Int>(16)
+    protected val sceneBackgroundSet = HashSet<Long>()
 
     /*Avatar映射关系*/
-    protected var avatarIdMap = HashMap<Long, Int>(16)
+    protected var avatarIdMap = ConcurrentHashMap<Long, Int>(16)
+    protected val avatarBackgroundSet = HashSet<Long>()
 
-
+    protected val mCachedThreadPool by lazy {
+        ThreadPoolExecutor(0,Integer.MAX_VALUE,30L, TimeUnit.SECONDS, SynchronousQueue<Runnable>())
+    }
     //region 数据比对
 
-    protected val bundleCreateList = ArrayList<String>()//需要新创建的Bundle
-    protected val bundleRemoveMap = LinkedHashMap<String, Int>()//比对需要减少的Bundle，key:路径  value 引用计数
-    protected val bundleAddMap = LinkedHashMap<String, Int>()//比对新增的Bundle，key:路径  value 引用计数
-    protected val sceneRemoveList = ArrayList<FUASceneData>()//需要移除的场景
-    protected val sceneAddList = ArrayList<FUASceneData>()//需要绑定创建的场景
-
-    protected val sceneBindHandleMap = LinkedHashMap<FUASceneData, ArrayList<String>>()//Scene比对结束需要绑定的句柄
-    protected val sceneUnbindHandleMap = LinkedHashMap<Long, ArrayList<String>>()//Scene比对结束需要解绑的句柄
-    protected val sceneUnbindAvatarMap = LinkedHashMap<Long, ArrayList<Long>>()//Scene比对结束需要解绑Avatar
-    protected val sceneBindAvatarMap = LinkedHashMap<Long, ArrayList<Long>>()//Scene比对结束需要绑定的Avatar
-
-    protected val avatarBindHandleMap = LinkedHashMap<FUAAvatarData, ArrayList<String>>()//Avatar比对结束需要绑定的句柄
-    protected val avatarUnbindHandleMap = LinkedHashMap<Long, ArrayList<String>>()//Avatar比对结束需要解绑的句柄
-
-
-    /**
-     * 清空比对数据缓存
-     */
-    protected fun clearCompData() {
-        bundleCreateList.clear()
-        bundleRemoveMap.clear()
-        bundleAddMap.clear()
-        sceneRemoveList.clear()
-        sceneAddList.clear()
-        sceneBindHandleMap.clear()
-        sceneUnbindHandleMap.clear()
-        sceneUnbindAvatarMap.clear()
-        sceneBindAvatarMap.clear()
-        avatarBindHandleMap.clear()
-        avatarUnbindHandleMap.clear()
-    }
 
     /**
      * 新增Avatar数据比对
      * @param fuaAvatarData FUAAvatarData
      */
-    protected fun addAvatar(sceneId: Long, fuaAvatarData: FUAAvatarData) {
+    protected fun addAvatar(sceneId: Long, fuaAvatarData: FUAAvatarData, compareData: AvatarCompareData) {
         val bindArray = ArrayList<String>()
-        fuaAvatarData.itemBundles.forEach {
-            if (!handleBundleIdMap.containsKey(it.path) && !bundleCreateList.contains(it.path)) {
-                bundleCreateList.add(it.path)
-            }
+        val bundles = getAvatarBundles(fuaAvatarData)
+        bundles.forEach {
             if (!bindArray.contains(it.path)) {
-                addReferenceCount(bundleAddMap, it.path)
+                addReferenceCount(compareData.bundleAddMap, it.path)
                 bindArray.add(it.path)
             }
         }
-        avatarBindHandleMap[fuaAvatarData] = bindArray
-        sceneBindAvatarMap[sceneId] = arrayListOf(fuaAvatarData.id)
+        compareData.avatarParamsMap[fuaAvatarData.id] = fuaAvatarData.param
+        compareData.avatarBindHandleMap[fuaAvatarData] = bindArray
+        compareData.sceneBindAvatarMap[sceneId] = arrayListOf(fuaAvatarData.id)
     }
+
 
     /**
      * 移除Avatar数据比对
      * @param fuaAvatarData FUAAvatarData
      */
-    protected fun removeAvatar(sceneId: Long, fuaAvatarData: FUAAvatarData) {
-        if (!avatarIdMap.containsKey(fuaAvatarData.id)){
-            FULogger.e(TAG,"removeAvatar failed has not contains this fuaAvatarData:${fuaAvatarData.id}")
-            return
-        }
+    protected fun removeAvatar(sceneId: Long, fuaAvatarData: FUAAvatarData, compareData: AvatarCompareData) {
         val unbindArray = ArrayList<String>()
-        fuaAvatarData.itemBundles.forEach {
+        val bundles = getAvatarBundles(fuaAvatarData)
+        bundles.forEach {
             if (!unbindArray.contains(it.path)) {
-                addReferenceCount(bundleRemoveMap, it.path)
+                addReferenceCount(compareData.bundleRemoveMap, it.path)
                 unbindArray.add(it.path)
             }
         }
-        avatarUnbindHandleMap[fuaAvatarData.id] = unbindArray
-        sceneUnbindAvatarMap[sceneId] = arrayListOf(fuaAvatarData.id)
+        compareData.avatarUnbindHandleMap[fuaAvatarData.id] = unbindArray
+        compareData.sceneUnbindAvatarMap[sceneId] = arrayListOf(fuaAvatarData.id)
     }
 
 
@@ -117,63 +85,51 @@ open class BaseAvatarController {
      * @param oldAvatar FUAAvatarData
      * @param newAvatar FUAAvatarData
      */
-    protected fun replaceAvatar(sceneId: Long, oldAvatar: FUAAvatarData, newAvatar: FUAAvatarData) {
-        if (!sceneIdMap.containsKey(sceneId)){
-            FULogger.e(TAG,"replaceAvatar failed has not contains this fuaSceneData:${sceneId}")
-            return
-        }
-        if (!avatarIdMap.containsKey(oldAvatar.id)){
-            FULogger.e(TAG,"replaceAvatar failed has not contains this oldAvatar:${oldAvatar.id}")
-            return
-        }
-        avatarIdMap[newAvatar.id]=avatarIdMap[oldAvatar.id]!!
-        avatarIdMap.remove(oldAvatar.id)
+    protected fun replaceAvatar(oldAvatar: FUAAvatarData, targetAvatar: FUAAvatarData, compareData: AvatarCompareData) {
+        compareData.sceneReplaceAvatarMap[oldAvatar.id] = targetAvatar.id
         val unbindArray = ArrayList<String>()
-        oldAvatar.itemBundles.forEach {
+        val oldBundles = getAvatarBundles(oldAvatar)
+        oldBundles.forEach {
             if (!unbindArray.contains(it.path)) {
-                addReferenceCount(bundleRemoveMap, it.path)
+                addReferenceCount(compareData.bundleRemoveMap, it.path)
                 unbindArray.add(it.path)
             }
         }
         val bindArray = ArrayList<String>()
-        newAvatar.itemBundles.forEach {
-            if (!handleBundleIdMap.containsKey(it.path) && !bundleCreateList.contains(it.path)) {
-                bundleCreateList.add(it.path)
-            }
-            if (!bindArray.contains(it.path)) {
-                if (unbindArray.contains(it.path)){
-                    unbindArray.remove(it.path)
-                }
-                addReferenceCount(bundleAddMap, it.path)
+        val targetBundles = getAvatarBundles(targetAvatar)
+        targetBundles.forEach {
+            if (unbindArray.contains(it.path)) {
+                unbindArray.remove(it.path)
+                removeReferenceCount(compareData.bundleRemoveMap, it.path)
+            } else {
                 bindArray.add(it.path)
+                addReferenceCount(compareData.bundleAddMap, it.path)
             }
         }
-        avatarUnbindHandleMap[newAvatar.id] = unbindArray
-        avatarBindHandleMap[newAvatar] = bindArray
-        diffBundleMap()
+        compareData.avatarParamsMap[targetAvatar.id] = targetAvatar.param
+        compareData.avatarUnbindHandleMap[oldAvatar.id] = unbindArray
+        compareData.avatarBindHandleMap[targetAvatar] = bindArray
     }
 
     /**
      * 添加场景
      * @param fuaSceneData FUASceneData
      */
-    protected fun addScene(fuaSceneData: FUASceneData) {
+    protected fun addScene(fuaSceneData: FUASceneData, compareData: AvatarCompareData) {
         val bindArray = ArrayList<String>()
-        fuaSceneData.bundles.forEach {
-            if (!handleBundleIdMap.containsKey(it.path) && !bundleCreateList.contains(it.path)) {
-                bundleCreateList.add(it.path)
-            }
+        val bundles = getSceneBundles(fuaSceneData)
+        bundles.forEach {
             if (!bindArray.contains(it.path)) {
                 bindArray.add(it.path)
-                addReferenceCount(bundleAddMap, it.path)
+                addReferenceCount(compareData.bundleAddMap, it.path)
             }
         }
-        if (!sceneAddList.contains(fuaSceneData)) {
-            sceneAddList.add(fuaSceneData)
+        if (!compareData.sceneAddList.contains(fuaSceneData)) {
+            compareData.sceneAddList.add(fuaSceneData)
         }
-        sceneBindHandleMap[fuaSceneData] = bindArray
+        compareData.sceneBindHandleMap[fuaSceneData] = bindArray
         fuaSceneData.avatars.forEach {
-            addAvatar(fuaSceneData.id, it)
+            addAvatar(fuaSceneData.id, it, compareData)
         }
     }
 
@@ -181,24 +137,21 @@ open class BaseAvatarController {
      * 移除场景
      * @param fuaSceneData FUASceneData
      */
-    protected fun removeScene(fuaSceneData: FUASceneData) {
-        if (!sceneIdMap.containsKey(fuaSceneData.id)){
-            FULogger.e(TAG,"removeScene failed has not contains this fuaSceneData:${fuaSceneData.id}")
-            return
-        }
+    protected fun removeScene(fuaSceneData: FUASceneData, compareData: AvatarCompareData) {
         val unbindArray = ArrayList<String>()
-        fuaSceneData.bundles.forEach {
+        val bundles = getSceneBundles(fuaSceneData)
+        bundles.forEach {
             if (!unbindArray.contains(it.path)) {
                 unbindArray.add(it.path)
-                addReferenceCount(bundleRemoveMap, it.path)
+                addReferenceCount(compareData.bundleRemoveMap, it.path)
             }
         }
-        if (!sceneRemoveList.contains(fuaSceneData)) {
-            sceneRemoveList.add(fuaSceneData)
+        if (!compareData.sceneRemoveList.contains(fuaSceneData)) {
+            compareData.sceneRemoveList.add(fuaSceneData)
         }
-        sceneUnbindHandleMap[fuaSceneData.id] = unbindArray
+        compareData.sceneUnbindHandleMap[fuaSceneData.id] = unbindArray
         fuaSceneData.avatars.forEach {
-            removeAvatar(fuaSceneData.id, it)
+            removeAvatar(fuaSceneData.id, it, compareData)
         }
     }
 
@@ -208,10 +161,47 @@ open class BaseAvatarController {
      * @param oldScene FUASceneData
      * @param newScene FUASceneData
      */
-    protected fun replaceScene(oldScene: FUASceneData, newScene: FUASceneData) {
-        removeScene(oldScene)
-        addScene(newScene)
-        diffBundleMap()
+    protected fun replaceScene(oldScene: FUASceneData, newScene: FUASceneData, compareData: AvatarCompareData) {
+        removeScene(oldScene, compareData)
+        addScene(newScene, compareData)
+        diffBundleMap(compareData)
+    }
+
+
+    /**
+     * 获取FUAAvatarData 包含的所有道具列表
+     * @param avatarData FUAAvatarData
+     * @return ArrayList<FUBundleData>
+     */
+    private fun getAvatarBundles(avatarData: FUAAvatarData): ArrayList<FUBundleData> {
+        val bundles = ArrayList<FUBundleData>()
+        bundles.addAll(avatarData.itemBundles)
+        avatarData.animationData.forEach {
+            bundles.add(it.animation)
+            if (it is FUGroupAnimationData) {
+                bundles.addAll(it.subAnimations)
+                bundles.addAll(it.subProps)
+            }
+        }
+        return bundles
+    }
+
+    /**
+     * 获取FUAAvatarData 包含的所有道具列表
+     * @param sceneData FUAAvatarData
+     * @return ArrayList<FUBundleData>
+     */
+    private fun getSceneBundles(sceneData: FUASceneData): ArrayList<FUBundleData> {
+        val bundles = ArrayList<FUBundleData>()
+        bundles.addAll(sceneData.itemBundles)
+        sceneData.animationData.forEach {
+            bundles.add(it.animation)
+            if (it is FUGroupAnimationData) {
+                bundles.addAll(it.subAnimations)
+                bundles.addAll(it.subProps)
+            }
+        }
+        return bundles
     }
 
 
@@ -220,14 +210,14 @@ open class BaseAvatarController {
 
     //region 业务支持
 
+
     /**
      * 添加控制道具
      * @param sceneData FUASceneData
      */
     protected fun loadControllerBundle(sceneData: FUASceneData) {
-        var handle = 0
         val controller = sceneData.controller
-        handle = mBundleManager.loadBundleFile(controller.name, controller.path)
+        val handle = mBundleManager.loadBundleFile(controller.name, controller.path)
         if (handle <= 0) {
             mBundleManager.destroyControllerBundle(mControllerBundleHandle)
             mControllerBundleHandle = -1
@@ -242,31 +232,80 @@ open class BaseAvatarController {
         mControllerBundleHandle = handle
     }
 
+    /**
+     * 销毁道具
+     * @param path String
+     */
+    protected fun destroyBundle(path: String) {
+        if (!handleReferenceCountMap.containsKey(path)) {
+            val handle = mBundleManager.getBundleHandle(path)
+            if (handle > 0) {
+                mBundleManager.destroyBundle(intArrayOf(handle))
+            }
+        }
+    }
+
+    /**
+     * 创建道具
+     * @param path String
+     * @return Int
+     */
+    protected fun createBundle(path: String): Int {
+        return mBundleManager.loadBundleFile(getFileName(path), path)
+    }
 
     /**
      * 引用计数增加
-     * @param linkedHashMap LinkedHashMap<String, Int>
+     * @param cacheMap ConcurrentHashMap<String, Int>
      * @param key String
      */
-    protected fun addReferenceCount(linkedHashMap: LinkedHashMap<String, Int>, key: String, count: Int = 1) {
-        if (linkedHashMap.containsKey(key)) {
-            linkedHashMap[key] = linkedHashMap[key]!! + count
+    protected fun addReferenceCount(cacheMap: ConcurrentHashMap<String, Int>, key: String, count: Int = 1) {
+        if (cacheMap.containsKey(key)) {
+            cacheMap[key] = cacheMap[key]!! + count
         } else {
-            linkedHashMap[key] = count
+            cacheMap[key] = count
+        }
+    }
+
+    /**
+     * 引用计数增加
+     * @param cacheMap LinkedHashMap<String, Int>
+     * @param key String
+     */
+    protected fun addReferenceCount(cacheMap: LinkedHashMap<String, Int>, key: String, count: Int = 1) {
+        if (cacheMap.containsKey(key)) {
+            cacheMap[key] = cacheMap[key]!! + count
+        } else {
+            cacheMap[key] = count
         }
     }
 
     /**
      * 引用计数减少
-     * @param linkedHashMap LinkedHashMap<String, Int>
+     * @param cacheMap ConcurrentHashMap<String, Int>
      * @param key String
      */
-    protected fun removeReferenceCount(linkedHashMap: LinkedHashMap<String, Int>, key: String, count: Int = 1) {
-        if (linkedHashMap.containsKey(key)) {
-            if (linkedHashMap[key]!! > count) {
-                linkedHashMap[key] = linkedHashMap[key]!! - count
+    protected fun removeReferenceCount(cacheMap: ConcurrentHashMap<String, Int>, key: String, count: Int = 1) {
+        if (cacheMap.containsKey(key)) {
+            if (cacheMap[key]!! > count) {
+                cacheMap[key] = cacheMap[key]!! - count
             } else {
-                linkedHashMap.remove(key)
+                cacheMap.remove(key)
+            }
+        }
+    }
+
+    /**
+     * 引用计数减少
+     * @param cacheMap ConcurrentHashMap<String, Int>
+     * @param key String
+     */
+    protected fun removeReferenceCount(cacheMap: LinkedHashMap<String, Int>, key: String, count: Int = 1) {
+        if (cacheMap.containsKey(key)) {
+            if (cacheMap[key]!! > count) {
+                cacheMap[key] = cacheMap[key]!! - count
+            } else {
+                cacheMap.remove(key)
             }
         }
     }
@@ -274,23 +313,23 @@ open class BaseAvatarController {
     /**
      * 比较更新道具Map
      */
-    private fun diffBundleMap() {
-        val iterator = bundleAddMap.entries.iterator()
+    private fun diffBundleMap(compareData: AvatarCompareData) {
+        val iterator = compareData.bundleAddMap.entries.iterator()
         while (iterator.hasNext()) {
             val item = iterator.next()
-            if (bundleRemoveMap.containsKey(item.key)) {
-                val removeCount = bundleRemoveMap[item.key]!!
+            if (compareData.bundleRemoveMap.containsKey(item.key)) {
+                val removeCount = compareData.bundleRemoveMap[item.key]!!
                 when {
                     removeCount < item.value -> {
-                        bundleRemoveMap.remove(item.key)
+                        compareData.bundleRemoveMap.remove(item.key)
                         item.setValue(item.value - removeCount)
                     }
                     removeCount == item.value -> {
-                        bundleRemoveMap.remove(item.key)
+                        compareData.bundleRemoveMap.remove(item.key)
                         iterator.remove()
                     }
                     else -> {
-                        bundleRemoveMap[item.key] = removeCount - item.value
+                        compareData.bundleRemoveMap[item.key] = removeCount - item.value
                         iterator.remove()
                     }
                 }

@@ -3,17 +3,16 @@ package com.faceunity.core.media.video;
 import android.content.Context;
 import android.media.MediaMetadataRetriever;
 import android.opengl.EGL14;
-import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 
 import com.faceunity.core.media.video.encoder.MediaAudioEncoder;
-import com.faceunity.core.media.video.encoder.MediaAudioFileEncoder;
 import com.faceunity.core.media.video.encoder.MediaEncoder;
 import com.faceunity.core.media.video.encoder.MediaMuxerWrapper;
 import com.faceunity.core.media.video.encoder.MediaVideoEncoder;
 import com.faceunity.core.utils.DecimalUtils;
 import com.faceunity.core.utils.FileUtils;
+import com.faceunity.core.weight.GLTextureView;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +37,7 @@ public class VideoRecordHelper {
 
     //region 录制相关
 
-    private GLSurfaceView mGLSurfaceView;
+    private GLTextureView mGLSurfaceView;
 
     private MediaMuxerWrapper mMuxer;
     private MediaVideoEncoder mVideoEncoder;
@@ -66,7 +65,7 @@ public class VideoRecordHelper {
      * @param width
      * @param height
      */
-    public void startRecording(GLSurfaceView glSurfaceView, int width, int height) {
+    public void startRecording(GLTextureView glSurfaceView, int width, int height) {
         if (isRecording) {
             Log.e(TAG, "startRecording failed ,VideoRecordHelper has  Recording now");
             return;
@@ -98,7 +97,7 @@ public class VideoRecordHelper {
      * @param width
      * @param height
      */
-    public void startRecording(GLSurfaceView glSurfaceView, int width, int height, String filePath) {
+    public void startRecording(GLTextureView glSurfaceView, int width, int height, String filePath) {
         if (isRecording) {
             Log.e(TAG, "startRecording failed ,VideoRecordHelper has  Recording now");
             return;

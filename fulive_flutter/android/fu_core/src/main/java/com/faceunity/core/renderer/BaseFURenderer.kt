@@ -1,24 +1,23 @@
 package com.faceunity.core.renderer
 
 import android.graphics.Bitmap
+import android.opengl.EGLConfig
 import android.opengl.GLES20
-import android.opengl.GLSurfaceView
 import android.opengl.Matrix
-import android.util.Log
 import com.faceunity.core.entity.FURenderFrameData
 import com.faceunity.core.entity.FURenderInputData
 import com.faceunity.core.entity.FURenderOutputData
-import com.faceunity.core.enumeration.*
+import com.faceunity.core.enumeration.FUExternalInputEnum
+import com.faceunity.core.enumeration.FUInputBufferEnum
+import com.faceunity.core.enumeration.FUInputTextureEnum
 import com.faceunity.core.faceunity.FURenderKit
 import com.faceunity.core.faceunity.FURenderManager
 import com.faceunity.core.listener.OnGlRendererListener
 import com.faceunity.core.program.ProgramTexture2d
-import com.faceunity.core.utils.DecimalUtils
 import com.faceunity.core.utils.GlUtil
 import com.faceunity.core.utils.LimitFpsUtil
 import com.faceunity.core.utils.ScreenUtils
-import javax.microedition.khronos.egl.EGLConfig
-import javax.microedition.khronos.opengles.GL10
+import com.faceunity.core.weight.GLTextureView
 
 
 /**
@@ -27,7 +26,7 @@ import javax.microedition.khronos.opengles.GL10
  * Created on 2021/1/27
  *
  */
-abstract class BaseFURenderer(protected var gLSurfaceView: GLSurfaceView?, protected var glRendererListener: OnGlRendererListener?) : GLSurfaceView.Renderer {
+abstract class BaseFURenderer(protected var gLTextureView: GLTextureView?, protected var glRendererListener: OnGlRendererListener?) : GLTextureView.Renderer {
     val TAG = "KIT_BaseFURenderer"
 
     /** FURenderKit**/
@@ -48,12 +47,17 @@ abstract class BaseFURenderer(protected var gLSurfaceView: GLSurfaceView?, prote
         0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f
     )
 
+    //上下镜像
+    val TEXTURE_MATRIX_CCRO_FLIPV_0 = floatArrayOf(
+        1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+    )
 
     /** 纹理Program**/
 
     protected var programTexture2d: ProgramTexture2d? = null
 
-    /**GLSurfaceView尺寸**/
+    /**GLTextureView尺寸**/
     protected var surfaceViewWidth: Int = 1
     protected var surfaceViewHeight: Int = 1
 
@@ -113,7 +117,7 @@ abstract class BaseFURenderer(protected var gLSurfaceView: GLSurfaceView?, prote
      */
     fun setFURenderSwitch(isOpen: Boolean) {
         if (!isOpen) {
-            gLSurfaceView?.queueEvent {
+            gLTextureView?.queueEvent {
                 mFURenderKit.clearCacheResource()
             }
         }
@@ -128,7 +132,7 @@ abstract class BaseFURenderer(protected var gLSurfaceView: GLSurfaceView?, prote
         frameFuRenderMinCount = count
     }
 
-    //region GLSurfaceView.Renderer实现
+    //region GLTextureView.Renderer实现
 
 
     /**
@@ -137,15 +141,16 @@ abstract class BaseFURenderer(protected var gLSurfaceView: GLSurfaceView?, prote
      * @param gl GL10
      * @param config EGLConfig
      */
-    override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
+    override fun onSurfaceCreated(config: EGLConfig?) {
+        destroyGlSurface()
         GlUtil.logVersionInfo()
         programTexture2d = ProgramTexture2d()
         frameCount = 0
-        surfaceCreated(gl, config)
+        surfaceCreated(config)
         glRendererListener?.onSurfaceCreated()
     }
 
-    protected abstract fun surfaceCreated(gl: GL10?, config: EGLConfig?)
+    protected abstract fun surfaceCreated(config: EGLConfig?)
 
     /**
      * 根据视图宽高，初始化配置
@@ -153,22 +158,22 @@ abstract class BaseFURenderer(protected var gLSurfaceView: GLSurfaceView?, prote
      * @param width Int
      * @param height Int
      */
-    override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
+    override fun onSurfaceChanged(width: Int, height: Int) {
         GLES20.glViewport(0, 0, width, height)
         if (surfaceViewWidth != width || surfaceViewHeight != height) {
             surfaceViewWidth = width
             surfaceViewHeight = height
-            surfaceChanged(gl, width, height)
+            surfaceChanged(width, height)
         }
         smallViewportX = width - smallViewportWidth - smallViewportHorizontalPadding
         smallViewportY = smallViewportBottomPadding
         glRendererListener?.onSurfaceChanged(width, height)
     }
 
-    protected abstract fun surfaceChanged(gl: GL10?, width: Int, height: Int)
+    protected abstract fun surfaceChanged(width: Int, height: Int)
 
 
-    override fun onDrawFrame(gl: GL10?) {
+    override fun onDrawFrame() {
         /* 应用是否在前台 */
         if (isActivityPause) {
             return
@@ -179,7 +184,7 @@ abstract class BaseFURenderer(protected var gLSurfaceView: GLSurfaceView?, prote
             return
         }
         /* 确认环境是否正确 */
-        if (!prepareRender(gl)) {
+        if (!prepareRender()) {
             return
         }
         /* 确认数据是否正确 */
@@ -191,6 +196,7 @@ abstract class BaseFURenderer(protected var gLSurfaceView: GLSurfaceView?, prote
         if (renderSwitch && frameCount++ >= frameFuRenderMinCount) {
             val frameData = FURenderFrameData(defaultFUTexMatrix.copyOf(), defaultFUMvpMatrix.copyOf())
             glRendererListener?.onRenderBefore(inputData)//特效合成前置处理
+            onRenderBefore(inputData,frameData)
             currentFURenderOutputData = mFURenderKit.renderWithInput(inputData)//特效合成
             faceUnity2DTexId = currentFURenderOutputData!!.texture?.texId ?: 0
             glRendererListener?.onRenderAfter(currentFURenderOutputData!!, frameData)  //纹理合成后置处理
@@ -199,22 +205,23 @@ abstract class BaseFURenderer(protected var gLSurfaceView: GLSurfaceView?, prote
         }
         /* 渲染 */
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
-        drawRenderFrame(gl)
+        drawRenderFrame()
         /* 渲染完成回调 */
         glRendererListener?.onDrawFrameAfter()
         /* 循环调用 */
         if (externalInputType != FUExternalInputEnum.EXTERNAL_INPUT_TYPE_CAMERA) {
             LimitFpsUtil.limitFrameRate()//循环调用
-            gLSurfaceView?.requestRender()
+            gLTextureView?.requestRender()
         }
     }
 
+    protected open fun onRenderBefore(input: FURenderInputData,fuRenderFrameData: FURenderFrameData) {}
 
-    protected abstract fun prepareRender(gl: GL10?): Boolean
+    protected abstract fun prepareRender(): Boolean
 
     protected abstract fun buildFURenderInputData(): FURenderInputData
 
-    protected abstract fun drawRenderFrame(gl: GL10?)
+    protected abstract fun drawRenderFrame()
 
 
     //endregion
@@ -242,14 +249,14 @@ abstract class BaseFURenderer(protected var gLSurfaceView: GLSurfaceView?, prote
     protected fun drawImageTexture(bitmap: Bitmap) {
         mIsBitmapPreview = true
         mShotBitmap = bitmap
-        gLSurfaceView?.queueEvent {
+        gLTextureView?.queueEvent {
             deleteBitmapTexId()
             mBitmap2dTexId = GlUtil.createImageTexture(bitmap)
             mBitmapMvpMatrix =
                 GlUtil.changeMvpMatrixCrop(surfaceViewWidth.toFloat(), surfaceViewHeight.toFloat(), bitmap.width.toFloat(), bitmap.height.toFloat())
             Matrix.scaleM(mBitmapMvpMatrix, 0, 1f, -1f, 1f)
         }
-        gLSurfaceView?.requestRender()
+        gLTextureView?.requestRender()
     }
 
     /**
@@ -258,10 +265,10 @@ abstract class BaseFURenderer(protected var gLSurfaceView: GLSurfaceView?, prote
     protected fun dismissImageTexture() {
         mShotBitmap = null
         mIsBitmapPreview = false
-        gLSurfaceView?.queueEvent {
+        gLTextureView?.queueEvent {
             deleteBitmapTexId()
         }
-        gLSurfaceView?.requestRender()
+        gLTextureView?.requestRender()
     }
 
     /**

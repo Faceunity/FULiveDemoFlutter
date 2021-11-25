@@ -8,7 +8,6 @@ import com.faceunity.core.entity.FUCoordinate2DData
 import com.faceunity.core.entity.FUFeaturesData
 import com.faceunity.core.model.BaseSingleModel
 import com.faceunity.core.support.FURenderBridge
-import com.faceunity.core.utils.DecimalUtils
 
 
 /**
@@ -61,7 +60,7 @@ class BgSegGreen(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
         }
 
     /* 是否启用安全区域纹理 */
-    var isUseTemplate = 0.0  //取值范围0.0-1.0，透明度：图像前后景透明度过度，值越大，两者边缘处透明过度更平滑
+    var isUseTemplate = 0.0  //1.0开启 0.0关闭
         set(value) {
             field = value
             updateAttributes(BgSegGreenParam.IS_USE_TEMPLATE, value)
