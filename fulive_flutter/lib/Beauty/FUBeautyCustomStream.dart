@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'BeautyToolsWidget.dart';
 import 'FUBeautyDataManager.dart';
 
-///自定义视频或者图片的页面
+///自定义视频或者图片的页面 ->业务组件，针对不同业务有不同的逻辑
 
 class FUBeautyCustomStream extends StatefulWidget {
   //0 图片， 1 视频

@@ -1,11 +1,13 @@
 //自定义视频流的基础组件
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fulive_plugin/FUFlutterEventChannel.dart';
 import 'package:fulive_plugin/fulive_plugin.dart';
 
-///自定义视频或者图片的页面
+///自定义视频或者图片的页面 -> 渲染组件，可复用
 
 class FUBaseCustomStream extends StatefulWidget {
   //0 图片， 1 视频
@@ -74,10 +76,15 @@ class _CustomStreamHomeState extends State<CustomStreamHome> {
       child: SafeArea(
           child: Stack(
         children: [
-          UiKitView(
-              viewType: 'CustomGLDisplayView',
-              creationParams: {"type": widget.type},
-              creationParamsCodec: const StandardMessageCodec()),
+          Platform.isIOS == true
+              ? UiKitView(
+                  viewType: 'CustomGLDisplayView',
+                  creationParams: {"type": widget.type},
+                  creationParamsCodec: const StandardMessageCodec())
+              : AndroidView(
+                  viewType: 'CustomGLDisplayView',
+                  creationParams: {"type": widget.type},
+                  creationParamsCodec: const StandardMessageCodec()),
           GestureDetector(
             onTap: () {
               // ignore: unnecessary_statements

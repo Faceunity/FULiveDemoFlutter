@@ -13,7 +13,7 @@ class FUMakeupModel extends Object {
   late double value; //组合妆整体程度值
 
   //是否支持自定义子妆的组合装标识
-  late bool canCustomSub = false;
+  late bool? canCustomSub = false;
 
   FUMakeupModel(this.title, this.imagePath, this.value);
   factory FUMakeupModel.fromJson(Map<String, dynamic> json) =>
