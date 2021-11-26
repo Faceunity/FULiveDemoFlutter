@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:json_annotation/json_annotation.dart';
 
 ///子妆: 口红、腮红、眉毛、眼影。。。。
@@ -19,9 +21,12 @@ class FUMakeupSubModel extends Object {
   late int? defaultColorIndex;
   //子妆强度值
   late double value;
+
+  //这个是客户端UI显示的颜色值，针对colors进行处理之后缓存下来。避免后续来回切换重复解析
+  late List<List<dynamic>>? CacheColors;
   FUMakeupSubModel(this.title, this.imagePath, this.colors,
       this.defaultColorIndex, this.value,
-      {this.colorIndex = 0});
+      {this.colorIndex = 0, this.CacheColors});
   factory FUMakeupSubModel.fromJson(Map<String, dynamic> json) =>
       _$FUMakeupSubModelFromJson(json);
 

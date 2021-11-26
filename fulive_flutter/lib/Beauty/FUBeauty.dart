@@ -25,6 +25,9 @@ class _FUBeautyState extends State<FUBeauty> {
   ///点击美颜底部item 通知FUBaseWidget 调整 拍照按钮位置
   late StreamController adjustPhotoStream;
 
+  /// 对比按钮按住时候禁止录屏操作控制流
+  late StreamController prohibitStream;
+
   late final args;
   @override
   void initState() {
@@ -33,12 +36,14 @@ class _FUBeautyState extends State<FUBeauty> {
     _manager = FUBeautifyDataManager();
 
     adjustPhotoStream = StreamController.broadcast();
+    prohibitStream = StreamController.broadcast();
   }
 
   @override
   void dispose() {
     super.dispose();
     adjustPhotoStream.close();
+    prohibitStream.close();
     FUBeautyPlugin.disposeFUBeauty();
   }
 
@@ -54,7 +59,11 @@ class _FUBeautyState extends State<FUBeauty> {
       showFilterTips: true,
       bizType: _manager.curBizType,
       dataList: _manager.dataList,
-      compareCallback: (bool compare) => FULivePlugin.renderOrigin(compare),
+      compareCallback: (bool compare) {
+        FULivePlugin.renderOrigin(compare);
+        //同时禁止录屏按钮点击
+        prohibitStream.sink.add(compare);
+      },
       clickItemCallback: (bool flag) =>
           //通知FUBaseWidget调整拍照按钮位置
           adjustPhotoStream.sink.add(flag),
@@ -65,6 +74,7 @@ class _FUBeautyState extends State<FUBeauty> {
         child: Stack(
           children: [
             FUBaseWidget(
+              neverShowCustomAlbum: false,
               model: args.model,
               selectedImagePath: args.selectedImagePath,
               child: child,
@@ -103,6 +113,7 @@ class _FUBeautyState extends State<FUBeauty> {
                     setState(() {});
                   });
               },
+              prohibitStream: prohibitStream,
               adjustPhotoStream: adjustPhotoStream,
               pointYMax: 0.8,
               pointYMin: 0.27,

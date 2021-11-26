@@ -1,38 +1,81 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:fulive_flutter/Makeup/FUMakeupModelManager.dart';
+import 'package:fulive_flutter/Makeup/Models/FUMakeupModel.dart';
 import 'package:provider/provider.dart';
-
-import 'Models/FUMakeupModel.dart';
-import 'FUMakeupModelManager.dart';
 
 //组合妆UI
 class FUMakeupUI extends StatefulWidget {
-  final List<FUMakeupModel> dataList;
+  final int selectedIndex;
   //切换自定义子妆回调
   final Function? switchCustomCallback;
 
-  FUMakeupUI(this.dataList, this.switchCustomCallback);
+  FUMakeupUI(this.switchCustomCallback, {this.selectedIndex = 1});
   @override
   _FUMakeupUIState createState() => _FUMakeupUIState();
 }
 
 class _FUMakeupUIState extends State<FUMakeupUI> {
   final _screenWidth = window.physicalSize.width / window.devicePixelRatio;
+  late final FUMakeupModelManager _manager;
+  // // 请求成功，显示数据
+  late final List<FUMakeupModel> _dataList;
+
+  @override
+  void initState() {
+    super.initState();
+    _manager = FUMakeupModelManager();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     //组合妆UI
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        _makeupSliderView(),
-        _makeupUI(widget.dataList),
-        Container(
-          height: 5,
-          color: Colors.black,
-        )
-      ],
+    return FutureBuilder<List<FUMakeupModel>>(
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasError) {
+            // 请求失败，显示错误
+            return Text("Error: ${snapshot.error}");
+          } else {
+            //默认选中第一个组合装(减龄)
+            _manager.didSelectedItem(widget.selectedIndex);
+            _dataList = snapshot.data;
+            return _setUpUI(_dataList);
+          }
+        } else {
+          // 请求未结束，显示loading
+          // return CircularProgressIndicator();
+          return Container();
+        }
+      },
+      future: _manager.getMakeupModels(),
     );
+  }
+
+  Widget _setUpUI(List<FUMakeupModel> dataList) {
+    return BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
+        child: Opacity(
+            opacity: 0.9,
+            child: ChangeNotifierProvider(
+                create: (context) => _manager,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    _makeupSliderView(),
+                    _makeupUI(dataList),
+                    Container(
+                      height: 5,
+                      color: Colors.black,
+                    )
+                  ],
+                ))));
   }
 
   //组合装列表UI
@@ -47,7 +90,7 @@ class _FUMakeupUIState extends State<FUMakeupUI> {
             return Padding(
                 padding: const EdgeInsets.fromLTRB(15, 3, 0, 0),
                 child: Opacity(
-                  opacity: manager.canCustomSubMakeup() ? 1.0 : 0.7,
+                  opacity: manager.changeCustomPicAlpha() ? 1.0 : 0.7,
                   child: GestureDetector(
                     onTap: () {
                       //当前组合装状态不是卸妆不允许点击自定义子妆
@@ -95,7 +138,7 @@ class _FUMakeupUIState extends State<FUMakeupUI> {
           ),
           Container(
             width: _screenWidth - 95,
-            child: _makeupListView(widget.dataList),
+            child: _makeupListView(dataList),
           ),
         ],
       ),
@@ -160,6 +203,8 @@ class _FUMakeupUIState extends State<FUMakeupUI> {
       String valueStr = "$percent";
       return Container(
           color: Colors.black,
+          height: 45.0,
+          width: _screenWidth,
           child: Visibility(
             visible: manager.showSlider,
             child: SliderTheme(

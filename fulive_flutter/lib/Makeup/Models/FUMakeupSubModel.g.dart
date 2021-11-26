@@ -17,6 +17,9 @@ FUMakeupSubModel _$FUMakeupSubModelFromJson(Map<String, dynamic> json) {
     json['defaultColorIndex'] as int?,
     (json['value'] as num).toDouble(),
     colorIndex: json['colorIndex'] as int?,
+    CacheColors: (json['CacheColors'] as List<dynamic>?)
+        ?.map((e) => e as List<dynamic>)
+        .toList(),
   );
 }
 
@@ -28,4 +31,5 @@ Map<String, dynamic> _$FUMakeupSubModelToJson(FUMakeupSubModel instance) =>
       'colorIndex': instance.colorIndex,
       'defaultColorIndex': instance.defaultColorIndex,
       'value': instance.value,
+      'CacheColors': instance.CacheColors,
     };

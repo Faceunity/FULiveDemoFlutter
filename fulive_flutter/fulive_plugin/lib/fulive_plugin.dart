@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/services.dart';
 
 class FULivePlugin {
@@ -121,6 +122,7 @@ class FULivePlugin {
     });
   }
 
+  ///调整亮度 value [-2, 2]
   static Future adjustSpotlight(double value) async {
     channel.invokeMethod(common, {"method": "adjustSpotlight", "value": value});
   }
