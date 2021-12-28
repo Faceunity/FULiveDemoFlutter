@@ -4,18 +4,26 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fulive_flutter/Makeup/FUMakeupConst.dart';
+import 'package:fulive_flutter/Makeup/Models/FUMakeupIndexModel.dart';
 import 'package:fulive_flutter/Makeup/Models/FUMakeupSubModel.dart';
 import 'package:fulive_flutter/Makeup/Models/FUMakeupSubTitleModel.dart';
+import 'package:fulive_flutter/Tools/FUImagePixelRatio.dart';
 import 'package:fulive_plugin/FUMakeupPlugin.dart';
+import 'package:fulive_flutter/Tools/ArrayExtension.dart';
 
 //管理子妆业务模型
 class FUMakeupSubManager extends ChangeNotifier {
-  FUMakeupSubManager({this.selectedSubTitleIndex = 0});
+  FUMakeupSubManager(
+      {this.selectedSubTitleIndex = 0, this.canCustomIndex = -1});
 
   //子妆数据源
   late List<FUMakeupSubTitleModel> makeupSubTitleModels;
   //当前选中的子妆标题的ItemIndex
   late int selectedSubTitleIndex;
+
+  //支持自定义子妆的组合妆索引
+  late int canCustomIndex;
 
   //记录当前是否有子妆被选中，YES，就需要展示sliderValue，来控制妆容强度值
   late bool subShowSlider = false;
@@ -23,22 +31,43 @@ class FUMakeupSubManager extends ChangeNotifier {
   //是否隐藏子妆(点击屏幕隐藏子妆，但是不隐藏子妆标题)
   late bool isHiddenSubMakeup = false;
 
+  //静态变量缓存数据, 数据还是自定义子妆数据,所以内部管理较好，InheritedWidget 不太合适。
+  static late List<FUMakeupSubTitleModel> cacheMakeupSubTitleModels = [];
+
+  static cacheData(List<FUMakeupSubTitleModel> dataList) {
+    FUMakeupSubManager.cacheMakeupSubTitleModels = dataList;
+  }
+
+  static releaseCacheData() {
+    FUMakeupSubManager.cacheMakeupSubTitleModels = [];
+  }
+
   Future<List<FUMakeupSubTitleModel>> getSubMakeupModels() async {
-    String jsonStr = await rootBundle.loadString("resource/MakeupSub.json");
-    final List jsonList = json.decode(jsonStr);
+    //有缓存用缓存
+    if (FUMakeupSubManager.cacheMakeupSubTitleModels.length != 0) {
+      this.makeupSubTitleModels = FUMakeupSubManager.cacheMakeupSubTitleModels;
+    } else {
+      String jsonStr = await rootBundle.loadString("resource/MakeupSub.json");
+      final List jsonList = json.decode(jsonStr);
 
-    final makeupSubTitleModels = jsonList.map((map) {
-      FUMakeupSubTitleModel model = FUMakeupSubTitleModel.fromJson(map);
-      model.subIndex = 0;
-      for (FUMakeupSubModel item in model.subModels) {
-        //拼接图片地址
-        item.imagePath =
-            'resource/images/Makeup/MakeupSub/3.0x/' + item.imagePath + '.png';
-      }
-      return model;
-    }).toList();
+      final makeupSubTitleModels = jsonList.map((map) {
+        FUMakeupSubTitleModel model = FUMakeupSubTitleModel.fromJson(map);
+        model.subIndex = 0;
+        for (FUMakeupSubModel item in model.subModels) {
+          String commonPre = FUImagePixelRatio.getImagePathWithRelativePathPre(
+              "resource/images/Makeup/MakeupSub");
+          //拼接图片地址
+          item.imagePath = commonPre + item.imagePath + '.png';
+        }
+        return model;
+      }).toList();
 
-    this.makeupSubTitleModels = makeupSubTitleModels;
+      this.makeupSubTitleModels = makeupSubTitleModels;
+    }
+
+    //向native 获取当前支持自定义子妆的组合妆对应的各个子妆数组索引
+    await requestAllCustomIndexWithSubIndex();
+
     return makeupSubTitleModels;
   }
 
@@ -116,11 +145,18 @@ class FUMakeupSubManager extends ChangeNotifier {
 
   //获取当前选中的子妆模型
   FUMakeupSubModel? getCurSubModel() {
-    if (selectedSubTitleIndex < makeupSubTitleModels.length) {
-      FUMakeupSubTitleModel titleModel =
-          makeupSubTitleModels[selectedSubTitleIndex];
+    return getSubModelWithIndex(selectedSubTitleIndex);
+  }
+
+  //通过索引，获取当前选中的子妆模型
+  FUMakeupSubModel? getSubModelWithIndex(int subIndex) {
+    if (makeupSubTitleModels.inRange(subIndex)) {
+      FUMakeupSubTitleModel titleModel = makeupSubTitleModels[subIndex];
       FUMakeupSubModel subModel = titleModel.subModels[titleModel.subIndex!];
+      subShowSlider = titleModel.subIndex != 0 ? true : false;
       return subModel;
+    } else {
+      print("数组越界");
     }
     return null;
   }
@@ -180,14 +216,59 @@ class FUMakeupSubManager extends ChangeNotifier {
   }
 
   //获取当前标题对应的子妆值
-  bool getSliderValue(int index) {
-    if (index > 0 && index < makeupSubTitleModels.length) {
+  double getSliderValue(int index) {
+    double value = 0.0;
+    if (makeupSubTitleModels.inRange(index)) {
       FUMakeupSubTitleModel titleModel = makeupSubTitleModels[index];
       FUMakeupSubModel model = titleModel.subModels[titleModel.subIndex!];
-
-      return model.value != 0;
+      value = model.value;
     }
 
-    return false;
+    return value;
+  }
+
+  //遍历子妆是否有选中的,true 有，false 无
+  bool checkSubMakeupSelected() {
+    bool ret = false;
+    for (FUMakeupSubTitleModel model in makeupSubTitleModels) {
+      for (FUMakeupSubModel subModel in model.subModels) {
+        double value = subModel.value;
+        ret = value != 0.0;
+        if (ret == true) {
+          break;
+        }
+      }
+    }
+    return ret;
+  }
+
+  void makeupChange() {
+    FUMakeupSubManager.cacheData(this.makeupSubTitleModels);
+    FUMakeupPlugin.makeupChange(true);
+  }
+
+  //向native 发接请求目前是否
+  Future<void> requestAllCustomIndexWithSubIndex() async {
+    if (canCustomIndex != MAKEUP_UNLOADINDEX && canCustomIndex != 0) {
+      String str = await FUMakeupPlugin.requestCustomIndex(canCustomIndex);
+      final Map<Object, dynamic> jsonMap = json.decode(str);
+      FUMakeupIndexModel model = FUMakeupIndexModel.fromJson(jsonMap);
+      if (model.sub.length == makeupSubTitleModels.length) {
+        for (var i = 0; i < model.sub.length; i++) {
+          FUSubMakeupIndexModel s = model.sub[i];
+          FUMakeupSubTitleModel titleModel = makeupSubTitleModels[i];
+          titleModel.subIndex = s.bundleIndex;
+
+          FUMakeupSubModel subModel =
+              titleModel.subModels[titleModel.subIndex!];
+
+          subModel.colorIndex = s.colorIndex;
+          subModel.value = double.parse(s.value);
+        }
+      } else {
+        print("native 数据长度和Flutter 不对应, 无法处理");
+      }
+    }
+    print("1111");
   }
 }

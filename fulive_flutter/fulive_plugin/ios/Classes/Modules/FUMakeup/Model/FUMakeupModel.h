@@ -25,7 +25,8 @@ NS_ASSUME_NONNULL_BEGIN
 /* 颜色值 */
 @property (nonatomic, strong) NSArray* colorStrV;
 
-
+/* 美妆妆容bundle键值*/
+@property (nonatomic, assign) SUBMAKEUPTYPE namaBundleType;
 @end
 
 NS_ASSUME_NONNULL_END

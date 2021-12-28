@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,14 @@ import 'FUBeautySubModel.dart';
 
 // ignore: must_be_immutable
 class BeautyToolsWidget extends StatefulWidget {
+  BeautyToolsWidget(
+      {required this.bizType,
+      required this.dataList,
+      this.showFilterTips,
+      this.compareCallback,
+      this.clickItemCallback,
+      this.prohibitCompare});
+
   //是否展示滤镜提示语
   late bool? showFilterTips = true;
   late FUBeautyDefine bizType;
@@ -20,14 +29,12 @@ class BeautyToolsWidget extends StatefulWidget {
   //点击底部item 美肤、美型这些标题回调外面，
   final Function? clickItemCallback;
 
+  //订阅外部是否禁止对比按钮事件
+  final StreamController? prohibitCompare;
+
   //对比按钮回调，上层处理
   final Function? compareCallback;
-  BeautyToolsWidget(
-      {required this.bizType,
-      required this.dataList,
-      this.showFilterTips,
-      this.compareCallback,
-      this.clickItemCallback});
+
   @override
   _BeautyToolsWidgetState createState() => _BeautyToolsWidgetState();
 }
@@ -36,6 +43,19 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
   late List<FUBeautyModel> _dataList;
 
   bool _hiddenDialog = true;
+
+  //订阅是否禁止录屏按钮工作
+  // ignore: cancel_subscriptions, unused_field
+  late StreamSubscription? _prohibitCompareSubscription;
+
+  bool _prohibitCompareEnable = false;
+
+  //对比按钮禁止工作
+  void _prohibitCompare(bool state) {
+    setState(() {
+      _prohibitCompareEnable = state;
+    });
+  }
 
   //是否隐藏dialog
   void hiddenDialog(bool hidden) {
@@ -48,6 +68,16 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
   void initState() {
     super.initState();
     _dataList = widget.dataList;
+
+    if (widget.prohibitCompare != null) {
+      _prohibitCompareSubscription =
+          widget.prohibitCompare!.stream.listen((event) {
+        print("禁止点击对比按钮:$event");
+        _prohibitCompare(event);
+      });
+    } else {
+      _prohibitCompareSubscription = null;
+    }
   }
 
   @override
@@ -60,33 +90,36 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
         widgets.add(Padding(
           padding: EdgeInsets.fromLTRB(15, 0, 0, 15),
           child: Align(
-            alignment: Alignment.topLeft,
-            child: GestureDetector(
-              onTapDown: (TapDownDetails details) {
-                if (widget.compareCallback != null) {
-                  widget.compareCallback!(true);
-                }
-              },
-              onTapUp: (TapUpDetails details) {
-                if (widget.compareCallback != null) {
-                  widget.compareCallback!(false);
-                }
-              },
-              onLongPress: () {
-                if (widget.compareCallback != null) {
-                  widget.compareCallback!(true);
-                }
-              },
-              onLongPressEnd: (details) {
-                if (widget.compareCallback != null) {
-                  widget.compareCallback!(false);
-                }
-              },
-              child: Image(
-                image: AssetImage("resource/images/commonImage/compare.png"),
-              ),
-            ),
-          ),
+              alignment: Alignment.topLeft,
+              child: AbsorbPointer(
+                absorbing: _prohibitCompareEnable,
+                child: GestureDetector(
+                  onTapDown: (TapDownDetails details) {
+                    if (widget.compareCallback != null) {
+                      widget.compareCallback!(true);
+                    }
+                  },
+                  onTapUp: (TapUpDetails details) {
+                    if (widget.compareCallback != null) {
+                      widget.compareCallback!(false);
+                    }
+                  },
+                  onLongPress: () {
+                    if (widget.compareCallback != null) {
+                      widget.compareCallback!(true);
+                    }
+                  },
+                  onLongPressEnd: (details) {
+                    if (widget.compareCallback != null) {
+                      widget.compareCallback!(false);
+                    }
+                  },
+                  child: Image(
+                    image:
+                        AssetImage("resource/images/commonImage/compare.png"),
+                  ),
+                ),
+              )),
         ));
       }
       if (bizType == FUBeautyDefine.FUBeautyDefineSkin ||

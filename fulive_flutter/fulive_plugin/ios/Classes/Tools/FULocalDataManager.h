@@ -16,6 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 //道具贴纸
 + (NSDictionary *)stickerTipsJsonData;
 
+//道具贴纸模块的bundle名称
++ (NSArray *)stickerBundleJsonData;
+
 //美妆 - 子妆容
 + (NSDictionary *)makeupJsonData;
 

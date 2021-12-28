@@ -41,7 +41,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/fulive_plugin/ios"
 
 SPEC CHECKSUMS:
-  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   FlutterPluginRegistrant: 782c06a15bcbf5d52e44128e5726d778f2028768
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   fulive_plugin: 085f82a5c42fca1242aa8955718ac0e79dff56cf
@@ -52,4 +52,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: f87e366f0a7d6ad46f7bf9f642e116c85edfd616
 
-COCOAPODS: 1.10.2
+COCOAPODS: 1.11.2

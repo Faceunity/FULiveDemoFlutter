@@ -34,6 +34,7 @@ public abstract class BaseGLView implements PlatformView {
     protected GLTextureView mGLTextureView;
     protected Context mContext;
     protected static volatile Runnable mGLRunnable; //用完必须回收
+    protected boolean inputBuffer = true;
 
     public BaseGLView(Context context) {
         Log.d("BaseGLView", this.getClass().getSimpleName());
@@ -66,7 +67,11 @@ public abstract class BaseGLView implements PlatformView {
         public void onSurfaceChanged(int width, int height) {}
 
         @Override
-        public void onRenderBefore(FURenderInputData inputData) {}
+        public void onRenderBefore(FURenderInputData inputData) {
+            if (!inputBuffer) {
+                inputData.setImageBuffer(null);
+            }
+        }
 
 
         @Override
@@ -224,4 +229,7 @@ public abstract class BaseGLView implements PlatformView {
         mGLRunnable = GLRunnable;
     }
 
+    public void setInputBuffer(boolean inputBuffer) {
+        this.inputBuffer = inputBuffer;
+    }
 }

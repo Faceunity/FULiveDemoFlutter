@@ -75,7 +75,7 @@ class FULivePlugin {
     });
   }
 
-  //监听原生native 方法 calback 是外面传进来的回调，设置到setMethodCallHandler 让flutter 底部调用
+  //监听原生native 方法 calback 是外面传进来的回调，设置到setMethodCallHandler 让flutter 底部调用。放这里为了可复用。
   static Future listenNative(Function calback) async {
     channel.setMethodCallHandler((call) => calback(call));
   }
@@ -163,5 +163,25 @@ class FULivePlugin {
   static Future downLoadCustomRender(int type) async {
     channel.invokeMethod(
         customRender, {"method": "downLoadCustomRender", "value": type});
+  }
+
+  // //common widget 即将显示
+  // static Future flutterWillAppear() async {
+  //   channel.invokeMethod(common, {
+  //     "method": "flutterWillAppear",
+  //   });
+  // }
+
+  // //common widget 即将消失
+  // static Future flutterWillDisappear() async {
+  //   channel.invokeMethod(common, {
+  //     "method": "flutterWillDisappear",
+  //   });
+  // }
+
+  static Future imagePickDispose() async {
+    channel.invokeListMethod(imagePick, {
+      "method": "imagePickDispose",
+    });
   }
 }

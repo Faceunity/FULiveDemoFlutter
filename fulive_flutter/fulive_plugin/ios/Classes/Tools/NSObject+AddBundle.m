@@ -12,10 +12,11 @@
     NSString *path = nil;
     path = [[NSBundle mainBundle] pathForResource:fileName ofType:ofType];
     if (!path) {
-        NSURL *bundleURL = [[NSBundle mainBundle] URLForResource:bundleName withExtension:@"bundle"];
-        NSBundle *desBundle = [NSBundle bundleWithURL:bundleURL];
-        bundleURL = [desBundle URLForResource:fileName withExtension:ofType];
-        path = bundleURL.path;
+        NSBundle *bundle = [NSBundle bundleForClass:self.class];
+        //bundle 内部的资源bundle
+        NSURL *resource  = [bundle URLForResource:bundleName withExtension:@"bundle"];
+        //资源路径
+        path = [NSBundle pathForResource:fileName ofType:ofType inDirectory:resource.path];
     }
   
     return path;

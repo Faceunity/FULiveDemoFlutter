@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fulive_flutter/Main/MainRouterDefine.dart';
-import 'package:fulive_plugin/fulive_plugin.dart';
 import 'package:fulive_flutter/Beauty/FUBeautyCustomStream.dart';
+import 'package:fulive_flutter/Main/MainRouterDefine.dart';
+import 'package:fulive_flutter/Sticker/FUStickerCustomStream.dart';
+import 'package:fulive_plugin/fulive_plugin.dart';
 
-// //路由传参，属于公共基类里面的参数，所以用这个名字
-// class SelectedArguments {
-//   final MainRouters? type;
-
-//   SelectedArguments(this.type);
-// }
+typedef JumpToRenderCallback = Function(int type);
 
 class FUSelectedImage extends StatelessWidget {
-  // static const routerName = '/FUSelectedImage';
+  FUSelectedImage(this.type, {this.data});
+
   final MainRouters? type;
-  FUSelectedImage(this.type);
+  //部分widget 需要传数据进去，
+  final dynamic data;
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +25,22 @@ class FUSelectedImage extends StatelessWidget {
       ),
       backgroundColor: Color(0xFF310),
       body: Center(
-        child: SelectedHome(),
+        child: SelectedHome(
+            this.type != null
+                ? this.type!
+                : MainRouters.FULiveModelTypeBeautifyFace,
+            data: this.data != null ? this.data! : []),
       ),
     );
   }
 }
 
 class SelectedHome extends StatefulWidget {
+  SelectedHome(this.modyleType, {this.data});
+  final MainRouters modyleType;
+  //部分widget 需要传数据进去，
+  final dynamic data;
+
   @override
   _SelectedHomeState createState() => _SelectedHomeState();
 }
@@ -52,26 +59,50 @@ class _SelectedHomeState extends State<SelectedHome> {
     print(call);
     if (call.method == "customSelectedImage") {
       var type = call.arguments["type"];
-//美颜
-      Navigator.push(
-        context,
-        new MaterialPageRoute(
-          builder: (context) => new FUBeautyCustomStream(type),
-        ),
-      )..then((value) {
-          setState(() {});
-        });
+      switch (widget.modyleType) {
+        case MainRouters.FULiveModelTypeBeautifyFace:
+          //回调进入美颜
+          Navigator.push(
+            context,
+            new MaterialPageRoute(
+              builder: (context) => new FUBeautyCustomStream(type),
+            ),
+          )..then((value) => FULivePlugin.listenNative(
+              listenNativeCustomImage)); //此处调用是因为Flutter 重新监听native 回调。
+          break;
+        case MainRouters.FULiveModelTypeItems:
+          //贴纸
+          Navigator.push(
+            context,
+            new MaterialPageRoute(
+              builder: (context) => new FUStickerCustomStream(
+                type,
+                widget.data != null ? widget.data! : [],
+                downLoadBtnHeight: 0.65,
+              ),
+            ),
+          )..then(
+              (value) => FULivePlugin.listenNative(listenNativeCustomImage));
+          break;
+        default:
+      }
     }
   }
 
   @override
   void initState() {
     super.initState();
+    FULivePlugin.listenNative(listenNativeCustomImage);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    FULivePlugin.imagePickDispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    FULivePlugin.listenNative(listenNativeCustomImage);
     return Scaffold(
       backgroundColor: Colors.black,
       body: WillPopScope(

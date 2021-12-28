@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fulive_flutter/BaseModule/FUBaseSelectedImage.dart';
+import 'package:fulive_flutter/BaseModule/FUBaseCustomStream.dart';
 import 'package:fulive_flutter/Beauty/FUBeautyDefine.dart';
 import 'package:fulive_plugin/fulive_plugin.dart';
 import 'package:provider/provider.dart';

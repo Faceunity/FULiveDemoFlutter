@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:fulive_flutter/Makeup/Models/FUMakeupColorModel.dart';
+import 'package:fulive_flutter/Tools/FUCustomController.dart';
 import 'package:vector_math/vector_math_64.dart' as v;
 
 //实际滑动选中
@@ -16,8 +17,8 @@ class FUColorSelectWidget extends StatefulWidget {
 
 class FUColorSelectWidgetState extends State<FUColorSelectWidget>
     with WidgetsBindingObserver {
-  late CustomScrollController _controller =
-      CustomScrollController((ScrollPosition position) {
+  late FUCustomController _controller =
+      FUCustomController((ScrollPosition position) {
     //猜测是ScrollView 每次在attach Position 时候 如果执行一个offset = 0.0的animation动画，实际都默认不滚动！所以设置为1.0时候有偏移量才会实际滚动一下。看源码找结论！
     position.animateTo(_offset,
         duration: const Duration(milliseconds: 200), curve: Curves.ease);
@@ -317,21 +318,6 @@ class FUColorSelectWidgetState extends State<FUColorSelectWidget>
                     )),
               ]),
             )));
-  }
-}
-
-class CustomScrollController extends ScrollController {
-  CustomScrollController(this.attachCallback);
-
-  final Function? attachCallback;
-
-  @override
-  void attach(ScrollPosition position) {
-    super.attach(position);
-    print("attach Position");
-    if (attachCallback != null) {
-      attachCallback!(position);
-    }
   }
 }
 
