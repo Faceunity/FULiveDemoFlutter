@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:fulive_plugin/FUFlutterEventChannel.dart';
 
@@ -20,10 +21,26 @@ import 'FUCircleInIndicator.dart';
 
 // ignore: must_be_immutable
 class FUBaseWidget extends StatefulWidget {
+  FUBaseWidget({
+    this.neverShowCustomAlbum = false,
+    Key? key,
+    this.model,
+    this.selectedImagePath,
+    this.child,
+    this.viewClick,
+    this.backActionCallback,
+    this.jumpCumstomAlbum,
+    this.adjustPhotoStream,
+    this.prohibitStream,
+    this.pointYMax,
+    this.pointYMin,
+    this.phototAction,
+  }) : super(key: key);
+
   MainCellModel? model;
   String? selectedImagePath;
   final Widget? child;
-
+  // bool late show
   //整个视图被点击
   final Function? viewClick;
 
@@ -36,29 +53,25 @@ class FUBaseWidget extends StatefulWidget {
   //外部组件控制是否调整相机位置的通知
   final StreamController? adjustPhotoStream;
 
+  //订阅外部是否禁止录屏按钮通知
+  final StreamController? prohibitStream;
+
+  //点击拍照或者录屏action
+  final Function? phototAction;
+
   //相机的Y轴位偏移的最大位置
   late double? pointYMax;
   //相机的Y轴位偏移的最小位置
   late double? pointYMin;
 
-  FUBaseWidget({
-    Key? key,
-    this.model,
-    this.selectedImagePath,
-    this.child,
-    this.viewClick,
-    this.backActionCallback,
-    this.jumpCumstomAlbum,
-    this.adjustPhotoStream,
-    this.pointYMax,
-    this.pointYMin,
-  }) : super(key: key);
+//部分业务不需要展示CustomAlbum，点击自定义视频/相册 直接跳转
+  late bool? neverShowCustomAlbum;
 
   @override
-  _FUBaseWidgetState createState() => _FUBaseWidgetState();
+  FUBaseWidgetState createState() => FUBaseWidgetState();
 }
 
-class _FUBaseWidgetState extends State<FUBaseWidget> {
+class FUBaseWidgetState extends State<FUBaseWidget> {
   bool _showSpolit = false;
 
   ///监听native 流式数据通道
@@ -70,16 +83,33 @@ class _FUBaseWidgetState extends State<FUBaseWidget> {
   //定位拍照按钮位置, false 放在底部，true 弹起来接近中心位置Y轴偏下
   late bool _positionFUCircleInIndicator = false;
 
+  //拍照按钮是否响应事件
+  late bool _prohibitFUCircleEnable = false;
+
   //订阅调整拍照按钮流事件信号
+  late StreamSubscription? _adjustTakeSubscription;
+
+  //订阅是否禁止录屏按钮工作
   // ignore: cancel_subscriptions
-  // ignore: avoid_init_to_null
-  late StreamSubscription? _adjustTakeSubscription = null;
+  late StreamSubscription? _prohibitSubscription;
 
   late FUBaseStreamManager _streamManager;
+
+  //刷新检测人脸数据流
+  void reloadStream() {
+    _streamManager.startStream();
+  }
 
   void _changeFUCircleInIndicator(bool state) {
     setState(() {
       _positionFUCircleInIndicator = state;
+    });
+  }
+
+  //禁止录屏按钮工作
+  void _prohibitIndicator(bool state) {
+    setState(() {
+      _prohibitFUCircleEnable = state;
     });
   }
 
@@ -92,6 +122,7 @@ class _FUBaseWidgetState extends State<FUBaseWidget> {
   @override
   void initState() {
     super.initState();
+
     _streamManager = FUBaseStreamManager();
 
     streamEvent = StreamController.broadcast();
@@ -100,6 +131,17 @@ class _FUBaseWidgetState extends State<FUBaseWidget> {
           widget.adjustPhotoStream!.stream.listen((event) {
         _changeFUCircleInIndicator(event);
       });
+    } else {
+      _adjustTakeSubscription = null;
+    }
+
+    if (widget.prohibitStream != null) {
+      _prohibitSubscription = widget.prohibitStream!.stream.listen((event) {
+        print("禁止录屏event:$event");
+        _prohibitIndicator(event);
+      });
+    } else {
+      _prohibitSubscription = null;
     }
   }
 
@@ -111,6 +153,10 @@ class _FUBaseWidgetState extends State<FUBaseWidget> {
     if (_adjustTakeSubscription != null) {
       _adjustTakeSubscription!.cancel();
     }
+
+    if (_prohibitSubscription != null) {
+      _prohibitSubscription!.cancel();
+    }
     FULivePlugin.disposeCommon();
   }
 
@@ -119,6 +165,12 @@ class _FUBaseWidgetState extends State<FUBaseWidget> {
     super.didUpdateWidget(oldWidget);
     //父组件更新子组件时 重新建立通道，之前通道已经被关闭
     _streamManager.startStream();
+  }
+
+  void didChangeDependencie() {
+    super.didChangeDependencies();
+
+    print("didChangeDependencies");
   }
 
   void delayHiddenSpolit(int duration) {
@@ -159,11 +211,13 @@ class _FUBaseWidgetState extends State<FUBaseWidget> {
               create: (context) => _streamManager,
               child: Stack(
                 children: [
-                  Platform.isIOS == true ? UiKitView(
-                    viewType: 'OpenGLDisplayView',
-                  ):AndroidView(
-                    viewType: 'fu_plugin/GLSurfaceView',
-                  ),
+                  Platform.isIOS == true
+                      ? UiKitView(
+                          viewType: 'OpenGLDisplayView',
+                        )
+                      : AndroidView(
+                          viewType: 'OpenGLDisplayView',
+                        ),
                   GestureDetector(
                     onTapDown: (detail) {
                       double dx = detail.globalPosition.dx;
@@ -233,7 +287,7 @@ class _FUBaseWidgetState extends State<FUBaseWidget> {
                   Column(mainAxisAlignment: MainAxisAlignment.start, children: [
                     Container(
                         padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
-                        child: FUToolBar(
+                        child: FUToolBar(widget.neverShowCustomAlbum!,
                             //顶部工具栏组件
                             selectedImagePath: widget.selectedImagePath,
                             backActionCallback: widget.backActionCallback,
@@ -253,10 +307,23 @@ class _FUBaseWidgetState extends State<FUBaseWidget> {
                         _positionFUCircleInIndicator == true
                             ? widget.pointYMin!
                             : widget.pointYMax!),
-                    child: FUCircleInIndicator(
-                      takePhoto: () => FULivePlugin.takePhoto(),
-                      startRecord: () => FULivePlugin.startRecord(),
-                      stopRecord: () => FULivePlugin.stopRecord(),
+                    child: AbsorbPointer(
+                      absorbing: _prohibitFUCircleEnable,
+                      child: FUCircleInIndicator(
+                        takePhoto: () => FULivePlugin.takePhoto(),
+                        startRecord: () {
+                          if (widget.phototAction != null) {
+                            widget.phototAction!(true);
+                          }
+                          FULivePlugin.startRecord();
+                        },
+                        stopRecord: () {
+                          if (widget.phototAction != null) {
+                            widget.phototAction!(false);
+                          }
+                          FULivePlugin.stopRecord();
+                        },
+                      ),
                     ),
                   ),
 
@@ -303,12 +370,18 @@ class FUToolBar extends StatefulWidget {
   final StreamController? streamEvent;
 
   late String? selectedImagePath;
+
+  //部分业务不需要展示CustomAlbum，点击自定义视频/相册 直接跳转
+  late bool neverShowCustomAlbum = false;
+
   FUToolBar(
-      {this.selectedImagePath,
-      this.backActionCallback,
-      this.jumpCumstomAlbum,
-      this.debugCallback,
-      this.streamEvent});
+    this.neverShowCustomAlbum, {
+    this.selectedImagePath,
+    this.backActionCallback,
+    this.jumpCumstomAlbum,
+    this.debugCallback,
+    this.streamEvent,
+  });
   @override
   _FUToolBarState createState() => _FUToolBarState();
 }
@@ -338,6 +411,11 @@ class _FUToolBarState extends State<FUToolBar> {
     super.initState();
     _format = 1;
     _streamSubscription = widget.streamEvent!.stream.listen((event) {
+      //部分业务不需要展示CustomAlbum，点击自定义视频/相册 直接跳转
+      if (widget.neverShowCustomAlbum == true) {
+        _showCustomPhotograph = false;
+        return;
+      }
       if (event is PointerDownEvent) {
         //通过坐标点转换确定当前点击区域是否在FUPopupMenu上
         RenderBox? object =
@@ -373,7 +451,6 @@ class _FUToolBarState extends State<FUToolBar> {
   @override
   void dispose() {
     super.dispose();
-    _streamSubscription.cancel();
   }
 
   @override
@@ -427,15 +504,21 @@ class _FUToolBarState extends State<FUToolBar> {
               ? IconButton(
                   key: _selecetdImageOffKey,
                   onPressed: () {
-                    setState(() {
-                      ///全局hook 手势点击事件，针对隐藏还是显示这个组件，所以这个组件本身的逻辑要关联_streamSubscription 的流式状态
-                      ///_streamSubscription负责隐藏这个组件隐藏和显示
-                      // _showCustomPhotograph = !_showCustomPhotograph;
-                      //不管debug显不显示，都关掉
-                      _showDebugInfo = false;
-                    });
-                    if (widget.debugCallback != null) {
-                      widget.debugCallback!(_showDebugInfo);
+                    if (widget.neverShowCustomAlbum) {
+                      if (widget.jumpCumstomAlbum != null) {
+                        widget.jumpCumstomAlbum!();
+                      }
+                    } else {
+                      setState(() {
+                        ///全局hook 手势点击事件，针对隐藏还是显示这个组件，所以这个组件本身的逻辑要关联_streamSubscription 的流式状态
+                        ///_streamSubscription负责隐藏这个组件隐藏和显示
+                        // _showCustomPhotograph = !_showCustomPhotograph;
+                        //不管debug显不显示，都关掉
+                        _showDebugInfo = false;
+                      });
+                      if (widget.debugCallback != null) {
+                        widget.debugCallback!(_showDebugInfo);
+                      }
                     }
                   },
                   icon: Image(

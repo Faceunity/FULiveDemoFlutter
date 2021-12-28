@@ -20,7 +20,7 @@
     if (self) {
         _view = [[FUGLDisplayView alloc] initWithFrame:frame];
         [FURenderKit shareRenderKit].glDisplayView = _view;
-        [[FURenderKit shareRenderKit] startInternalCamera];
+//        [[FURenderKit shareRenderKit] startInternalCamera];
     }
     return self;
 }
@@ -32,5 +32,6 @@
 
 - (void)dealloc {
     [FURenderKit shareRenderKit].glDisplayView = nil;
+//    [[FURenderKit shareRenderKit] stopInternalCamera];
 }
 @end

@@ -59,6 +59,7 @@ flutter:
     - resource/images/
     - resource/images/homeView/
     - resource/images/commonImage/
+    - resource/images/commonImage/3.0x/
     - resource/images/beauty/
     - resource/images/beauty/shape/2.0x/
     - resource/images/beauty/shape/3.0x/
@@ -69,7 +70,8 @@ flutter:
     - resource/images/Makeup/MakeupCombination/3.0x/
     - resource/images/Makeup/MakeupSub/3.0x/
     - resource/images/Makeup/3.0x/
-
+    - resource/images/Makeup/3.0x/
+    - resource/images/sticker/3.0x/
   # To add Flutter specific assets to your application, add an assets section,
   # like this:
   # assets:

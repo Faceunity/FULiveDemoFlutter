@@ -9,7 +9,8 @@ class MainDataModel {
   Future<List<List<MainCellModel>>> get getModels async {
     late String jsonString;
     try {
-      jsonString = await rootBundle.loadString("resource/MainDataSource.json");
+      jsonString =
+          await rootBundle.loadString("resource/MainDataSourceAll.json");
     } catch (e) {
       developer.log(e.toString() + "json解析出错！！！");
     }

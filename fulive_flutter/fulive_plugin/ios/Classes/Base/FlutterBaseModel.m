@@ -13,4 +13,12 @@
     FlutterBaseModel *model = [[self class] mj_objectWithKeyValues:params];
     return model;
 }
+
+/**
+ * model - > jsonStr
+ */
+- (NSString *)jsonStr {
+    NSString *jsonStr = self.mj_JSONString;
+    return jsonStr;
+}
 @end

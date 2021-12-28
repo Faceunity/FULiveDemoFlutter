@@ -154,4 +154,11 @@
     return model;
 }
 
+
+- (void)imagePickDispose {
+    if ([self.delegate respondsToSelector:@selector(disposePluginWithKey:)]) {
+        [self.delegate disposePluginWithKey:NSStringFromClass(self.class)];
+    }
+    
+}
 @end

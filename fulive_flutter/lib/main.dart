@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fulive_flutter/Main/MainCellModel.dart';
 import 'package:fulive_flutter/Main/MainDataModel.dart';
 import 'package:fulive_flutter/Makeup/FUMakeup.dart';
+import 'package:fulive_flutter/Sticker/FUSticker.dart';
 import 'package:fulive_plugin/FUBasicMessageManager.dart';
 import 'dart:developer' as developer;
 import 'dart:async';
@@ -34,6 +36,7 @@ class MyApp extends StatelessWidget {
       routes: {
         FUBeauty.routerName: (context) => FUBeauty(),
         FUMakeup.routerName: (context) => FUMakeup(),
+        FUSticker.routerName: (context) => FUSticker(),
       },
     );
   }
@@ -62,6 +65,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    //强制竖屏
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   }
 
   @override
@@ -286,6 +291,15 @@ class _MyHomePageState extends State<MyHomePage> {
           //美颜
           Navigator.pushNamed(context, FUMakeup.routerName,
               arguments: FUBaseWidgetArguments(model));
+        }
+        break;
+      case MainRouters.FULiveModelTypeItems:
+        {
+          //贴纸
+          Navigator.pushNamed(context, FUSticker.routerName,
+              arguments: FUBaseWidgetArguments(model,
+                  selectedImagePath:
+                      "resource/images/commonImage/3.0x/selectedCameraIcon.png"));
         }
         break;
       default:

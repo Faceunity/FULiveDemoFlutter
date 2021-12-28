@@ -252,4 +252,154 @@
     
 }
 
+
+//检测组合妆是否有变化
+-(BOOL)supValueHaveChangeWithIndex:(int)index {
+    BOOL isValueChange = NO;
+    BOOL isColorChange = NO;
+    BOOL isSelChange = NO;
+    if(index < 0 || index >= _supArray.count) return NO;
+    FUMakeupSupModel *supModle = _supArray[index];
+    for (FUSingleMakeupModel *modle0 in supModle.makeups) {
+        for (FUMakeupModel *modle1 in _dataArray) {
+            if(modle0.makeType != modle1.sgArr[0].makeType){
+                continue;
+            }
+            for (FUSingleMakeupModel *modle2 in modle1.sgArr) {
+                /* 样式对应 */
+                if(modle0.makeType == MAKEUPTYPE_Lip){//口红特殊比较
+                    if (modle0.lip_type == modle2.lip_type && modle2.title && modle0.is_two_color == modle2.is_two_color){
+                        isValueChange = fabs(modle2.value - modle0.value * supModle.value) > 0.01;
+                        isSelChange   = modle1.singleSelIndex != (int)[modle1.sgArr indexOfObject:modle2];
+                    }
+                }else if(modle0.makeType == MAKEUPTYPE_foundation){
+                    
+                }else if(modle0.makeType == MAKEUPTYPE_eyeBrow){
+                    if (modle0.brow_warp_type == modle2.brow_warp_type && modle2.title) {
+                        isSelChange  = modle1.singleSelIndex != [modle1.sgArr indexOfObject:modle2];
+                        isValueChange = fabs(modle2.value - modle0.value * supModle.value) > 0.01;
+                    }
+                }else{
+//                    NSString *str = [modle0.namaBundle stringByReplacingOccurrencesOfString:@".bundle"withString:@""];
+                    NSString *str = [modle0.namaBundle stringByReplacingOccurrencesOfString:@".png"withString:@""];
+                    if([str isEqualToString:modle2.namaBundle]) {//样式一样
+                        isValueChange = fabs(modle2.value - modle0.value * supModle.value) > 0.01;
+                        isSelChange   = modle1.singleSelIndex != (int)[modle1.sgArr indexOfObject:modle2];
+                    }
+                }
+                
+                /* 对应的颜色 */
+                for (NSArray *color in modle2.colors) {
+                    if ([self array:modle0.colorStrV isEqualTo:color]) {
+                        isColorChange = modle2.defaultColorIndex != (int)[modle2.colors indexOfObject:color];
+                        if (modle2.makeType == MAKEUPTYPE_foundation) {
+                            /* 值 */
+                            isValueChange = fabs(modle1.sgArr[modle1.singleSelIndex].value - modle0.value * supModle.value) > 0.01;
+                            isSelChange   = modle1.singleSelIndex != (int)[modle2.colors indexOfObject:color] + 1;;
+                        }
+                    }
+                }
+                
+                if (isValueChange || isSelChange || isColorChange) {
+                    return YES;
+                }
+                
+            }
+        }
+    }
+    
+    return NO;
+}
+
+
+
+
+/**
+ * 可自定义组合妆对应的子妆状态处理
+ * index supModel 组合妆索引
+ * dataArray 当前子妆数组数据
+ */
+- (NSArray *)makeupTransformToSubMakeupWithIndex:(int)index {
+    if(index < 0 || index >= _supArray.count) return @[];
+    for (FUMakeupModel *modle in _dataArray) {
+        modle.singleSelIndex = 0;
+    }
+    if(index == 0){//卸妆状态没有对关系
+        return @[];
+    }
+    FUMakeupSupModel *supModle = _supArray[index];
+    for (FUSingleMakeupModel *modle0 in supModle.makeups) {
+        for (FUMakeupModel *modle1 in _dataArray) {
+            if(modle0.makeType != modle1.sgArr[0].makeType){
+                continue;
+            }
+            for (FUSingleMakeupModel *modle2 in modle1.sgArr) {
+                /* 样式对应 */
+                if(modle0.makeType == MAKEUPTYPE_Lip && modle2.title){//口红特殊比较
+                    if (modle0.lip_type == modle2.lip_type && modle0.is_two_color == modle2.is_two_color){
+                       modle1.singleSelIndex = (int)[modle1.sgArr indexOfObject:modle2];
+                        /* 值 */
+                        modle2.value = modle0.value * supModle.value;
+                    }
+                }else if(modle0.makeType == MAKEUPTYPE_foundation){
+                       /* 粉底通过颜色，计算选中 */
+                }else if(modle0.makeType == MAKEUPTYPE_eyeBrow){
+                    if (modle0.brow_warp_type == modle2.brow_warp_type && modle2.title) {
+                        modle1.singleSelIndex = (int)[modle1.sgArr indexOfObject:modle2];//   modle0.brow_warp_type + 1;
+                        modle2.value = modle0.value * supModle.value;
+                    }
+                }else{
+//                    NSString *str = [modle0.namaBundle stringByReplacingOccurrencesOfString:@".bundle"withString:@""];
+                    NSString *str = [modle0.namaBundle stringByReplacingOccurrencesOfString:@".png"withString:@""];
+                    if([str isEqualToString:modle2.namaBundle]) {//样式一样
+                        modle1.singleSelIndex = (int)[modle1.sgArr indexOfObject:modle2];
+                        /* 值 */
+                        modle2.value = modle0.value * supModle.value;
+                    } 
+                }
+                
+                /* 对应的颜色 */
+                for (NSArray *color in modle2.colors) {
+                    if ([self array:modle0.colorStrV isEqualTo:color]) {
+                        modle2.defaultColorIndex = (int)[modle2.colors indexOfObject:color];
+                        
+                        if (modle2.makeType == MAKEUPTYPE_foundation) {
+                            if ([modle2.colors containsObject:color]) {
+                                modle1.singleSelIndex = (int)[modle2.colors indexOfObject:color] + 1;
+                                /* 值 */
+                                modle1.sgArr[modle1.singleSelIndex].value = modle0.value * supModle.value;
+//                                modle2.value = modle0.value * supModle.value;
+                            }
+                        }
+                        
+                        if (modle2.makeType == MAKEUPTYPE_eyeShadow){
+                            if ([modle2.colors containsObject:color]) {
+                                modle1.singleSelIndex = (int)[modle2.colors indexOfObject:color] + 1;
+                                /* 值 */
+                                modle1.sgArr[modle1.singleSelIndex].value = modle0.value * supModle.value;
+                                //                                modle2.value = modle0.value * supModle.value;
+                            }
+                        }
+                        
+                    }
+                }
+     
+            }
+        }
+    }
+    
+    return [_dataArray copy];
+}
+
+
+- (BOOL)array:(NSArray *)array1 isEqualTo:(NSArray *)array2 {
+    int count = (int)MIN(array1.count, array2.count);
+    for (int i = 0; i  < count; i ++) {
+        if (fabsf([array1[i] floatValue] - [array2[i] floatValue]) > 0.01 ) {
+            return NO;
+        }
+    }
+    return YES;
+}
+
 @end

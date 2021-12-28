@@ -2,46 +2,110 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fulive_flutter/Makeup/FUMakeupConst.dart';
+
 import 'package:fulive_flutter/Makeup/Models/FUMakeupSubModel.dart';
 import 'package:fulive_flutter/Makeup/Models/FUMakeupSubTitleModel.dart';
 import 'package:provider/provider.dart';
+import 'package:fulive_flutter/Makeup/FUMakeupSubManager.dart';
 
-import 'FUMakeupModelManager.dart';
+//change 表示切换一个title，
+typedef SelectedSubItemCallback = Function(
+    List<List<Color>> colors, bool showColors, int index);
+
+typedef SwitchMakeupCallback = Function(bool flag);
 
 //子妆UI
 class FUMakeupSubUI extends StatefulWidget {
-  final List<FUMakeupSubTitleModel> dataList;
+  FUMakeupSubUI(Key key, this.switchMakeupCallback, this.colorSelectedCallback,
+      {this.canCustomSubIndex = MAKEUP_UNLOADINDEX})
+      : super(key: key);
+
   //切换组合妆回调
-  final Function? switchMakeupCallback;
-  FUMakeupSubUI(this.dataList, this.switchMakeupCallback);
+  final SwitchMakeupCallback? switchMakeupCallback;
+
+  final SelectedSubItemCallback? colorSelectedCallback;
+
+  //可自定义子妆的组合妆索引值,初始化默认-1表示没有
+  final int canCustomSubIndex;
+
   @override
-  _FUMakeupSubUIState createState() => _FUMakeupSubUIState();
+  FUMakeupSubUIState createState() => FUMakeupSubUIState();
 }
 
-class _FUMakeupSubUIState extends State<FUMakeupSubUI> {
+class FUMakeupSubUIState extends State<FUMakeupSubUI> {
   final _screenWidth = window.physicalSize.width / window.devicePixelRatio;
+  late final FUMakeupSubManager _manager;
+
+  //颜色组件选中具体颜色值
+  void selectedColorIndex(int colorIndex) {
+    _manager.didSelectedColorItem(colorIndex);
+  }
+
+  //设置是否隐藏子妆上半部分,外部调用
+  void setHiddenSubUI(bool isHidden) {
+    _manager.hiddenSubMakeup(true);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _manager = FUMakeupSubManager(canCustomIndex: widget.canCustomSubIndex);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: GestureDetector(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            _makeupSubUI(widget.dataList),
-            Container(
-              height: 1.0,
-              color: Colors.transparent,
-            ),
-            _makeupSubTitleListView(widget.dataList),
-          ],
-        ),
-      ),
+    return FutureBuilder<List<FUMakeupSubTitleModel>>(
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasError) {
+            // 请求失败，显示错误
+            return Text("Error: ${snapshot.error}");
+          } else {
+            // // 请求成功，显示数据
+            List<FUMakeupSubTitleModel> dataList = snapshot.data;
+            return _customSubMakeup(dataList);
+          }
+        } else {
+          // 请求未结束，显示loading
+          // return CircularProgressIndicator();
+          return Container();
+        }
+      },
+      future: _manager.getSubMakeupModels(),
     );
+  }
+
+  //自定义子妆UI
+  Widget _customSubMakeup(List<FUMakeupSubTitleModel> dataList) {
+    return ChangeNotifierProvider(
+        create: (context) => _manager,
+        child: Stack(
+          children: [
+            Container(
+              child: GestureDetector(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                        color: Colors.black87, child: _makeupSubUI(dataList)),
+                    _makeupSubTitleListView(dataList)
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ));
   }
 
   //子妆标题
   Consumer _makeupSubTitleListView(List<FUMakeupSubTitleModel> dataList) {
-    return Consumer<FUMakeupModelManager>(builder: (context, manager, child) {
+    return Consumer<FUMakeupSubManager>(builder: (context, manager, child) {
       return Container(
         height: 54,
         width: _screenWidth,
@@ -70,6 +134,18 @@ class _FUMakeupSubUIState extends State<FUMakeupSubUI> {
                     onPressed: () {
                       manager.didSelectedSubTitleItem(index);
                       manager.hiddenSubMakeup(false); //显示
+                      //颜色值回调出去
+                      if (widget.colorSelectedCallback != null) {
+                        widget.colorSelectedCallback!(
+                          manager.getCurSubColors(),
+                          manager.isShowColorWidget(
+                                  dataList[index].subIndex != null
+                                      ? dataList[index].subIndex!
+                                      : 0) &&
+                              manager.getCurSubColors().length != 0,
+                          manager.getColorIndex(),
+                        );
+                      }
                     },
                     child: Stack(
                       children: [
@@ -83,7 +159,10 @@ class _FUMakeupSubUIState extends State<FUMakeupSubUI> {
                                   fontSize: 13)),
                         ),
                         Visibility(
-                            visible: selectedSubIndex != 0 ? true : false,
+                            visible: (selectedSubIndex != 0 &&
+                                    manager.getSliderValue(index) != 0.0)
+                                ? true
+                                : false,
                             child: Align(
                               alignment: Alignment(1.0, -0.7),
                               child: Image(
@@ -94,18 +173,7 @@ class _FUMakeupSubUIState extends State<FUMakeupSubUI> {
                             ))
                       ],
                     ),
-                  )
-                  // GestureDetector(
-                  //   onTapDown: (TapDownDetails details) {
-                  //     print("object");
-                  //   },
-                  //   onTap: () {
-                  //     manager.didSelectedSubTitleItem(index);
-                  //     manager.hiddenSubMakeup(false); //显示
-                  //   },
-                  //   child:
-                  // )
-                  );
+                  ));
             }),
       );
     });
@@ -113,28 +181,30 @@ class _FUMakeupSubUIState extends State<FUMakeupSubUI> {
 
   //子妆
   Widget _makeupSubUI(List<FUMakeupSubTitleModel> dataList) {
-    return Consumer<FUMakeupModelManager>(builder: (context, manager, child) {
+    return Consumer<FUMakeupSubManager>(builder: (context, manager, child) {
       int selectedSubIndex = dataList[manager.selectedSubTitleIndex].subIndex!;
       List<FUMakeupSubModel> subModels =
           dataList[manager.selectedSubTitleIndex].subModels;
       return Visibility(
           visible: !manager.isHiddenSubMakeup,
           child: Container(
-            color: Colors.black,
+            // color: Colors.black,
             height: 140.0,
             child: Column(children: [
               _makeupSubSliderView(manager),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Consumer<FUMakeupModelManager>(
+                  Consumer<FUMakeupSubManager>(
                       builder: (context, manager, child) {
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(15, 3, 0, 0),
                       child: GestureDetector(
                         onTap: () {
                           if (widget.switchMakeupCallback != null) {
-                            widget.switchMakeupCallback!();
+                            widget.switchMakeupCallback!(
+                                manager.checkSubMakeupSelected());
+                            manager.makeupChange();
                           }
                         },
                         child: Column(
@@ -182,7 +252,7 @@ class _FUMakeupSubUIState extends State<FUMakeupSubUI> {
 
   ///selectedSubIndex 当前选中的子妆索引
   Widget _makeupSubListView(List<FUMakeupSubModel> dataList,
-      FUMakeupModelManager manager, int selectedSubIndex) {
+      FUMakeupSubManager manager, int selectedSubIndex) {
     return ListView.separated(
       itemCount: dataList.length,
       padding: const EdgeInsets.fromLTRB(0, 0, 15, 0),
@@ -211,6 +281,7 @@ class _FUMakeupSubUIState extends State<FUMakeupSubUI> {
             a = (colors[3] * 255).toInt();
           }
         }
+
         bool selected = false;
         if (selectedSubIndex == index) {
           selected = true;
@@ -231,8 +302,19 @@ class _FUMakeupSubUIState extends State<FUMakeupSubUI> {
                         gravity: ToastGravity.CENTER,
                         fontSize: 32.0);
                   }
+
                   manager.didSelectedSubItem(index,
                       subModel.colorIndex != null ? subModel.colorIndex! : 0);
+
+                  //颜色值回调出去
+                  if (widget.colorSelectedCallback != null) {
+                    widget.colorSelectedCallback!(
+                      manager.getCurSubColors(),
+                      manager.isShowColorWidget(index) &&
+                          manager.getCurSubColors().length != 0,
+                      manager.getColorIndex(),
+                    );
+                  }
                 },
                 child: Container(
                     decoration: BoxDecoration(
@@ -260,7 +342,7 @@ class _FUMakeupSubUIState extends State<FUMakeupSubUI> {
     );
   }
 
-  Widget _makeupSubSliderView(FUMakeupModelManager manager) {
+  Widget _makeupSubSliderView(FUMakeupSubManager manager) {
     double value = manager.getCurSubModel() != null
         ? manager.getCurSubModel()!.value
         : 1.0;
@@ -269,7 +351,6 @@ class _FUMakeupSubUIState extends State<FUMakeupSubUI> {
     return Container(
         height: 45.0,
         width: _screenWidth,
-        color: Colors.black,
         child: Visibility(
           visible: manager.subShowSlider,
           child: SliderTheme(

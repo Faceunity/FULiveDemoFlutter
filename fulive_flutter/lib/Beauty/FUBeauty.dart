@@ -25,6 +25,15 @@ class _FUBeautyState extends State<FUBeauty> {
   ///点击美颜底部item 通知FUBaseWidget 调整 拍照按钮位置
   late StreamController adjustPhotoStream;
 
+  /// 对比按钮按住时候禁止录屏操作控制流
+  late StreamController prohibitStream;
+
+  // 录屏或者拍照action时候禁止点击对比按钮
+  late StreamController prohibitCompare;
+
+  //刷新basewidget里面的流式业务数据
+  final GlobalKey<FUBaseWidgetState> _baseWidgetKey = GlobalKey();
+
   late final args;
   @override
   void initState() {
@@ -33,12 +42,18 @@ class _FUBeautyState extends State<FUBeauty> {
     _manager = FUBeautifyDataManager();
 
     adjustPhotoStream = StreamController.broadcast();
+    prohibitStream = StreamController.broadcast();
+    prohibitCompare = StreamController.broadcast();
   }
 
   @override
   void dispose() {
     super.dispose();
     adjustPhotoStream.close();
+    prohibitStream.close();
+    prohibitCompare.close();
+    //告知native 页面消失
+    FUBeautyPlugin.flutterWillAppear();
     FUBeautyPlugin.disposeFUBeauty();
   }
 
@@ -54,10 +69,15 @@ class _FUBeautyState extends State<FUBeauty> {
       showFilterTips: true,
       bizType: _manager.curBizType,
       dataList: _manager.dataList,
-      compareCallback: (bool compare) => FULivePlugin.renderOrigin(compare),
+      compareCallback: (bool compare) {
+        FULivePlugin.renderOrigin(compare);
+        //同时禁止录屏按钮点击
+        prohibitStream.sink.add(compare);
+      },
       clickItemCallback: (bool flag) =>
           //通知FUBaseWidget调整拍照按钮位置
           adjustPhotoStream.sink.add(flag),
+      prohibitCompare: prohibitCompare,
     );
 
     return ChangeNotifierProvider(
@@ -65,6 +85,8 @@ class _FUBeautyState extends State<FUBeauty> {
         child: Stack(
           children: [
             FUBaseWidget(
+              key: _baseWidgetKey,
+              neverShowCustomAlbum: false,
               model: args.model,
               selectedImagePath: args.selectedImagePath,
               child: child,
@@ -88,24 +110,31 @@ class _FUBeautyState extends State<FUBeauty> {
                 adjustPhotoStream.sink.add(false);
                 print("离开当前页面");
                 FUBeautyPlugin.flutterWillDisappear();
+
                 //美颜
                 Navigator.push(
                   context,
                   new MaterialPageRoute(
-                    builder: (context) => new FUSelectedImage(
-                        MainRouters.FULiveModelTypeBeautifyFace),
-                  ),
+                      builder: (context) => new FUSelectedImage(
+                            MainRouters.FULiveModelTypeBeautifyFace,
+                          )),
                 )..then((value) {
                     print("回退到当前页面页面");
                     FUBeautyPlugin.flutterWillAppear();
-
-                    ///返回时目的是刷新一下子FUBaseWidget，重新开启流式监听
-                    setState(() {});
+                    if (_baseWidgetKey.currentState != null) {
+                      _baseWidgetKey.currentState!.reloadStream();
+                    } else {
+                      print("_baseWidgetKey.currentState 为空");
+                    }
                   });
               },
+              prohibitStream: prohibitStream,
               adjustPhotoStream: adjustPhotoStream,
               pointYMax: 0.8,
               pointYMin: 0.27,
+              phototAction: (bool flag) {
+                prohibitCompare.sink.add(flag);
+              },
             ),
           ],
         ));

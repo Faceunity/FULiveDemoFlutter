@@ -46,6 +46,15 @@
 }
 
 
+//- (void)flutterWillAppear {
+//    [self startCapture];
+//}
+//
+//- (void)flutterWillDisappear {
+//    [self stopCature];
+//}
+
+
 //目的获取channel
 - (void)startBeautyStreamListen:(NSDictionary *)params {
     FlutterCommonModel *model = [FlutterCommonModel analysis: params];
@@ -60,6 +69,8 @@
     if ([self.delegate respondsToSelector:@selector(disposePluginWithKey:)]) {
         [self.delegate disposePluginWithKey:NSStringFromClass([self class])];
     }
+    [self stopCature];
+    [self disposeRenderKit];
 }
 
 
@@ -82,7 +93,7 @@ static NSTimeInterval startTime = 0;
     CVPixelBufferRef pixelBuffer = renderOutput.pixelBuffer;
     [self updateVideoParametersText:endTime bufferRef:pixelBuffer];
     self.hasFace = [FUAIKit shareKit].trackedFacesCount > 0;
-   
+    
     if (self.debugStr && self.eventChannel) {
         NSDictionary *par = @{@"debug":self.debugStr, @"hasFace":@(self.hasFace)};
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:par options:NSJSONWritingPrettyPrinted error:nil];

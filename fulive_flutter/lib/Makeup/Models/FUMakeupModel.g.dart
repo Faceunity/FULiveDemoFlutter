@@ -11,7 +11,7 @@ FUMakeupModel _$FUMakeupModelFromJson(Map<String, dynamic> json) {
     json['title'] as String,
     json['imagePath'] as String,
     (json['value'] as num).toDouble(),
-  );
+  )..canCustomSub = json['canCustomSub'] as bool?;
 }
 
 Map<String, dynamic> _$FUMakeupModelToJson(FUMakeupModel instance) =>
@@ -19,4 +19,5 @@ Map<String, dynamic> _$FUMakeupModelToJson(FUMakeupModel instance) =>
       'title': instance.title,
       'imagePath': instance.imagePath,
       'value': instance.value,
+      'canCustomSub': instance.canCustomSub,
     };

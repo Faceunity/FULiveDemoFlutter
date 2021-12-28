@@ -13,6 +13,7 @@
 #import "FlutterFUMakeupPlugin.h"
 #import "FlutterFUBasePlugin.h"
 #import "FlutterCommonPlugin.h"
+#import "FUStickerPlugin.h"
 
 @interface FULiveModulePlugin ()<FUModulePluginProtocol>
 //缓存各个模块的实例, key为类名称
@@ -72,6 +73,11 @@
 //美妆接口
 - (void)FUMakeup:(FlutterMethodCall *)call result:(FlutterResult)result {
     [self targetWithClass:[FlutterFUMakeupPlugin class] actionWithCall:call result:result];
+}
+
+//贴纸接口
+- (void)Sticker:(FlutterMethodCall *)call result:(FlutterResult)result {
+    [self targetWithClass:[FUStickerPlugin class] actionWithCall:call result:result];
 }
 
 - (void)targetWithClass:(Class)cls actionWithCall:(FlutterMethodCall *)call result:(FlutterResult)result {
