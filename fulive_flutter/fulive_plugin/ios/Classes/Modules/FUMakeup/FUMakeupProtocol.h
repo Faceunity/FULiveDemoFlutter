@@ -25,9 +25,9 @@ NS_ASSUME_NONNULL_BEGIN
 /* 加载到部位的图片，可以是图片名称也可以是bundle名称 */
 @property (nonatomic, copy) NSString* namaBundle;
 /* 妆容程度值键值 sdk参数*/
-@property (nonatomic, assign) int namaValueType;
+@property (nonatomic, assign) SUBMAKEUPTYPE namaValueType;
 /* 妆容程度值 */
-@property (nonatomic, assign) float  value;
+@property (nonatomic, assign) float value;
 /* 妆容颜色键值 sdk参数*/
 @property (nonatomic, copy) NSString* colorStr;
 /* 妆容颜色 */

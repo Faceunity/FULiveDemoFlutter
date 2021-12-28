@@ -9,6 +9,7 @@
 #import "FULocalDataManager.h"
 #import "NSObject+AddBundle.h"
 @interface FULocalDataManager ()
+@property (nonatomic, strong) NSArray *stickerData;
 @property (nonatomic, strong) NSDictionary *stickTipsData;
 @property (nonatomic, strong) NSDictionary *makeupJsonData;
 @property (nonatomic, strong) NSDictionary *makeupWholeJsonData;
@@ -39,6 +40,11 @@
     return [[FULocalDataManager shareManager] stickerTipsJsonData];
 }
 
+//道具贴纸模块的bundle名称
++ (NSArray *)stickerBundleJsonData {
+    return [[FULocalDataManager shareManager] stickerBundleJsonData];
+}
+
 + (NSDictionary *)makeupJsonData {
     return [[FULocalDataManager shareManager] makeupJsonData];
 }
@@ -56,6 +62,12 @@
     return [[FULocalDataManager shareManager] bodyBeautyJsonData];
 }
 
+- (NSArray *)stickerBundleJsonData {
+    if (!_stickerData) {
+        _stickerData = @[@"resetItem",@"CatSparks",@"fu_zh_fenshu",@"sdlr",@"xlong_zh_fu",@"newy1",@"redribbt",@"DaisyPig",@"sdlu"];
+    }
+    return _stickerData;
+}
 //道具贴纸提示语数据
 - (NSDictionary *)stickerTipsJsonData {
     if (!_stickTipsData) {
@@ -84,6 +96,8 @@
     }
     return _stickTipsData;
 }
+
+
 
 //获取美妆业务数据
 - (NSDictionary *)makeupJsonData {

@@ -1,17 +1,35 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:fulive_flutter/Makeup/FUMakeupConst.dart';
 import 'package:fulive_flutter/Makeup/FUMakeupModelManager.dart';
 import 'package:fulive_flutter/Makeup/Models/FUMakeupModel.dart';
+import 'package:fulive_flutter/Tools/FUCustomController.dart';
 import 'package:provider/provider.dart';
+
+//切换自定义子妆回调,表示当前可支持自定义子妆的组合妆回调索引
+typedef SwitchCustomCallback = Function(int canCustomIndex, double offset);
 
 //组合妆UI
 class FUMakeupUI extends StatefulWidget {
-  final int selectedIndex;
-  //切换自定义子妆回调
-  final Function? switchCustomCallback;
+  FUMakeupUI(
+    this.switchCustomCallback, {
+    this.unMakeupCallback,
+    this.selectedIndex = MAKEUP_UNLOADINDEX,
+    this.offset = 1.0,
+  });
 
-  FUMakeupUI(this.switchCustomCallback, {this.selectedIndex = 1});
+  //切换自定义子妆回调
+  final SwitchCustomCallback? switchCustomCallback;
+
+  //卸妆按钮回调
+  final Function? unMakeupCallback;
+
+  //初始化组合妆索引
+  final int selectedIndex;
+
+  //滑动偏移量
+  final double offset;
   @override
   _FUMakeupUIState createState() => _FUMakeupUIState();
 }
@@ -22,10 +40,28 @@ class _FUMakeupUIState extends State<FUMakeupUI> {
   // // 请求成功，显示数据
   late final List<FUMakeupModel> _dataList;
 
+  late final FUCustomController _controller;
+
+  late double _lastOffset;
   @override
   void initState() {
     super.initState();
-    _manager = FUMakeupModelManager();
+    _lastOffset = widget.offset;
+    //好好考虑一下初始值
+    _manager = FUMakeupModelManager(selectedIndex: widget.selectedIndex);
+    _controller = FUCustomController((ScrollPosition position) {
+      //
+      position.animateTo(_lastOffset,
+          duration: const Duration(milliseconds: 200), curve: Curves.ease);
+    });
+
+    _controller.addListener(() {
+      _lastOffset = _controller.offset;
+      if (_lastOffset <= 1.0) {
+        //由于 传入0.0 给position.animateTo这个方法会报空值错误，所以给1.0, 应该是flutter 下面处理好
+        _lastOffset = 1.0;
+      }
+    });
   }
 
   @override
@@ -44,7 +80,7 @@ class _FUMakeupUIState extends State<FUMakeupUI> {
             return Text("Error: ${snapshot.error}");
           } else {
             //默认选中第一个组合装(减龄)
-            _manager.didSelectedItem(widget.selectedIndex);
+            _manager.selectedDefault();
             _dataList = snapshot.data;
             return _setUpUI(_dataList);
           }
@@ -62,7 +98,7 @@ class _FUMakeupUIState extends State<FUMakeupUI> {
     return BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
         child: Opacity(
-            opacity: 0.9,
+            opacity: 0.8,
             child: ChangeNotifierProvider(
                 create: (context) => _manager,
                 child: Column(
@@ -97,7 +133,9 @@ class _FUMakeupUIState extends State<FUMakeupUI> {
                       if (manager.selectedIndex == 0 ||
                           manager.canCustomSubMakeup()) {
                         if (widget.switchCustomCallback != null) {
-                          widget.switchCustomCallback!();
+                          widget.switchCustomCallback!(
+                              manager.selectedIndex, _lastOffset);
+                          manager.makeupChange();
                         }
                       }
                     },
@@ -151,6 +189,7 @@ class _FUMakeupUIState extends State<FUMakeupUI> {
       return ListView.separated(
         padding: const EdgeInsets.fromLTRB(0, 0, 15, 0),
         scrollDirection: Axis.horizontal,
+        controller: _controller,
         separatorBuilder: (BuildContext context, int index) {
           return VerticalDivider(
             width: 10,
@@ -170,7 +209,14 @@ class _FUMakeupUIState extends State<FUMakeupUI> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 GestureDetector(
-                  onTap: () => manager.didSelectedItem(index),
+                  onTap: () {
+                    manager.didSelectedItem(index);
+                    //
+                    if (widget.unMakeupCallback != null &&
+                        manager.canCustomSubMakeup() == false) {
+                      widget.unMakeupCallback!();
+                    }
+                  },
                   child: Container(
                       decoration: BoxDecoration(
                           border: Border.all(
@@ -198,7 +244,7 @@ class _FUMakeupUIState extends State<FUMakeupUI> {
 
   Widget _makeupSliderView() {
     return Consumer<FUMakeupModelManager>(builder: (context, manager, child) {
-      double value = manager.makeupModels[manager.selectedIndex].value;
+      double value = manager.getSliderValue();
       int percent = (value * 100).toInt();
       String valueStr = "$percent";
       return Container(

@@ -29,6 +29,16 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)loadMakeupPackageWithPathName:(NSString *)pathName;
 
 - (void)setSupModel:(FUMakeupSupModel *)model;
+
+//检测组合妆是否有变化
+-(BOOL)supValueHaveChangeWithIndex:(int)index;
+
+/**
+ * 可自定义组合妆对应的子妆状态处理
+ * index supModel 组合妆索引
+ * dataArray 当前子妆数组数据
+ */
+- (NSArray *)makeupTransformToSubMakeupWithIndex:(int)index;
 @end
 
 NS_ASSUME_NONNULL_END

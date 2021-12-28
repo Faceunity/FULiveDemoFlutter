@@ -1,5 +1,6 @@
 package com.example.fulive_plugin;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.IntDef;
@@ -11,8 +12,8 @@ import com.example.fulive_plugin.entity.FuEvent;
 import com.example.fulive_plugin.impl.FuBeautyKey;
 import com.example.fulive_plugin.impl.FuMakeupKey;
 import com.example.fulive_plugin.impl.FuPluginKey;
+import com.example.fulive_plugin.impl.FuStickerKey;
 import com.example.fulive_plugin.view.BaseGLView;
-import com.faceunity.core.faceunity.FURenderKit;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -44,6 +45,7 @@ public class FULivePlugin implements FlutterPlugin, MethodCallHandler {
     /// when the Flutter Engine is detached from the Activity
 
     public MethodChannel channel;
+    private static Context appContext;
     public GLDisplayViewFactory mGLDisplayViewFactory;
     public CustomGLDisplayViewFactory mCustomGLDisplayViewFactory;
     private @State int state = STATE_DISPLAY;
@@ -53,6 +55,7 @@ public class FULivePlugin implements FlutterPlugin, MethodCallHandler {
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "fulive_plugin");
         channel.setMethodCallHandler(this);
+        appContext = flutterPluginBinding.getApplicationContext();
 
         BinaryMessenger messenger = flutterPluginBinding.getBinaryMessenger();
         mGLDisplayViewFactory = new GLDisplayViewFactory(messenger);
@@ -80,9 +83,7 @@ public class FULivePlugin implements FlutterPlugin, MethodCallHandler {
         if (call.method.equals("getPlatformVersion")) {
             result.success("Android " + android.os.Build.VERSION.RELEASE);
         } else if (call.method.equals("getModuleCode")) {
-            int moduleCode0 = FURenderKit.getInstance().getModuleCode(0);
-            int moduleCode1 = FURenderKit.getInstance().getModuleCode(1);
-            result.success(new int[]{moduleCode0, moduleCode1});
+            result.success(new int[]{0x7ebf7f7f, 0xfffff});
         } else if (call.arguments instanceof Map) {
             String method = (String) ((Map) call.arguments).get("method");
             Log.i(TAG, "onMethodCall: " + method);
@@ -94,11 +95,17 @@ public class FULivePlugin implements FlutterPlugin, MethodCallHandler {
             }
             for (FuMakeupKey key : FuMakeupKey.values()) {
                 if (method.equals(key.name())) {
-                    key.handle(call, result);
+                    key.handle(this, call, result);
                     return;
                 }
             }
             for (FuBeautyKey key : FuBeautyKey.values()) {
+                if (method.equals(key.name())) {
+                    key.handle(this, call, result);
+                    return;
+                }
+            }
+            for (FuStickerKey key : FuStickerKey.values()) {
                 if (method.equals(key.name())) {
                     key.handle(this, call, result);
                     return;
@@ -134,6 +141,10 @@ public class FULivePlugin implements FlutterPlugin, MethodCallHandler {
         } else {
             mCustomGLDisplayViewFactory.setInfoCallback(infoCallback);
         }
+    }
+
+    public static Context getAppContext() {
+        return appContext;
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

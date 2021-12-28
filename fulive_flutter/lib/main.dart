@@ -299,7 +299,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Navigator.pushNamed(context, FUSticker.routerName,
               arguments: FUBaseWidgetArguments(model,
                   selectedImagePath:
-                      "resource/images/commonImage/demoIconMore.png"));
+                      "resource/images/commonImage/3.0x/selectedCameraIcon.png"));
         }
         break;
       default:

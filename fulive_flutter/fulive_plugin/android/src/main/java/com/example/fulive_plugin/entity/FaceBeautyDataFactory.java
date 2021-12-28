@@ -75,10 +75,10 @@ public class FaceBeautyDataFactory {
                 faceBeauty.setCheekVIntensity(value);
                 break;
             case 2:
-                faceBeauty.setCheekNarrowIntensityV2(value);
+                faceBeauty.setCheekNarrowIntensity(value);
                 break;
             case 3:
-                faceBeauty.setCheekSmallIntensityV2(value);
+                faceBeauty.setCheekSmallIntensity(value);
                 break;
             case 4:
                 faceBeauty.setCheekBonesIntensity(value);
@@ -87,7 +87,7 @@ public class FaceBeautyDataFactory {
                 faceBeauty.setLowerJawIntensity(value);
                 break;
             case 6:
-                faceBeauty.setEyeEnlargingIntensityV2(value);
+                faceBeauty.setEyeEnlargingIntensity(value);
                 break;
             case 7:
                 faceBeauty.setEyeCircleIntensity(value);
@@ -96,13 +96,13 @@ public class FaceBeautyDataFactory {
                 faceBeauty.setChinIntensity(value);
                 break;
             case 9:
-                faceBeauty.setForHeadIntensityV2(value);
+                faceBeauty.setForHeadIntensity(value);
                 break;
             case 10:
-                faceBeauty.setNoseIntensityV2(value);
+                faceBeauty.setNoseIntensity(value);
                 break;
             case 11:
-                faceBeauty.setMouthIntensityV2(value);
+                faceBeauty.setMouthIntensity(value);
                 break;
             case 12:
                 faceBeauty.setCanthusIntensity(value);
@@ -142,8 +142,8 @@ public class FaceBeautyDataFactory {
                 model.setToothIntensity(0.25);
                 model.setCheekThinningIntensity(0.45);
                 model.setCheekVIntensity(0.08);
-                model.setCheekSmallIntensityV2(0.05);
-                model.setEyeEnlargingIntensityV2(0.3);
+                model.setCheekSmallIntensity(0.05);
+                model.setEyeEnlargingIntensity(0.3);
                 FURenderKit.getInstance().setFaceBeauty(model);
                 break;
             }
@@ -159,8 +159,8 @@ public class FaceBeautyDataFactory {
                 model.setEyeBrightIntensity(0.5);
                 model.setToothIntensity(0.4);
                 model.setCheekThinningIntensity(0.3);
-                model.setNoseIntensityV2(0.5);
-                model.setEyeEnlargingIntensityV2(0.25);
+                model.setNoseIntensity(0.5);
+                model.setEyeEnlargingIntensity(0.25);
                 FURenderKit.getInstance().setFaceBeauty(model);
                 break;
             }
@@ -172,9 +172,9 @@ public class FaceBeautyDataFactory {
                 model.setRedIntensity(0.3);
                 model.setBlurIntensity(2.4);
                 model.setCheekThinningIntensity(0.3);
-                model.setCheekSmallIntensityV2(0.15);
-                model.setEyeEnlargingIntensityV2(0.65);
-                model.setNoseIntensityV2(0.3);
+                model.setCheekSmallIntensity(0.15);
+                model.setEyeEnlargingIntensity(0.65);
+                model.setNoseIntensity(0.3);
                 FURenderKit.getInstance().setFaceBeauty(model);
                 break;
             }
@@ -185,8 +185,8 @@ public class FaceBeautyDataFactory {
                 model.setColorIntensity(0.7);
                 model.setBlurIntensity(3.9);
                 model.setCheekThinningIntensity(0.3);
-                model.setCheekSmallIntensityV2(0.05);
-                model.setEyeEnlargingIntensityV2(0.65);
+                model.setCheekSmallIntensity(0.05);
+                model.setEyeEnlargingIntensity(0.65);
                 FURenderKit.getInstance().setFaceBeauty(model);
                 break;
             }
@@ -199,7 +199,7 @@ public class FaceBeautyDataFactory {
                 model.setColorIntensity(0.6);
                 model.setBlurIntensity(3.0);
                 model.setCheekThinningIntensity(0.5);
-                model.setEyeEnlargingIntensityV2(0.65);
+                model.setEyeEnlargingIntensity(0.65);
                 FURenderKit.getInstance().setFaceBeauty(model);
                 break;
             }
@@ -211,7 +211,7 @@ public class FaceBeautyDataFactory {
                 model.setFilterIntensity(0.8);
                 model.setColorIntensity(0.7);
                 model.setBlurIntensity(4.2);
-                model.setEyeEnlargingIntensityV2(0.6);
+                model.setEyeEnlargingIntensity(0.6);
                 model.setCheekThinningIntensity(0.3);
                 FURenderKit.getInstance().setFaceBeauty(model);
                 break;
@@ -225,7 +225,7 @@ public class FaceBeautyDataFactory {
                 model.setColorIntensity(0.2);
                 model.setRedIntensity(0.65);
                 model.setBlurIntensity(3.3);
-                model.setCheekSmallIntensityV2(0.05);
+                model.setCheekSmallIntensity(0.05);
                 model.setCheekThinningIntensity(0.1);
                 FURenderKit.getInstance().setFaceBeauty(model);
                 break;
@@ -249,16 +249,16 @@ public class FaceBeautyDataFactory {
     public static void resetShapeBeauty(FaceBeauty faceBeauty) {
         faceBeauty.setCheekThinningIntensity(0);
         faceBeauty.setCheekVIntensity(0.5);
-        faceBeauty.setCheekNarrowIntensityV2(0);
-        faceBeauty.setCheekSmallIntensityV2(0);
+        faceBeauty.setCheekNarrowIntensity(0);
+        faceBeauty.setCheekSmallIntensity(0);
         faceBeauty.setCheekBonesIntensity(0);
         faceBeauty.setLowerJawIntensity(0);
-        faceBeauty.setEyeEnlargingIntensityV2(0.4);
+        faceBeauty.setEyeEnlargingIntensity(0.4);
         faceBeauty.setEyeCircleIntensity(0);
         faceBeauty.setChinIntensity(0.3);
-        faceBeauty.setForHeadIntensityV2(0.3);
-        faceBeauty.setNoseIntensityV2(0.5);
-        faceBeauty.setMouthIntensityV2(0.4);
+        faceBeauty.setForHeadIntensity(0.3);
+        faceBeauty.setNoseIntensity(0.5);
+        faceBeauty.setMouthIntensity(0.4);
         faceBeauty.setCanthusIntensity(0);
         faceBeauty.setEyeSpaceIntensity(0.5);
         faceBeauty.setEyeRotateIntensity(0.5);

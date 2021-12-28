@@ -10,7 +10,15 @@
 NS_ASSUME_NONNULL_BEGIN
 //Flutter 数据协议模型基类，属性用协议实现FUFlutterPluginModelProtocol实现
 @interface FlutterBaseModel : NSObject
+/**
+ * json -> model
+ */
 + (instancetype)analysis:(NSDictionary *)params;
+
+/**
+ * model - > jsonStr
+ */
+- (NSString *)jsonStr;
 @end
 
 NS_ASSUME_NONNULL_END

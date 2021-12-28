@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fulive_flutter/Makeup/FUMakeupConst.dart';
 
 import 'package:fulive_flutter/Makeup/Models/FUMakeupSubModel.dart';
 import 'package:fulive_flutter/Makeup/Models/FUMakeupSubTitleModel.dart';
@@ -12,15 +13,22 @@ import 'package:fulive_flutter/Makeup/FUMakeupSubManager.dart';
 typedef SelectedSubItemCallback = Function(
     List<List<Color>> colors, bool showColors, int index);
 
+typedef SwitchMakeupCallback = Function(bool flag);
+
 //子妆UI
 class FUMakeupSubUI extends StatefulWidget {
+  FUMakeupSubUI(Key key, this.switchMakeupCallback, this.colorSelectedCallback,
+      {this.canCustomSubIndex = MAKEUP_UNLOADINDEX})
+      : super(key: key);
+
   //切换组合妆回调
-  final Function? switchMakeupCallback;
+  final SwitchMakeupCallback? switchMakeupCallback;
 
   final SelectedSubItemCallback? colorSelectedCallback;
 
-  FUMakeupSubUI(Key key, this.switchMakeupCallback, this.colorSelectedCallback)
-      : super(key: key);
+  //可自定义子妆的组合妆索引值,初始化默认-1表示没有
+  final int canCustomSubIndex;
+
   @override
   FUMakeupSubUIState createState() => FUMakeupSubUIState();
 }
@@ -42,7 +50,7 @@ class FUMakeupSubUIState extends State<FUMakeupSubUI> {
   @override
   void initState() {
     super.initState();
-    _manager = FUMakeupSubManager();
+    _manager = FUMakeupSubManager(canCustomIndex: widget.canCustomSubIndex);
   }
 
   @override
@@ -84,10 +92,8 @@ class FUMakeupSubUIState extends State<FUMakeupSubUI> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
-                        child: Opacity(
-                            opacity: 0.9, child: _makeupSubUI(dataList))),
+                    Container(
+                        color: Colors.black87, child: _makeupSubUI(dataList)),
                     _makeupSubTitleListView(dataList)
                   ],
                 ),
@@ -154,7 +160,7 @@ class FUMakeupSubUIState extends State<FUMakeupSubUI> {
                         ),
                         Visibility(
                             visible: (selectedSubIndex != 0 &&
-                                    manager.getSliderValue(index))
+                                    manager.getSliderValue(index) != 0.0)
                                 ? true
                                 : false,
                             child: Align(
@@ -182,7 +188,7 @@ class FUMakeupSubUIState extends State<FUMakeupSubUI> {
       return Visibility(
           visible: !manager.isHiddenSubMakeup,
           child: Container(
-            color: Colors.black,
+            // color: Colors.black,
             height: 140.0,
             child: Column(children: [
               _makeupSubSliderView(manager),
@@ -196,7 +202,9 @@ class FUMakeupSubUIState extends State<FUMakeupSubUI> {
                       child: GestureDetector(
                         onTap: () {
                           if (widget.switchMakeupCallback != null) {
-                            widget.switchMakeupCallback!();
+                            widget.switchMakeupCallback!(
+                                manager.checkSubMakeupSelected());
+                            manager.makeupChange();
                           }
                         },
                         child: Column(
@@ -343,7 +351,6 @@ class FUMakeupSubUIState extends State<FUMakeupSubUI> {
     return Container(
         height: 45.0,
         width: _screenWidth,
-        color: Colors.black,
         child: Visibility(
           visible: manager.subShowSlider,
           child: SliderTheme(

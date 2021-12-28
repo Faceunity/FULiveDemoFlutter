@@ -21,6 +21,22 @@ import 'FUCircleInIndicator.dart';
 
 // ignore: must_be_immutable
 class FUBaseWidget extends StatefulWidget {
+  FUBaseWidget({
+    this.neverShowCustomAlbum = false,
+    Key? key,
+    this.model,
+    this.selectedImagePath,
+    this.child,
+    this.viewClick,
+    this.backActionCallback,
+    this.jumpCumstomAlbum,
+    this.adjustPhotoStream,
+    this.prohibitStream,
+    this.pointYMax,
+    this.pointYMin,
+    this.phototAction,
+  }) : super(key: key);
+
   MainCellModel? model;
   String? selectedImagePath;
   final Widget? child;
@@ -40,6 +56,9 @@ class FUBaseWidget extends StatefulWidget {
   //订阅外部是否禁止录屏按钮通知
   final StreamController? prohibitStream;
 
+  //点击拍照或者录屏action
+  final Function? phototAction;
+
   //相机的Y轴位偏移的最大位置
   late double? pointYMax;
   //相机的Y轴位偏移的最小位置
@@ -47,26 +66,12 @@ class FUBaseWidget extends StatefulWidget {
 
 //部分业务不需要展示CustomAlbum，点击自定义视频/相册 直接跳转
   late bool? neverShowCustomAlbum;
-  FUBaseWidget({
-    this.neverShowCustomAlbum = false,
-    Key? key,
-    this.model,
-    this.selectedImagePath,
-    this.child,
-    this.viewClick,
-    this.backActionCallback,
-    this.jumpCumstomAlbum,
-    this.adjustPhotoStream,
-    this.prohibitStream,
-    this.pointYMax,
-    this.pointYMin,
-  }) : super(key: key);
 
   @override
-  _FUBaseWidgetState createState() => _FUBaseWidgetState();
+  FUBaseWidgetState createState() => FUBaseWidgetState();
 }
 
-class _FUBaseWidgetState extends State<FUBaseWidget> {
+class FUBaseWidgetState extends State<FUBaseWidget> {
   bool _showSpolit = false;
 
   ///监听native 流式数据通道
@@ -90,6 +95,11 @@ class _FUBaseWidgetState extends State<FUBaseWidget> {
 
   late FUBaseStreamManager _streamManager;
 
+  //刷新检测人脸数据流
+  void reloadStream() {
+    _streamManager.startStream();
+  }
+
   void _changeFUCircleInIndicator(bool state) {
     setState(() {
       _positionFUCircleInIndicator = state;
@@ -109,8 +119,6 @@ class _FUBaseWidgetState extends State<FUBaseWidget> {
   double _dx = 0.0;
   double _dy = 0.0;
 
-  //监听每一帧回调
-  late WidgetsBinding? frameCallbackBind;
   @override
   void initState() {
     super.initState();
@@ -159,6 +167,12 @@ class _FUBaseWidgetState extends State<FUBaseWidget> {
     _streamManager.startStream();
   }
 
+  void didChangeDependencie() {
+    super.didChangeDependencies();
+
+    print("didChangeDependencies");
+  }
+
   void delayHiddenSpolit(int duration) {
     _showSpolit = true;
     Future.delayed(Duration(milliseconds: duration), () {
@@ -204,33 +218,6 @@ class _FUBaseWidgetState extends State<FUBaseWidget> {
                       : AndroidView(
                           viewType: 'OpenGLDisplayView',
                         ),
-                  // PlatformViewLink(
-                  //     surfaceFactory: (BuildContext context,
-                  //         PlatformViewController controller) {
-                  //       return AndroidViewSurface(
-                  //         controller: controller as AndroidViewController,
-                  //         gestureRecognizers: const <
-                  //             Factory<OneSequenceGestureRecognizer>>{},
-                  //         hitTestBehavior:
-                  //             PlatformViewHitTestBehavior.opaque,
-                  //       );
-                  //     },
-                  //     onCreatePlatformView:
-                  //         (PlatformViewCreationParams parmas) {
-                  //       return PlatformViewsService.initSurfaceAndroidView(
-                  //           id: parmas.id,
-                  //           viewType: 'OpenGLDisplayView',
-                  //           layoutDirection: TextDirection.ltr,
-                  //           creationParams: <String, dynamic>{},
-                  //           creationParamsCodec: StandardMessageCodec(),
-                  //           onFocus: () {
-                  //             print(parmas.onFocusChanged);
-                  //           })
-                  //         ..addOnPlatformViewCreatedListener(
-                  //             parmas.onPlatformViewCreated)
-                  //         ..create();
-                  //     },
-                  //     viewType: 'OpenGLDisplayView'),
                   GestureDetector(
                     onTapDown: (detail) {
                       double dx = detail.globalPosition.dx;
@@ -324,8 +311,18 @@ class _FUBaseWidgetState extends State<FUBaseWidget> {
                       absorbing: _prohibitFUCircleEnable,
                       child: FUCircleInIndicator(
                         takePhoto: () => FULivePlugin.takePhoto(),
-                        startRecord: () => FULivePlugin.startRecord(),
-                        stopRecord: () => FULivePlugin.stopRecord(),
+                        startRecord: () {
+                          if (widget.phototAction != null) {
+                            widget.phototAction!(true);
+                          }
+                          FULivePlugin.startRecord();
+                        },
+                        stopRecord: () {
+                          if (widget.phototAction != null) {
+                            widget.phototAction!(false);
+                          }
+                          FULivePlugin.stopRecord();
+                        },
                       ),
                     ),
                   ),

@@ -16,7 +16,7 @@ A new flutter plugin project.
   s.source_files = ['Classes/**/*']
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'FURenderKit'
+  s.dependency 'FURenderKit', '7.4.1'
   s.dependency 'SVProgressHUD'
   s.dependency 'MJExtension', '3.0.15.1'
   s.static_framework = true

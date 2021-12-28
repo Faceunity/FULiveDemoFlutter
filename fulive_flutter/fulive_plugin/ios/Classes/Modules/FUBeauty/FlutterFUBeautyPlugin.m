@@ -6,7 +6,6 @@
 //
 
 #import "FlutterFUBeautyPlugin.h"
-#import <FURenderKit/FURenderKit.h>
 #import "FUBeautyDefine.h"
 #import "FUFlutterPluginModelProtocol.h"
 #import "FlutterBaseModel.h"
@@ -26,8 +25,6 @@
 
 @interface FlutterFUBeautyPlugin () {
 
-    //记录当前被渲染的view
-    FUGLDisplayView *_curRenderView;
 }
 
 @property (nonatomic, strong) FUBaseViewControllerManager *baseManager;
@@ -40,7 +37,7 @@
     self = [super init];
     if (self) {
         _baseManager = [[FUBaseViewControllerManager alloc] init];
-
+        [self startCapture];
     }
     return self;
 }
@@ -54,36 +51,20 @@
 }
 
 
-
-
 //从上个页面回退到当前页面，类比viewWillAppear,不完全一样，初始化widget不走这个方法
 - (void)FlutterWillAppear {
-    [[FURenderKit shareRenderKit] startInternalCamera];
     [self.baseManager loadItem];
-    [FURenderKit shareRenderKit].glDisplayView = _curRenderView;
-    [FURenderKit shareRenderKit].pause = NO;
+    [self startCapture];
 }
 
 
-//离开当前页面
+//离开当前页面, 销毁FlutterWidget 不走此方法，可以走disposeFUBeauty来释放资源
 - (void)FlutterWillDisappear {
-    [[FURenderKit shareRenderKit].captureCamera resetFocusAndExposureModes];
-//    [FURenderKit shareRenderKit].glDisplayView;
-    /* 清一下信息，防止快速切换有人脸信息缓存 */
-    [self.baseManager setOnCameraChange];
-    
-    //停止录像
-//    [_photoBtn photoButtonFinishRecord];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    //处理进入自定义视频/图片模块的问题，必须停止
-    NSLog(@"viewWillDisappear : %@",self);
-    [[FURenderKit shareRenderKit] stopInternalCamera];
-    //记录当前页面的view，下次再进入时候赋值给FURenderKit
-    _curRenderView = [FURenderKit shareRenderKit].glDisplayView;
-    [FURenderKit shareRenderKit].glDisplayView = nil;
+    [self stopCature];
+    [self setOnCameraChange];
 }
 
-//FULiveModulePlugin 销毁plugin
+//FULiveModulePlugin 销毁plugin,
 - (void)disposeFUBeauty {
     if ([self.delegate respondsToSelector:@selector(disposePluginWithKey:)]) {
         [self.delegate disposePluginWithKey:NSStringFromClass([self class])];
@@ -92,17 +73,8 @@
 
 //清理资源
 - (void)beautyClean {
-    [FURenderKit shareRenderKit].glDisplayView = nil;
     [self.baseManager releaseItem];
     [self.baseManager updateBeautyCache];
-    NSLog(@"~~~~~~~~~业务层进入关闭内部相机方法");
-//    [FURenderKit shareRenderKit].pause = YES;
-    [[FURenderKit shareRenderKit] stopInternalCamera];
-    //分别率还原成720 * 1080
-    [FURenderKit shareRenderKit].internalCameraSetting.sessionPreset = AVCaptureSessionPreset1280x720;
-    
-    //退出页面还原成前置摄像头
-    [[FURenderKit shareRenderKit].captureCamera changeCameraInputDeviceisFront:YES];
 }
 
 - (void)resetDefault:(NSDictionary *)params {
