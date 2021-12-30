@@ -8,7 +8,6 @@ import android.opengl.EGL14;
 import android.opengl.GLSurfaceView;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
 
 import com.faceunity.core.utils.FileUtils;
 import com.faceunity.core.utils.MediaFileUtil;
@@ -21,15 +20,13 @@ import java.nio.ByteBuffer;
  * Created on 2021/3/28
  */
 public class VideoPlayHelper {
-    private final static String TAG = "VideoPlayHelper";
 
     /**  加载本地文件保存初始大小 */
     private int requestPhotoWidth = 1080;
     private int requestPhotoHeight = 1920;
 
     public interface VideoDecoderListener {
-        void onReadVideoPixel(byte[] bytes, int width, int height);
-        void onReadImagePixel(byte[] bytes, int width, int height);
+        void onReadPixel(byte[] bytes, int width, int height);
     }
 
     private VideoDecoder mVideoDecoder;
@@ -57,15 +54,8 @@ public class VideoPlayHelper {
     private VideoDecoder.OnReadPixelListener mOnReadPixelListener = new VideoDecoder.OnReadPixelListener() {
 
         @Override
-        public void onReadVideoPixel(int width, int height, byte[] rgba) {
-            if (mVideoDecoderListener != null)
-                mVideoDecoderListener.onReadVideoPixel(rgba, width, height);
-        }
-
-        @Override
-        public void onReadImagePixel(int width, int height, byte[] rgba) {
-            if (mVideoDecoderListener != null)
-                mVideoDecoderListener.onReadImagePixel(rgba, width, height);
+        public void onReadPixel(int width, int height, byte[] rgba) {
+            mVideoDecoderListener.onReadPixel(rgba, width, height);
         }
     };
 
@@ -74,45 +64,27 @@ public class VideoPlayHelper {
      *
      * @param path
      */
-    public void playVideo(Context context, String path) {
+    public void playVideo(String path) {
         mPlayerHandler.post(() -> {
             if (path == null && mVideoDecoder != null) {
                 mVideoDecoder.stop();
                 return;
             }
             if (MediaFileUtil.isImageFileType(path)) {
-                //判断路径是手机下还是资源目录下
-                Bitmap bitmap;
-                if (context != null)//资源目录下
-                    bitmap = FileUtils.loadBitmapFromLocal(context,path);
-                else //手机下
-                    bitmap = FileUtils.loadBitmapFromExternalUnRotate(path, requestPhotoWidth, requestPhotoHeight);
-                if (bitmap == null) {
-                    Log.e(TAG,"图片加载异常。");
-                    return;
-                }
+                Bitmap bitmap = FileUtils.loadBitmapFromExternal(path, requestPhotoWidth, requestPhotoHeight);
                 int orientation = FileUtils.INSTANCE.getPhotoOrientation(path);
                 bitmap = rotateBitmap(bitmap, orientation);
                 byte[] rgbBytes = new byte[bitmap.getByteCount()];
                 ByteBuffer rgbaBuffer = ByteBuffer.wrap(rgbBytes);
                 bitmap.copyPixelsToBuffer(rgbaBuffer);
                 bitmap.recycle();
-//                mVideoDecoder.stop();
-                mVideoDecoderListener.onReadImagePixel(rgbBytes, bitmap.getWidth(), bitmap.getHeight());
+                mVideoDecoder.stop();
+                mVideoDecoderListener.onReadPixel(rgbBytes, bitmap.getWidth(), bitmap.getHeight());
             } else if (MediaFileUtil.isVideoFileType(path)) {
                 mVideoDecoder.stop();
                 mVideoDecoder.start(path);
             }
         });
-    }
-
-    /**
-     * 播放
-     *
-     * @param path
-     */
-    public void playVideo(String path) {
-        playVideo(null,path);
     }
 
     /**
@@ -138,13 +110,14 @@ public class VideoPlayHelper {
                 bitmap.copyPixelsToBuffer(rgbaBuffer);
                 bitmap.recycle();
                 mVideoDecoder.stop();
-                mVideoDecoderListener.onReadVideoPixel(rgbBytes, bitmap.getWidth(), bitmap.getHeight());
+                mVideoDecoderListener.onReadPixel(rgbBytes, bitmap.getWidth(), bitmap.getHeight());
             } else if (MediaFileUtil.isVideoFileType(path)) {
                 mVideoDecoder.stop();
                 mVideoDecoder.start(mFilePath);
             }
         });
     }
+
 
     /**
      * 暂停播放

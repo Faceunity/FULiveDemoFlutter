@@ -41,14 +41,6 @@ object PropParam {
     /*人脸跟随*/
     const val FACE_FOLLOW = "{\"thing\":\"<global>\",\"param\":\"follow\"}" // 0表示关闭 1表示开启
 
-    /*人脸位置_X_是否开启*/
-    const val IS_FIX_X = "{\"thing\":\"<global>\",\"param\":\"is_fix_x\"}" // X轴位置
-    /*人脸跟随_Y_是否开启*/
-    const val IS_FIX_Y = "{\"thing\":\"<global>\",\"param\":\"is_fix_y\"}" // Y轴位置
-    /*人脸跟随_Z_是否开启*/
-    const val IS_FIX_Z = "{\"thing\":\"<global>\",\"param\":\"is_fix_z\"}" // Z轴位置
-    /* 老道具 -> animoji 人脸不跟随 -> 设置人脸移除时候锁定方向*/
-    const val FIX_ROTATION = "fix_rotation"
 
     /**
      * ExpressionRecognition

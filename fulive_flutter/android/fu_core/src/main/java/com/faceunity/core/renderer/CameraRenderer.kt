@@ -6,15 +6,11 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.opengl.EGLConfig
-import android.opengl.GLES11Ext
-import android.opengl.GLES20
-import android.opengl.Matrix
+import android.opengl.*
 import android.view.MotionEvent
 import com.faceunity.core.camera.FUCamera
 import com.faceunity.core.camera.FUCameraPreviewData
 import com.faceunity.core.entity.FUCameraConfig
-import com.faceunity.core.entity.FURenderFrameData
 import com.faceunity.core.entity.FURenderInputData
 import com.faceunity.core.enumeration.*
 import com.faceunity.core.faceunity.FURenderManager
@@ -40,8 +36,8 @@ import kotlin.math.abs
  *
  */
 
-class CameraRenderer(gLTextureView: GLTextureView?, private val cameraConfig: FUCameraConfig, glRendererListener: OnGlRendererListener?) :
-    BaseFURenderer(gLTextureView, glRendererListener), ICameraRenderer {
+class CameraRenderer(gLSurfaceView: GLTextureView?, private val cameraConfig: FUCameraConfig, glRendererListener: OnGlRendererListener?) :
+    BaseFURenderer(gLSurfaceView, glRendererListener), ICameraRenderer {
 
     /**相机**/
     var fUCamera: FUCamera = FUCamera.getInstance()
@@ -61,9 +57,9 @@ class CameraRenderer(gLTextureView: GLTextureView?, private val cameraConfig: FU
         externalInputType = FUExternalInputEnum.EXTERNAL_INPUT_TYPE_CAMERA
         inputTextureType = FUInputTextureEnum.FU_ADM_FLAG_EXTERNAL_OES_TEXTURE
         inputBufferType = FUInputBufferEnum.FU_FORMAT_NV21_BUFFER
-        gLTextureView?.setEGLContextClientVersion(2)
-        gLTextureView?.setRenderer(this)
-        gLTextureView?.renderMode = GLTextureView.RENDERMODE_WHEN_DIRTY
+        gLSurfaceView?.setEGLContextClientVersion(2)
+        gLSurfaceView?.setRenderer(this)
+        gLSurfaceView?.renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
     }
 
     /**
@@ -108,7 +104,7 @@ class CameraRenderer(gLTextureView: GLTextureView?, private val cameraConfig: FU
                     }
                 isCameraPreviewFrame = true
             }
-            gLTextureView?.requestRender()
+            gLSurfaceView?.requestRender()
         }
     }
 
@@ -121,7 +117,7 @@ class CameraRenderer(gLTextureView: GLTextureView?, private val cameraConfig: FU
     override fun onResume() {
         mSensorManager.registerListener(mSensorEventListener, mSensor, SensorManager.SENSOR_DELAY_NORMAL)
         if (isActivityPause) {
-            gLTextureView?.onResume()
+            gLSurfaceView?.onResume()
         }
         isActivityPause = false
     }
@@ -133,7 +129,7 @@ class CameraRenderer(gLTextureView: GLTextureView?, private val cameraConfig: FU
         mSensorManager.unregisterListener(mSensorEventListener)
         fUCamera.closeCamera()
         val countDownLatch = CountDownLatch(1)
-        gLTextureView?.queueEvent {
+        gLSurfaceView?.queueEvent {
             cacheLastBitmap()
             destroyGlSurface()
             countDownLatch.countDown()
@@ -143,21 +139,21 @@ class CameraRenderer(gLTextureView: GLTextureView?, private val cameraConfig: FU
         } catch (e: InterruptedException) {
             // ignored
         }
-        gLTextureView?.onPause()
+        gLSurfaceView?.onPause()
     }
 
     /**Activity onDestroy**/
     override fun onDestroy() {
         mCacheBitmap = null
         glRendererListener = null
-        gLTextureView = null
+        gLSurfaceView = null
     }
 
 
     //endregion 生命周期调用
 
 
-    //region  GLTextureView.Renderer相关
+    //region  GLSurfaceView.Renderer相关
 
 
     override fun surfaceCreated(config: EGLConfig?) {
@@ -204,13 +200,6 @@ class CameraRenderer(gLTextureView: GLTextureView?, private val cameraConfig: FU
         }
     }
 
-    override fun onRenderBefore(input: FURenderInputData ,fuRenderFrameData: FURenderFrameData) {
-        if (input.imageBuffer?.inputBufferType == FUInputBufferEnum.FU_FORMAT_YUV_BUFFER && input.renderConfig.isNeedBufferReturn) {
-            fuRenderFrameData.texMatrix = TEXTURE_MATRIX_CCRO_FLIPV_0.copyOf()
-            input.renderConfig.outputMatrix = FUTransformMatrixEnum.CCROT0_FLIPVERTICAL
-            input.renderConfig.outputMatrixEnable = true
-        }
-    }
 
     override fun drawRenderFrame() {
         if (faceUnity2DTexId > 0 && renderSwitch) {

@@ -75,7 +75,7 @@ public class VideoDecoder implements SurfaceTexture.OnFrameAvailableListener {
         rgbaBuffer.rewind();
         rgbaBuffer.get(mRgbaByte);
         if (mOnReadPixelListener != null && !mIsStopDecode) {
-            mOnReadPixelListener.onReadVideoPixel(drawWidth, drawHeight, mRgbaByte);
+            mOnReadPixelListener.onReadPixel(drawWidth, drawHeight, mRgbaByte);
         }
     }
 
@@ -112,10 +112,13 @@ public class VideoDecoder implements SurfaceTexture.OnFrameAvailableListener {
         Log.d(TAG, "start: ");
         mVideoPath = videoPath;
         mIsStopDecode = false;
-        mDecodeHandler.post(() -> {
-            retrieveVideoInfo();
-            createSurface();
-            createMediaPlayer();
+        mDecodeHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                retrieveVideoInfo();
+                createSurface();
+                createMediaPlayer();
+            }
         });
     }
 
@@ -125,9 +128,12 @@ public class VideoDecoder implements SurfaceTexture.OnFrameAvailableListener {
             return;
         }
         mIsStopDecode = true;
-        mDecodeHandler.post(() -> {
-            releaseMediaPlayer();
-            releaseSurface();
+        mDecodeHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                releaseMediaPlayer();
+                releaseSurface();
+            }
         });
     }
 
@@ -261,21 +267,13 @@ public class VideoDecoder implements SurfaceTexture.OnFrameAvailableListener {
 
     public interface OnReadPixelListener {
         /**
-         * 读到 video rgba 数据
+         * 读到 rgba 数据
          *
          * @param width
          * @param height
          * @param rgba
          */
-        void onReadVideoPixel(int width, int height, byte[] rgba);
-
-        /**
-         * 读到Image rgba 数据回调
-         * @param width
-         * @param height
-         * @param rgba
-         */
-        void onReadImagePixel(int width, int height, byte[] rgba);
+        void onReadPixel(int width, int height, byte[] rgba);
     }
 
 }

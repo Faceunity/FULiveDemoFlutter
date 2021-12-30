@@ -1,5 +1,6 @@
 package com.faceunity.core.faceunity
 
+import com.faceunity.core.avatar.AvatarContainer
 import com.faceunity.core.entity.FURenderInputData
 import com.faceunity.core.entity.FURenderOutputData
 import com.faceunity.core.model.action.ActionRecognition
@@ -96,13 +97,12 @@ class FURenderKit private constructor() {
 
         if (propContainer.getAllProp().isNotEmpty()) {
             propContainer.removeAllProp()
+            mFURenderBridge.mPropContainerController.release()
         }
-        mFURenderBridge.mPropContainerController.release()
-        if (sceneManager.getAllScene().isNotEmpty()) {
-            sceneManager.removeAllScene()
+        if (avatarContainer.getAllSceneModel().isNotEmpty()) {
+            avatarContainer.removeAllScene()
             mFURenderBridge.mAvatarController.release()
         }
-
         mFURenderBridge.onDestroy(isSafe)
     }
 
@@ -248,7 +248,7 @@ class FURenderKit private constructor() {
     val propContainer by lazy { PropContainer.getInstance() }
 
     /*avatar容器*/
-    val sceneManager by lazy { FUSceneKit.getInstance() }
+    val avatarContainer by lazy { AvatarContainer.getInstance() }
     //endregion业务模型
     //region 渲染
 
@@ -306,13 +306,6 @@ class FURenderKit private constructor() {
      */
     fun getVersion(): String {
         return SDKController.getVersion()
-    }
-
-    /**
-     * 获取证书权限码
-     */
-    fun getModuleCode(code:Int): Int {
-        return SDKController.getModuleCode(code)
     }
 
     /**

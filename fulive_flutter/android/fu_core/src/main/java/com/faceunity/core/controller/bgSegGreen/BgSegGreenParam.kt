@@ -44,9 +44,5 @@ object BgSegGreenParam {
     /*背景场景纹理*/
     const val TAX_BG = "tex_bg"
 
-    /*生成安全区域纹理*/
-    const val TEX_TEMPLATE = "tex_template"
 
-    /*是否启用安全区域纹理*/
-    const val IS_USE_TEMPLATE = "is_use_template"
 }

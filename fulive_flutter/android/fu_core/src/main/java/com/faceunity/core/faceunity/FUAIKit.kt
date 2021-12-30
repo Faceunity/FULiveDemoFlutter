@@ -153,10 +153,6 @@ class FUAIKit private constructor() {
      */
     fun isTracking() = SDKController.isTracking()
 
-    /**
-     * 获取人脸置信度
-     */
-    fun getFaceProcessorGetConfidenceScore(index:Int) = SDKController.getFaceProcessorGetConfidenceScore(index)
 
     /**
      * 获取人脸信息
@@ -212,13 +208,6 @@ class FUAIKit private constructor() {
         SDKController.setMaxFaces(maxFaces)
     }
 
-    /**
-     * 设置Landmark算法精度
-     * @param ratio Int 0 1 2
-     */
-    fun faceProcessorSetFaceLandmarkQuality(ratio: Int) {
-        SDKController.faceProcessorSetFaceLandmarkQuality(ratio)
-    }
 
     /**
      * 设置人脸检测距离的接口
@@ -227,8 +216,6 @@ class FUAIKit private constructor() {
     fun faceProcessorSetMinFaceRatio(ratio: Float) {
         SDKController.faceProcessorSetMinFaceRatio(ratio)
     }
-
-
 
 
     /**

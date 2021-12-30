@@ -66,29 +66,6 @@ class BgSegGreenController : BaseSingleController() {
     }
 
     /**
-     * 创建安全区域纹理
-     * @param rgba ByteArray
-     * @param width Int
-     * @param height Int
-     */
-    internal fun createSafeAreaSegment(sign: Long, rgba: ByteArray, width: Int, height: Int) {
-        if (sign != modelSign) return
-        FULogger.i(TAG, "createSafeAreaSegment ")
-        deleteItemTex(BgSegGreenParam.TEX_TEMPLATE)
-        createItemTex(BgSegGreenParam.TEX_TEMPLATE, rgba, width, height)
-    }
-
-    /**
-     * 移除安全区域纹理
-     * @param sign Long
-     */
-    internal fun removeSafeAreaSegment(sign: Long) {
-        if (sign != modelSign) return
-        FULogger.i(TAG, "removeSafeAreaSegment ")
-        deleteItemTex(BgSegGreenParam.TEX_TEMPLATE)
-    }
-
-    /**
      * 创建背景纹理
      * @param rgba ByteArray
      * @param width Int

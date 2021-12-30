@@ -16,8 +16,6 @@ import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 
-import com.faceunity.core.utils.FULogger;
-
 import java.io.Writer;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -130,11 +128,8 @@ public class GLTextureView extends TextureView
 
     @Override
     public void setBackgroundDrawable(Drawable background) {
-        FULogger.i(TAG,"setBackgroundDrawable pre");
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N && background != null) {
-            FULogger.i(TAG,"setBackgroundDrawable start");
             setBackgroundDrawable(background);
-            FULogger.i(TAG,"setBackgroundDrawable end");
         }
     }
 

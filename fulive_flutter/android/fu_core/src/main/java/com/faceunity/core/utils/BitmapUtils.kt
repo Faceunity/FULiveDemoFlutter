@@ -91,7 +91,7 @@ object BitmapUtils {
      * @param orientation
      * @return
      */
-    fun rotateBitmap(bitmap: Bitmap, orientation: Int): Bitmap {
+    fun rotateBitmap(bitmap: Bitmap, orientation: Int): Bitmap? {
         var bitmap = bitmap
         if (orientation == 90 || orientation == 180 || orientation == 270) {
             val matrix = Matrix()
@@ -106,114 +106,20 @@ object BitmapUtils {
      *
      * @param inputWidth
      * @param inputHeight
-     * @param bitmap
+     * @param scaled
      * @return
      */
-    fun getNV21(inputWidth: Int, inputHeight: Int, bitmap: Bitmap, needRecycle: Boolean = true): ByteArray? {
-        val intRGBA = IntArray(inputWidth * inputHeight)
-        bitmap.getPixels(intRGBA, 0, inputWidth, 0, 0, inputWidth, inputHeight)
-        val yuv = ByteArray(inputHeight * inputWidth + 2 * ceil(inputHeight.toFloat() / 2.toDouble()).toInt() * ceil(inputWidth.toFloat() / 2.toDouble()).toInt())
-        encodeYUV420SP(yuv, intRGBA, inputWidth, inputHeight)
+    fun getNV21(inputWidth: Int, inputHeight: Int, scaled: Bitmap, needRecycle: Boolean = true): ByteArray? {
+        val argb = IntArray(inputWidth * inputHeight)
+        scaled.getPixels(argb, 0, inputWidth, 0, 0, inputWidth, inputHeight)
+        val yuv = ByteArray(
+            inputHeight * inputWidth + 2 * ceil(inputHeight.toFloat() / 2.toDouble()).toInt() * ceil(inputWidth.toFloat() / 2.toDouble()).toInt()
+        )
+        encodeYUV420SP(yuv, argb, inputWidth, inputHeight)
         if (needRecycle) {
-            bitmap.recycle()
+            scaled.recycle()
         }
         return yuv
-    }
-
-    /**
-     * 将bitmap 转换为RGBA数组（四通道）
-     * @param bitmap
-     * @return
-     */
-    fun bitmap2RGBA(bitmap: Bitmap,needRecycle: Boolean = true): ByteArray? {
-        val width = bitmap.width
-        val height = bitmap.height
-        val intRGBA = IntArray(width * height)
-        bitmap.getPixels(intRGBA, 0, width, 0, 0, width, height)
-        val rgba = ByteArray(width * height * 4)
-        for (i in intRGBA.indices) {
-            val `val` = intRGBA[i]
-            rgba[i * 4] = (`val` shr 16 and 0xFF).toByte() //R
-            rgba[i * 4 + 1] = (`val` shr 8 and 0xFF).toByte() //G
-            rgba[i * 4 + 2] = (`val` and 0xFF).toByte() //B
-            rgba[i * 4 + 3] = 0xFF.toByte() //A
-        }
-        if (needRecycle) {
-            bitmap.recycle()
-        }
-        return rgba
-    }
-
-    fun getIntRGBA(width: Int, height: Int, bitmap: Bitmap) :IntArray{
-        val intRGBA = IntArray(width * height)
-        bitmap.getPixels(intRGBA, 0, width, 0, 0, width, height)
-        return intRGBA
-    }
-
-    fun intRGBA2ByteRGBA(width:Int,height:Int,intRGBA: IntArray):ByteArray?{
-        val rgba = ByteArray(width * height * 4)
-        for (i in intRGBA.indices) {
-            val `val` = intRGBA[i]
-            rgba[i * 4] = (`val` shr 16 and 0xFF).toByte() //R
-            rgba[i * 4 + 1] = (`val` shr 8 and 0xFF).toByte() //G
-            rgba[i * 4 + 2] = (`val` and 0xFF).toByte() //B
-            rgba[i * 4 + 3] = 0xFF.toByte() //A
-        }
-        return rgba
-    }
-
-    fun intRGBA2ByteNV21(width:Int,height:Int,intRGBA: IntArray):ByteArray?{
-        val yuv = ByteArray(height * width + 2 * ceil(height.toFloat() / 2.toDouble()).toInt() * ceil(width.toFloat() / 2.toDouble()).toInt())
-        encodeYUV420SP(yuv, intRGBA, width, height)
-        return yuv
-    }
-
-    /**
-     * YUV分量转NV21
-     */
-    fun YUVTOVN21(yBuffer: ByteArray, uBuffer: ByteArray, vBuffer: ByteArray): ByteArray {
-        //4、交叉存储VU数据
-        var lengthY = yBuffer.size
-        var lengthU = uBuffer.size
-        var lengthV = vBuffer.size
-
-        var newLength = lengthY + lengthU + lengthV
-        var arrayNV21 = ByteArray(newLength)
-
-        //先将数据Y 拷贝进去
-        System.arraycopy(yBuffer, 0, arrayNV21, 0, lengthY)
-
-        //再将UV数据拷贝进去
-        for (i in 0 until lengthV) {
-            var index = lengthY + i * 2
-            arrayNV21[index] = vBuffer[i]
-        }
-
-        for (i in 0 until lengthU) {
-            var index = lengthY + i * 2 + 1
-            arrayNV21[index] = uBuffer[i]
-        }
-
-        return arrayNV21
-    }
-
-    /**
-     * YUV分量转NV21
-     */
-    fun NV21ToYUV(nv21Buffer:ByteArray, yBuffer: ByteArray, uBuffer: ByteArray, vBuffer: ByteArray){
-        //将前面的数据拷进入ybuffer
-        System.arraycopy(nv21Buffer, 0, yBuffer, 0, yBuffer.size)
-
-        //再将后面的数据拷贝进UVbuffer
-        for (i in vBuffer.indices) {
-            var index = yBuffer.size + i * 2
-            vBuffer[i] = nv21Buffer[index]
-        }
-
-        for (i in uBuffer.indices) {
-            var index = yBuffer.size + i * 2 + 1
-            uBuffer[i] = nv21Buffer[index]
-        }
     }
 
     /**

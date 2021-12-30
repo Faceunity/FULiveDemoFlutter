@@ -26,7 +26,7 @@ import com.faceunity.core.weight.GLTextureView
  * Created on 2021/1/27
  *
  */
-abstract class BaseFURenderer(protected var gLTextureView: GLTextureView?, protected var glRendererListener: OnGlRendererListener?) : GLTextureView.Renderer {
+abstract class BaseFURenderer(protected var gLSurfaceView: GLTextureView?, protected var glRendererListener: OnGlRendererListener?) : GLTextureView.Renderer {
     val TAG = "KIT_BaseFURenderer"
 
     /** FURenderKit**/
@@ -47,17 +47,12 @@ abstract class BaseFURenderer(protected var gLTextureView: GLTextureView?, prote
         0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f
     )
 
-    //上下镜像
-    val TEXTURE_MATRIX_CCRO_FLIPV_0 = floatArrayOf(
-        1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
-    )
 
     /** 纹理Program**/
 
     protected var programTexture2d: ProgramTexture2d? = null
 
-    /**GLTextureView尺寸**/
+    /**GLSurfaceView尺寸**/
     protected var surfaceViewWidth: Int = 1
     protected var surfaceViewHeight: Int = 1
 
@@ -117,7 +112,7 @@ abstract class BaseFURenderer(protected var gLTextureView: GLTextureView?, prote
      */
     fun setFURenderSwitch(isOpen: Boolean) {
         if (!isOpen) {
-            gLTextureView?.queueEvent {
+            gLSurfaceView?.queueEvent {
                 mFURenderKit.clearCacheResource()
             }
         }
@@ -132,7 +127,7 @@ abstract class BaseFURenderer(protected var gLTextureView: GLTextureView?, prote
         frameFuRenderMinCount = count
     }
 
-    //region GLTextureView.Renderer实现
+    //region GLSurfaceView.Renderer实现
 
 
     /**
@@ -196,7 +191,6 @@ abstract class BaseFURenderer(protected var gLTextureView: GLTextureView?, prote
         if (renderSwitch && frameCount++ >= frameFuRenderMinCount) {
             val frameData = FURenderFrameData(defaultFUTexMatrix.copyOf(), defaultFUMvpMatrix.copyOf())
             glRendererListener?.onRenderBefore(inputData)//特效合成前置处理
-            onRenderBefore(inputData,frameData)
             currentFURenderOutputData = mFURenderKit.renderWithInput(inputData)//特效合成
             faceUnity2DTexId = currentFURenderOutputData!!.texture?.texId ?: 0
             glRendererListener?.onRenderAfter(currentFURenderOutputData!!, frameData)  //纹理合成后置处理
@@ -211,11 +205,10 @@ abstract class BaseFURenderer(protected var gLTextureView: GLTextureView?, prote
         /* 循环调用 */
         if (externalInputType != FUExternalInputEnum.EXTERNAL_INPUT_TYPE_CAMERA) {
             LimitFpsUtil.limitFrameRate()//循环调用
-            gLTextureView?.requestRender()
+            gLSurfaceView?.requestRender()
         }
     }
 
-    protected open fun onRenderBefore(input: FURenderInputData,fuRenderFrameData: FURenderFrameData) {}
 
     protected abstract fun prepareRender(): Boolean
 
@@ -249,14 +242,14 @@ abstract class BaseFURenderer(protected var gLTextureView: GLTextureView?, prote
     protected fun drawImageTexture(bitmap: Bitmap) {
         mIsBitmapPreview = true
         mShotBitmap = bitmap
-        gLTextureView?.queueEvent {
+        gLSurfaceView?.queueEvent {
             deleteBitmapTexId()
             mBitmap2dTexId = GlUtil.createImageTexture(bitmap)
             mBitmapMvpMatrix =
                 GlUtil.changeMvpMatrixCrop(surfaceViewWidth.toFloat(), surfaceViewHeight.toFloat(), bitmap.width.toFloat(), bitmap.height.toFloat())
             Matrix.scaleM(mBitmapMvpMatrix, 0, 1f, -1f, 1f)
         }
-        gLTextureView?.requestRender()
+        gLSurfaceView?.requestRender()
     }
 
     /**
@@ -265,10 +258,10 @@ abstract class BaseFURenderer(protected var gLTextureView: GLTextureView?, prote
     protected fun dismissImageTexture() {
         mShotBitmap = null
         mIsBitmapPreview = false
-        gLTextureView?.queueEvent {
+        gLSurfaceView?.queueEvent {
             deleteBitmapTexId()
         }
-        gLTextureView?.requestRender()
+        gLSurfaceView?.requestRender()
     }
 
     /**

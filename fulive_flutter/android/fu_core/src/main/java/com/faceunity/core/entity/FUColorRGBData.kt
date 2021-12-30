@@ -67,12 +67,5 @@ data class FUColorRGBData @JvmOverloads constructor(val red: Double, val green: 
         return result
     }
 
-    /**
-     * 克隆
-     * @return FUBundleData
-     */
-    fun clone(): FUColorRGBData {
-        return FUColorRGBData(red, green, blue, alpha)
-    }
 
 }

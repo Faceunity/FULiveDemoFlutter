@@ -27,12 +27,7 @@ object MakeupParam {
 
     /*口红颜色*/
     const val MAKEUP_LIP_COLOR = "makeup_lip_color"//口红1
-    const val MAKEUP_LIP_COLOR_V2 = "makeup_lip_color_v2"//口红1
     const val MAKEUP_LIP_COLOR2 = "makeup_lip_color2"//口红2
-
-    /*口红高光*/
-    const val MAKEUP_LIP_HIGH_LIGHT_ENABLE = "makeup_lip_highlight_enable"//口红高光开光
-    const val MAKEUP_LIP_HIGH_LIGHT_STRENGTH = "makeup_lip_highlight_strength"//口红高光强度
 
     /*是否使用眉毛变形*/
     const val BROW_WARP = "brow_warp"//0表示关闭，1表示开启
@@ -63,7 +58,6 @@ object MakeupParam {
     const val FOUNDATION_INTENSITY = "makeup_intensity_foundation"//粉底强度
     const val HIGHLIGHT_INTENSITY = "makeup_intensity_highlight"//高光强度
     const val SHADOW_INTENSITY = "makeup_intensity_shadow"//阴影强度
-    const val FILTER_INTENSITY = "filter_level"//阴影强度
 
     /**
      * 子项妆容贴图
@@ -81,7 +75,6 @@ object MakeupParam {
     const val TEX_FOUNDATION = "tex_foundation"//粉底
     const val TEX_HIGH_LIGHT = "tex_highlight"//高光
     const val TEX_SHADOW = "tex_shadow"//阴影
-    const val TEX_LIP = "tex_lip"//口红
 
 
     /**
