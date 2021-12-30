@@ -18,6 +18,7 @@ object FURenderManager {
     internal var mContext: Context by Delegates.notNull()
     internal var mOperateCallback: OperateCallback? = null
 
+
     /**
      * 初始化FaceUnity环境
      * @param context Context   上下文
@@ -33,25 +34,6 @@ object FURenderManager {
             SDKController.setup(auth)
         } else {
             operateCallback.onSuccess(FURenderConfig.OPERATE_SUCCESS_AUTH, "setup")
-        }
-    }
-
-    /**
-     * 本地初始化FaceUnity环境
-     * @param context Context   上下文
-     * @param auth ByteArray 鉴权数据字节数组 authpack.A()
-     * @param offlineBundle ByteArray 鉴权使用的离线Bundle
-     * @param operateCallback OperateCallback 执行回调
-     * @return FaceUnityHelper
-     */
-    @JvmStatic
-    fun registerFURenderLocal(context: Context, auth: ByteArray, offlineBundle:ByteArray,operateCallback: OperateCallback) {
-        mContext = context.applicationContext
-        mOperateCallback = operateCallback
-        if (!SDKController.fuIsLibraryInit()) {
-            SDKController.setupLocal(auth,offlineBundle)
-        } else {
-            operateCallback.onSuccess(FURenderConfig.OPERATE_SUCCESS_AUTH, "setupLocal")
         }
     }
 

@@ -50,23 +50,6 @@ object FileUtils {
         return `is`
     }
 
-    /**
-     * 根据路径获取InputStream
-     * @param path String
-     * @return InputStream?
-     */
-    @JvmStatic
-    private fun readInputByPath(path: String): InputStream? {
-        if (path.isBlank()) return null
-        var `is`: InputStream? = null
-        try {
-            `is` = FileInputStream(path)
-        } catch (e: IOException) {
-
-        }
-        return `is`
-    }
-
 
     /**
      * 根据路径加载Bundle文件
@@ -346,30 +329,6 @@ object FileUtils {
         return fileDir
     }
 
-    /**
-     * load本地String
-     * @param context Context
-     * @param path String
-     * @return String?
-     */
-    @JvmStatic
-    fun loadStringFromExternal(path: String): String? {
-        val inputStream = readInputByPath(path)
-        var content: String? = null
-        inputStream?.let {
-            try {
-                val bytes = ByteArray(it.available())
-                it.read(bytes)
-                content = String(bytes)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                it.close()
-            }
-        }
-        FULogger.d(TAG, "loadStringFromLocal failed path:$path")
-        return content
-    }
 
     /**
      * load本地图片
@@ -412,46 +371,27 @@ object FileUtils {
      * @return Bitmap
      */
     @JvmStatic
-    fun loadBitmapFromExternal(path: String, screenWidth: Int, screenHeight: Int): Bitmap? {
-        var bitmap = loadBitmapFromExternalUnRotate(path,screenWidth,screenHeight)
-        val orientation = getPhotoOrientation(path)
-        bitmap?.let {
-            bitmap = BitmapUtils.rotateBitmap(it, orientation)
-        }
-        return bitmap
-    }
-
-    /**
-     * load本地图片
-     * @param path String
-     * @param screenWidth Int
-     * @param screenHeight Int
-     * @return Bitmap
-     */
-    @JvmStatic
-    fun loadBitmapFromExternalUnRotate(path: String, screenWidth: Int, screenHeight: Int): Bitmap? {
-        try {
-            val opt = BitmapFactory.Options()
-            opt.inJustDecodeBounds = true
-            BitmapFactory.decodeFile(path, opt)
-            val picWidth = opt.outWidth
-            val picHeight = opt.outHeight
-            var inSampleSize = 1
-            // 根据屏的大小和图片大小计算出缩放比例
-            if (picHeight > screenHeight || picWidth > screenWidth) {
-                val halfHeight: Int = picHeight / 2
-                val halfWidth: Int = picWidth / 2
-                while (halfHeight / inSampleSize >= screenHeight && halfWidth / inSampleSize >= screenWidth) {
-                    inSampleSize *= 2
-                }
+    fun loadBitmapFromExternal(path: String, screenWidth: Int, screenHeight: Int): Bitmap {
+        val opt = BitmapFactory.Options()
+        opt.inJustDecodeBounds = true
+        BitmapFactory.decodeFile(path, opt)
+        val picWidth = opt.outWidth
+        val picHeight = opt.outHeight
+        var inSampleSize = 1
+        // 根据屏的大小和图片大小计算出缩放比例
+        if (picHeight > screenHeight || picWidth > screenWidth) {
+            val halfHeight: Int = picHeight / 2
+            val halfWidth: Int = picWidth / 2
+            while (halfHeight / inSampleSize >= screenHeight && halfWidth / inSampleSize >= screenWidth) {
+                inSampleSize *= 2
             }
-            opt.inSampleSize = inSampleSize
-            opt.inJustDecodeBounds = false
-            return BitmapFactory.decodeFile(path, opt)
-        } catch (e:Exception) {
-            e.printStackTrace()
-            return null
         }
+        opt.inSampleSize = inSampleSize
+        opt.inJustDecodeBounds = false
+        var bitmap = BitmapFactory.decodeFile(path, opt)
+        val orientation = getPhotoOrientation(path)
+        bitmap = BitmapUtils.rotateBitmap(bitmap, orientation)
+        return bitmap
     }
 
 

@@ -13,9 +13,10 @@ import com.faceunity.core.support.FURenderBridge
  *
  */
 class FaceBeauty(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
-    override fun getModelController() = mFaceBeautyController
 
-    private val mFaceBeautyController by lazy { FURenderBridge.getInstance().mFaceBeautyController }
+
+    override fun getModelController() = FURenderBridge.getInstance().mFaceBeautyController
+
 
     //region 滤镜
     /* 滤镜名称 */
@@ -58,7 +59,7 @@ class FaceBeauty(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
         }
 
     /* 磨皮类型 */
-    var blurType = FaceBeautyBlurTypeEnum.FineSkin // 清晰磨皮  朦胧磨皮   精细磨皮  均匀磨皮。 此参数优先级比 heavy_blur 低，在使用时要将 heavy_blur 设为 0
+    var blurType = FaceBeautyBlurTypeEnum.FineSkin // 清晰磨皮  朦胧磨皮   精细磨皮。 此参数优先级比 heavy_blur 低，在使用时要将 heavy_blur 设为 0
         set(value) {
             field = value
             updateAttributes(FaceBeautyParam.BLUR_TYPE, value)
@@ -159,20 +160,6 @@ class FaceBeauty(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
             updateAttributes(FaceBeautyParam.CHEEK_V_INTENSITY, value)
         }
 
-    /* 长脸程度 */
-    var cheekLongIntensity = 0.0 //范围 [0-1]
-        set(value) {
-            field = value
-            updateAttributes(FaceBeautyParam.CHEEK_LONG_INTENSITY, value)
-        }
-
-    /* 圆脸程度 */
-    var cheekCircleIntensity = 0.0 //范围 [0-1]
-        set(value) {
-            field = value
-            updateAttributes(FaceBeautyParam.CHEEK_CIRCLE_INTENSITY, value)
-        }
-
     /* 窄脸程度 */
     var cheekNarrowIntensity = 0.0 //范围 [0-1]
         set(value) {
@@ -180,32 +167,11 @@ class FaceBeauty(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
             updateAttributes(FaceBeautyParam.CHEEK_NARROW_INTENSITY, value)
         }
 
-    /* 窄脸程度 */
-    var cheekNarrowIntensityV2 = 0.0 //范围 [0-1]
-        set(value) {
-            field = value
-            updateAttributes(FaceBeautyParam.CHEEK_NARROW_INTENSITY_V2, value)
-        }
-
-    /* 短脸程度 */
-    var cheekShortIntensity = 0.0 //范围 [0-1]
-        set(value) {
-            field = value
-            updateAttributes(FaceBeautyParam.CHEEK_SHORT_INTENSITY, value)
-        }
-
     /* 小脸程度 */
     var cheekSmallIntensity = 0.0 //范围 [0-1]
         set(value) {
             field = value
             updateAttributes(FaceBeautyParam.CHEEK_SMALL_INTENSITY, value)
-        }
-
-    /* 小脸程度 */
-    var cheekSmallIntensityV2 = 0.0 //范围 [0-1]
-        set(value) {
-            field = value
-            updateAttributes(FaceBeautyParam.CHEEK_SMALL_INTENSITY_V2, value)
         }
 
     /* 瘦颧骨 */
@@ -229,13 +195,6 @@ class FaceBeauty(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
             updateAttributes(FaceBeautyParam.EYE_ENLARGING_INTENSITY, value)
         }
 
-    /* 大眼程度 */
-    var eyeEnlargingIntensityV2 = 0.0 //范围 [0-1]
-        set(value) {
-            field = value
-            updateAttributes(FaceBeautyParam.EYE_ENLARGING_INTENSITY_V2, value)
-        }
-
     /* 下巴调整程度 */
     var chinIntensity = 0.5 //范围 [0-1]，0-0.5是变小，0.5-1是变大
         set(value) {
@@ -250,13 +209,6 @@ class FaceBeauty(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
             updateAttributes(FaceBeautyParam.FOREHEAD_INTENSITY, value)
         }
 
-    /* 额头调整程度 */
-    var forHeadIntensityV2 = 0.5 //范围[0-1]，0-0.5 是变小，0.5-1 是变大
-        set(value) {
-            field = value
-            updateAttributes(FaceBeautyParam.FOREHEAD_INTENSITY_V2, value)
-        }
-
     /* 瘦鼻程度 */
     var noseIntensity = 0.0 //范围 [0-1]
         set(value) {
@@ -264,25 +216,11 @@ class FaceBeauty(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
             updateAttributes(FaceBeautyParam.NOSE_INTENSITY, value)
         }
 
-    /* 瘦鼻程度 */
-    var noseIntensityV2 = 0.0 //范围 [0-1]
-        set(value) {
-            field = value
-            updateAttributes(FaceBeautyParam.NOSE_INTENSITY_V2, value)
-        }
-
     /* 嘴巴调整程度 */
     var mouthIntensity = 0.5 //[0-1]，0-0.5是变小，0.5-1是变大
         set(value) {
             field = value
             updateAttributes(FaceBeautyParam.MOUTH_INTENSITY, value)
-        }
-
-    /* 嘴巴调整程度 */
-    var mouthIntensityV2 = 0.5 //[0-1]，0-0.5是变小，0.5-1是变大
-        set(value) {
-            field = value
-            updateAttributes(FaceBeautyParam.MOUTH_INTENSITY_V2, value)
         }
 
     /* 开眼角强度 */
@@ -333,6 +271,8 @@ class FaceBeauty(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
             field = value
             updateAttributes(FaceBeautyParam.EYE_CIRCLE_INTENSITY, value)
         }
+
+
 //endregion
 
     override fun buildParams(): java.util.LinkedHashMap<String, Any> {
@@ -359,18 +299,15 @@ class FaceBeauty(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
         params[FaceBeautyParam.FACE_SHAPE_INTENSITY] = faceShapeIntensity
         params[FaceBeautyParam.CHEEK_THINNING_INTENSITY] = cheekThinningIntensity
         params[FaceBeautyParam.CHEEK_V_INTENSITY] = cheekVIntensity
-        params[FaceBeautyParam.CHEEK_LONG_INTENSITY] = cheekLongIntensity
-        params[FaceBeautyParam.CHEEK_CIRCLE_INTENSITY] = cheekCircleIntensity
-        params[FaceBeautyParam.CHEEK_NARROW_INTENSITY_V2] = cheekNarrowIntensityV2
-        params[FaceBeautyParam.CHEEK_SHORT_INTENSITY] = cheekShortIntensity
-        params[FaceBeautyParam.CHEEK_SMALL_INTENSITY_V2] = cheekSmallIntensityV2
+        params[FaceBeautyParam.CHEEK_NARROW_INTENSITY] = cheekNarrowIntensity
+        params[FaceBeautyParam.CHEEK_SMALL_INTENSITY] = cheekSmallIntensity
         params[FaceBeautyParam.INTENSITY_CHEEKBONES_INTENSITY] = cheekBonesIntensity
         params[FaceBeautyParam.INTENSITY_LOW_JAW_INTENSITY] = lowerJawIntensity
-        params[FaceBeautyParam.EYE_ENLARGING_INTENSITY_V2] = eyeEnlargingIntensityV2
+        params[FaceBeautyParam.EYE_ENLARGING_INTENSITY] = eyeEnlargingIntensity
         params[FaceBeautyParam.CHIN_INTENSITY] = chinIntensity
-        params[FaceBeautyParam.FOREHEAD_INTENSITY_V2] = forHeadIntensityV2
-        params[FaceBeautyParam.NOSE_INTENSITY_V2] = noseIntensityV2
-        params[FaceBeautyParam.MOUTH_INTENSITY_V2] = mouthIntensityV2
+        params[FaceBeautyParam.FOREHEAD_INTENSITY] = forHeadIntensity
+        params[FaceBeautyParam.NOSE_INTENSITY] = noseIntensity
+        params[FaceBeautyParam.MOUTH_INTENSITY] = mouthIntensity
         params[FaceBeautyParam.CANTHUS_INTENSITY] = canthusIntensity
         params[FaceBeautyParam.EYE_SPACE_INTENSITY] = eyeSpaceIntensity
         params[FaceBeautyParam.EYE_ROTATE_INTENSITY] = eyeRotateIntensity
@@ -378,9 +315,6 @@ class FaceBeauty(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
         params[FaceBeautyParam.PHILTRUM_INTENSITY] = philtrumIntensity
         params[FaceBeautyParam.SMILE_INTENSITY] = smileIntensity
         params[FaceBeautyParam.EYE_CIRCLE_INTENSITY] = eyeCircleIntensity
-
-        //设置旧的参数
-        params[FaceBeautyParam.EYE_ENLARGING_INTENSITY] = eyeEnlargingIntensity
         return params
     }
 }

@@ -18,7 +18,6 @@ import com.faceunity.core.entity.FURenderInputData
 import com.faceunity.core.entity.FURenderOutputData
 import com.faceunity.core.enumeration.*
 import com.faceunity.core.faceunity.FURenderKit
-import com.faceunity.core.utils.BitmapUtils
 import com.faceunity.core.utils.DecimalUtils
 import com.faceunity.core.utils.FULogger
 import com.faceunity.wrapper.faceunity
@@ -249,7 +248,7 @@ class FURenderBridge private constructor() {
      */
     private fun drawFrameBeautify(width: Int, height: Int, texId: Int, inputTextureType: Int, needChangedTexture: Boolean): FURenderOutputData {
         val flags = getRenderFlags(texId, inputTextureType)
-        val fuTex = SDKController.fuRenderBeautifyOnly(width ,height, mFrameId++, BundleManager.getInstance().renderBindBundles,flags,texId)
+        val fuTex = SDKController.fuRenderBeautifyOnly(texId, flags, width, height, mFrameId++, BundleManager.getInstance().renderBindBundles)
         if (fuTex <= 0) {
             SDKController.callBackSystemError()
         }
@@ -277,7 +276,6 @@ class FURenderBridge private constructor() {
             FULogger.e(TAG, "drawFrameYUV data is illegal  y_buffer:${y_buffer == null}  u_buffer:${u_buffer == null} v_buffer:${v_buffer == null} width:$width  height:$height  ")
             return FURenderOutputData()
         }
-        var readBackBuffer: ByteArray? = null
         val uvStride = width shr 1
         val retTexH = if (needChangedTexture) width else height
         val retTexW = if (needChangedTexture) height else width
@@ -285,23 +283,14 @@ class FURenderBridge private constructor() {
         val retBufW = if (needChangedBuffer) height else width
         val retStride = retBufW shr 1
         val flags = getRenderFlags(0, 0)
-        //YUV -> NV21
-        val buffer = BitmapUtils.YUVTOVN21(y_buffer,u_buffer,v_buffer)
-        if (needReadBack) {
-            readBackBuffer = ByteArray(buffer.size)
-        }
-        val fuTex = SDKController.fuRenderImg(width, height, mFrameId++, BundleManager.getInstance().renderBindBundles, flags, buffer, FUInputBufferEnum.FU_FORMAT_NV21_BUFFER.type,retBufW,retBufH ,readBackBuffer )
+        val fuTex = SDKController.fuRenderYUV(width, height, mFrameId++, BundleManager.getInstance().renderBindBundles, flags, y_buffer, u_buffer, v_buffer, width, uvStride, uvStride, needReadBack)
         if (fuTex <= 0) {
             SDKController.callBackSystemError()
         }
         return if (needReadBack) {
-            val yBackBuffer = ByteArray(y_buffer.size)
-            val uBackBuffer = ByteArray(u_buffer.size)
-            val vBackBuffer = ByteArray(v_buffer.size)
-            BitmapUtils.NV21ToYUV(readBackBuffer!!,yBackBuffer,uBackBuffer,vBackBuffer)
             FURenderOutputData(
                 FURenderOutputData.FUTexture(fuTex, retTexW, retTexH),
-                FURenderOutputData.FUImageBuffer(retBufW, retBufH, DecimalUtils.copyArray(yBackBuffer), DecimalUtils.copyArray(uBackBuffer), DecimalUtils.copyArray(vBackBuffer), retBufW, retStride, retStride)
+                FURenderOutputData.FUImageBuffer(retBufW, retBufH, DecimalUtils.copyArray(y_buffer), DecimalUtils.copyArray(u_buffer), DecimalUtils.copyArray(v_buffer), retBufW, retStride, retStride)
             )
         } else {
             FURenderOutputData(FURenderOutputData.FUTexture(fuTex, retTexW, retTexH))
@@ -451,7 +440,7 @@ class FURenderBridge private constructor() {
         }
         if (renderConfig.outputMatrix != outputMatrix) {
             outputMatrix = renderConfig.outputMatrix
-            if (renderConfig.outputMatrixEnable) SDKController.setOutputMatrix(renderConfig.outputMatrix.index)
+            SDKController.setOutputMatrix(renderConfig.outputMatrix.index)
         }
     }
 

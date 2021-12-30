@@ -3,10 +3,7 @@ package com.faceunity.core.renderer
 import android.graphics.SurfaceTexture
 import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.opengl.EGLConfig
-import android.opengl.GLES11Ext
-import android.opengl.GLES20
-import android.opengl.Matrix
+import android.opengl.*
 import android.os.Handler
 import android.os.HandlerThread
 import android.view.Surface
@@ -42,7 +39,7 @@ import java.util.concurrent.TimeUnit
  * Created on 2021/1/4
  *
  */
-class VideoRenderer(gLTextureView: GLTextureView?, private val videoPath: String, glRendererListener: OnGlRendererListener) : BaseFURenderer(gLTextureView, glRendererListener), IVideoRenderer {
+class VideoRenderer(gLSurfaceView: GLTextureView?, private val videoPath: String, glRendererListener: OnGlRendererListener) : BaseFURenderer(gLSurfaceView, glRendererListener), IVideoRenderer {
 
 
     //region 初始化
@@ -58,9 +55,9 @@ class VideoRenderer(gLTextureView: GLTextureView?, private val videoPath: String
             }
         }
         externalInputType = FUExternalInputEnum.EXTERNAL_INPUT_TYPE_VIDEO
-        gLTextureView?.setEGLContextClientVersion(2)
-        gLTextureView?.setRenderer(this)
-        gLTextureView?.renderMode = GLTextureView.RENDERMODE_WHEN_DIRTY
+        gLSurfaceView?.setEGLContextClientVersion(2)
+        gLSurfaceView?.setRenderer(this)
+        gLSurfaceView?.renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
 
     }
 
@@ -73,7 +70,7 @@ class VideoRenderer(gLTextureView: GLTextureView?, private val videoPath: String
     override fun onResume() {
         startPlayerThread()
         if (isActivityPause) {
-            gLTextureView?.onResume()
+            gLSurfaceView?.onResume()
         }
         isActivityPause = false
     }
@@ -85,7 +82,7 @@ class VideoRenderer(gLTextureView: GLTextureView?, private val videoPath: String
         mPlayerHandler?.removeCallbacksAndMessages(null)
         mPlayerHandler?.post {
             releaseMediaPlayer()
-            gLTextureView?.queueEvent(Runnable {
+            gLSurfaceView?.queueEvent(Runnable {
                 destroyGlSurface()
                 count.countDown()
             })
@@ -96,21 +93,21 @@ class VideoRenderer(gLTextureView: GLTextureView?, private val videoPath: String
         } catch (e: InterruptedException) {
             // ignored
         }
-        gLTextureView?.onPause()
+        gLSurfaceView?.onPause()
     }
 
     /**Activity onDestroy**/
     override fun onDestroy() {
         stopPlayerThread()
         glRendererListener = null
-        gLTextureView = null
+        gLSurfaceView = null
     }
 
 
     //endregion 生命周期调用
 
 
-    //region GLTextureView.Renderer 回调
+    //region GLSurfaceView.Renderer 回调
 
     private var videoOrientation = 0
     /*系统相机录制标识*/
@@ -166,7 +163,7 @@ class VideoRenderer(gLTextureView: GLTextureView?, private val videoPath: String
         return currentFURenderInputData
     }
 
-    override fun drawRenderFrame() {
+    override fun drawRenderFrame( ) {
         if (faceUnity2DTexId > 0 && renderSwitch) {
             programTexture2d!!.drawFrame(faceUnity2DTexId, currentFUTexMatrix, currentFUMvpMatrix)
         } else if (originalTextId > 0) {
@@ -182,7 +179,7 @@ class VideoRenderer(gLTextureView: GLTextureView?, private val videoPath: String
     private fun createSurfaceTexture() {
         mSurfaceTexture = SurfaceTexture(originalTextId)
         mSurfaceTexture!!.setOnFrameAvailableListener {
-            gLTextureView?.requestRender()
+            gLSurfaceView?.requestRender()
         }
         mSurface = Surface(mSurfaceTexture)
         mPlayerHandler?.post {
@@ -284,7 +281,7 @@ class VideoRenderer(gLTextureView: GLTextureView?, private val videoPath: String
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             when (playbackState) {
                 Player.STATE_READY -> if (playWhenReady) {
-                    gLTextureView?.requestRender()
+                    gLSurfaceView?.requestRender()
                 }
                 Player.STATE_ENDED -> {
                     mOnVideoPlayListener?.onPlayFinish()

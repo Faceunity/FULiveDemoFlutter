@@ -31,6 +31,7 @@ import android.media.MediaFormat;
 import android.media.MediaRecorder;
 import android.util.Log;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class MediaAudioEncoder extends MediaEncoder {
@@ -50,41 +51,36 @@ public class MediaAudioEncoder extends MediaEncoder {
     }
 
     @Override
-    protected void prepare() {
-        try {
-            if (DEBUG) Log.v(TAG, "prepare:");
-            mTrackIndex = -1;
-            mMuxerStarted = mIsEOS = false;
-            // prepare MediaCodec for AAC encoding of audio data from inernal mic.
-            final MediaCodecInfo audioCodecInfo = selectAudioCodec(MIME_TYPE);
-            if (audioCodecInfo == null) {
-                Log.e(TAG, "Unable to find an appropriate codec for " + MIME_TYPE);
-                return;
-            }
-            if (DEBUG) Log.i(TAG, "selected codec: " + audioCodecInfo.getName());
+    protected void prepare() throws IOException {
+        if (DEBUG) Log.v(TAG, "prepare:");
+        mTrackIndex = -1;
+        mMuxerStarted = mIsEOS = false;
+        // prepare MediaCodec for AAC encoding of audio data from inernal mic.
+        final MediaCodecInfo audioCodecInfo = selectAudioCodec(MIME_TYPE);
+        if (audioCodecInfo == null) {
+            Log.e(TAG, "Unable to find an appropriate codec for " + MIME_TYPE);
+            return;
+        }
+        if (DEBUG) Log.i(TAG, "selected codec: " + audioCodecInfo.getName());
 
-            final MediaFormat audioFormat = MediaFormat.createAudioFormat(MIME_TYPE, SAMPLE_RATE, 1);
-            audioFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
-            audioFormat.setInteger(MediaFormat.KEY_CHANNEL_MASK, AudioFormat.CHANNEL_IN_MONO);
-            audioFormat.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);
-            audioFormat.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
+        final MediaFormat audioFormat = MediaFormat.createAudioFormat(MIME_TYPE, SAMPLE_RATE, 1);
+        audioFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+        audioFormat.setInteger(MediaFormat.KEY_CHANNEL_MASK, AudioFormat.CHANNEL_IN_MONO);
+        audioFormat.setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE);
+        audioFormat.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
 //		audioFormat.setLong(MediaFormat.KEY_MAX_INPUT_SIZE, inputFile.length());
 //      audioFormat.setLong(MediaFormat.KEY_DURATION, (long)durationInMs );
-            if (DEBUG) Log.i(TAG, "format: " + audioFormat);
-            mMediaCodec = MediaCodec.createEncoderByType(MIME_TYPE);
-            mMediaCodec.configure(audioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-            mMediaCodec.start();
-            if (DEBUG) Log.i(TAG, "prepare finishing");
-            if (mListener != null) {
-                try {
-                    mListener.onPrepared(this);
-                } catch (final Exception e) {
-                    Log.e(TAG, "prepare:", e);
-                }
+        if (DEBUG) Log.i(TAG, "format: " + audioFormat);
+        mMediaCodec = MediaCodec.createEncoderByType(MIME_TYPE);
+        mMediaCodec.configure(audioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+        mMediaCodec.start();
+        if (DEBUG) Log.i(TAG, "prepare finishing");
+        if (mListener != null) {
+            try {
+                mListener.onPrepared(this);
+            } catch (final Exception e) {
+                Log.e(TAG, "prepare:", e);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            release();
         }
     }
 

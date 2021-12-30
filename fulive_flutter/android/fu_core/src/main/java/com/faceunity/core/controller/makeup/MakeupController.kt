@@ -98,19 +98,6 @@ class MakeupController : BaseSingleController() {
 
     }
 
-    /**
-     * 添加道具
-     * @param fuFeaturesData FUFeaturesData
-     */
-    fun applyAddProp( bundle: FUBundleData) {
-        val handle = mBundleManager.loadBundleFile(bundle.name, bundle.path)
-        if (handle <= 0) {
-            FULogger.e(TAG, "load Prop bundle failed bundle path:${bundle.path}")
-            return
-        }
-        mBundleManager.bindControllerBundle(handle)
-    }
-
 
     /**
      * 相机摄像头切换，重设参数

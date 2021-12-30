@@ -295,11 +295,7 @@ class PropContainerController : BasePropController() {
             if (data.param.containsKey(PropParam.FACE_FOLLOW)) {
                 // 设置 Animoji 跟随人脸 需要GL线程设置
                 doGLThreadAction {
-                    itemSetParam(handle, PropParam.FACE_FOLLOW, if (data.param[PropParam.FACE_FOLLOW] as Boolean) 1.0 else 0.0)
-                    itemSetParam(handle, PropParam.IS_FIX_X, if (data.param[PropParam.FACE_FOLLOW] as Boolean) 0.0 else 1.0)
-                    itemSetParam(handle, PropParam.IS_FIX_Y, if (data.param[PropParam.FACE_FOLLOW] as Boolean) 0.0 else 1.0)
-                    itemSetParam(handle, PropParam.IS_FIX_Z, if (data.param[PropParam.FACE_FOLLOW] as Boolean) 0.0 else 1.0)
-                    itemSetParam(handle, PropParam.FIX_ROTATION, if (data.param[PropParam.FACE_FOLLOW] as Boolean) 0.0 else 1.0)
+                    itemSetParam(handle, PropParam.FACE_FOLLOW, data.param[PropParam.FACE_FOLLOW]!!)
                 }
             }
         } else if (remark[PropParam.PROP_TYPE] == PropParam.PROP_TYPE_BG_SEG_CUSTOM) {

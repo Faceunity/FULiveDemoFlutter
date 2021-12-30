@@ -59,14 +59,6 @@ open class SimpleMakeup(controlBundle: FUBundleData) : BaseSingleModel(controlBu
         updateCustomUnit(key) { mMakeupController.updateItemBundle(getCurrentSign(), key, bundle) }
     }
 
-    /**
-     * 添加道具
-     * @param fuFeaturesData FUFeaturesData
-     */
-    private fun applyAddProp(bundle: FUBundleData) {
-        mMakeupController.applyAddProp(bundle)
-    }
-
 
     override fun buildParams(): LinkedHashMap<String, Any> {
         val params = LinkedHashMap<String, Any>()

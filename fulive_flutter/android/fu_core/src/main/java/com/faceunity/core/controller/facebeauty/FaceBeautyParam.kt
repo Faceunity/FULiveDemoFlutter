@@ -70,29 +70,14 @@ object FaceBeautyParam {
     /* 瘦脸程度 */
     const val CHEEK_THINNING_INTENSITY = "cheek_thinning"//范围 [0-1]，默认0
 
-    /* 长脸程度 */
-    const val CHEEK_LONG_INTENSITY = "cheek_long"//范围 [0-1]，默认0
-
-    /* 圆脸程度 */
-    const val CHEEK_CIRCLE_INTENSITY = "cheek_circle"//范围 [0-1]，默认0
-
     /* V脸程度 */
     const val CHEEK_V_INTENSITY = "cheek_v"//范围 [0-1]，默认0
 
     /* 窄脸程度 */
     const val CHEEK_NARROW_INTENSITY = "cheek_narrow"//范围 [0-1]，默认0
 
-    /* 窄脸程度 */
-    const val CHEEK_NARROW_INTENSITY_V2 = "cheek_narrow_v2"//范围 [0-1]，默认0
-
-    /* 短脸程度 */
-    const val CHEEK_SHORT_INTENSITY = "cheek_short"//范围 [0-1]，默认0
-
-    /* 小脸程度*/
+    /* 小脸程度 */
     const val CHEEK_SMALL_INTENSITY = "cheek_small"//范围 [0-1]，默认0
-
-    /* 小脸程度*/
-    const val CHEEK_SMALL_INTENSITY_V2 = "cheek_small_v2"//范围 [0-1]，默认0
 
     /* 瘦颧骨 */
     const val INTENSITY_CHEEKBONES_INTENSITY = "intensity_cheekbones"//范围 [0-1]，默认0
@@ -103,29 +88,17 @@ object FaceBeautyParam {
     /* 大眼程度 */
     const val EYE_ENLARGING_INTENSITY = "eye_enlarging"//范围 [0-1]，默认 0.5
 
-    /* 大眼程度 */
-    const val EYE_ENLARGING_INTENSITY_V2 = "eye_enlarging_v2"//范围 [0-1]，默认 0.5
-
     /* 下巴调整程度 */
     const val CHIN_INTENSITY = "intensity_chin"//范围 [0-1]，0-0.5是变小，0.5-1是变大，默认 0.5
 
     /* 额头调整程度 */
     const val FOREHEAD_INTENSITY = "intensity_forehead"//范围 [0-1]，0-0.5 是变小，0.5-1 是变大，默认 0.5
 
-    /* 额头调整程度 */
-    const val FOREHEAD_INTENSITY_V2 = "intensity_forehead_v2"//范围 [0-1]，0-0.5 是变小，0.5-1 是变大，默认 0.5
-
     /* 瘦鼻程度 */
     const val NOSE_INTENSITY = "intensity_nose"//范围 [0-1]，默认0.0
 
-    /* 瘦鼻程度 */
-    const val NOSE_INTENSITY_V2 = "intensity_nose_v2"//范围 [0-1]，默认0.0
-
     /* 嘴巴调整程度 */
     const val MOUTH_INTENSITY = "intensity_mouth"//范围 [0-1]，0-0.5是变小，0.5-1是变大，默认  0.5
-
-    /* 嘴巴调整程度 */
-    const val MOUTH_INTENSITY_V2 = "intensity_mouth_v2"//范围 [0-1]，0-0.5是变小，0.5-1是变大，默认  0.5
 
     /* 开眼角强度 */
     const val CANTHUS_INTENSITY = "intensity_canthus"//范围 [0-1]，0.0 到 1.0 变强 默认0.0

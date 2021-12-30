@@ -59,12 +59,6 @@ class BgSegGreen(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
             updateAttributes(BgSegGreenParam.TRANSPARENCY, value)
         }
 
-    /* 是否启用安全区域纹理 */
-    var isUseTemplate = 0.0  //1.0开启 0.0关闭
-        set(value) {
-            field = value
-            updateAttributes(BgSegGreenParam.IS_USE_TEMPLATE, value)
-        }
 
     /* 中心坐标 */
     var centerPoint = FUCoordinate2DData(0.5, 0.5)  //取值范围0.0-1.0, [0.5,0.5]表示中心点坐标
@@ -80,18 +74,6 @@ class BgSegGreen(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
             updateCustomUnit("coordinate") { mBgSegGreenController.setScale(getCurrentSign(), value, centerPoint.positionX, centerPoint.positionY) }
         }
 
-    /* 自定义安全区域纹理 */
-    fun createSafeAreaSegment(rgba: ByteArray, width: Int, height: Int) {
-        isUseTemplate = 1.0
-        updateCustomUnit("createSafeAreaSegment") { mBgSegGreenController.createSafeAreaSegment(getCurrentSign(), rgba, width, height) }
-    }
-
-    /*移除自定义安全区域纹理*/
-    fun removeSafeAreaSegment() {
-        isUseTemplate = 0.0
-        updateCustomUnit("removeSafeAreaSegment") { mBgSegGreenController.removeSafeAreaSegment(getCurrentSign()) }
-    }
-
     /* 自定义背景 */
     fun createBgSegment(rgba: ByteArray, width: Int, height: Int) {
         updateCustomUnit("createBgSegment") { mBgSegGreenController.createBgSegment(getCurrentSign(), rgba, width, height) }
@@ -101,6 +83,7 @@ class BgSegGreen(controlBundle: FUBundleData) : BaseSingleModel(controlBundle) {
     fun removeBgSegment() {
         updateCustomUnit("removeBgSegment") { mBgSegGreenController.removeBgSegment(getCurrentSign()) }
     }
+
 
     override fun buildParams(): java.util.LinkedHashMap<String, Any> {
         val params = LinkedHashMap<String, Any>()

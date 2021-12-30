@@ -28,7 +28,6 @@ public class VideoRecordHelper {
 
     private Context mContext;
     private OnVideoRecordingListener mOnVideoRecordingListener;
-    public static final int MAX_VIDEO_LENGTH = 1920;
 
     public VideoRecordHelper(Context context, OnVideoRecordingListener listener) {
         mContext = context;
@@ -122,18 +121,6 @@ public class VideoRecordHelper {
             mCountDownLatch = new CountDownLatch(2);
             int videoWidth = (videoOrientation == 0 || videoOrientation == 180) ? width : height;
             int videoHeight = (videoOrientation == 0 || videoOrientation == 180) ? height : width;
-            //检查宽高如果超过1920 就压缩
-            int scale = 1;
-
-            if (videoWidth > MAX_VIDEO_LENGTH || videoHeight > MAX_VIDEO_LENGTH) {
-                while (videoWidth / scale >= MAX_VIDEO_LENGTH && videoHeight / scale >= MAX_VIDEO_LENGTH) {
-                    scale++;
-                }
-
-                videoWidth = videoWidth / scale;
-                videoHeight = videoHeight / scale;
-            }
-
             new MediaVideoEncoder(mMuxer, mMediaEncoderListener, (videoWidth << 1) >> 1, (videoHeight << 1) >> 1);
             new MediaAudioEncoder(mMuxer, mMediaEncoderListener);
             mMuxer.prepare();

@@ -35,16 +35,10 @@ data class FURenderInputData(
         var cameraFacing: CameraFacingEnum = CameraFacingEnum.CAMERA_FRONT,//数据源为相机时候->前后置相机
         var inputTextureMatrix: FUTransformMatrixEnum = FUTransformMatrixEnum.CCROT0,//纹理旋转角度
         var inputBufferMatrix: FUTransformMatrixEnum = FUTransformMatrixEnum.CCROT0,//数据旋转角度
-        var outputMatrixEnable: Boolean = false,//是否调用底层去设置outputMatrix
-        var isRenderFaceBeautyOnly: Boolean = false,//数据旋转角度
-        var isNeedBufferReturn: Boolean = false//是否需要合成后Buffer返回){}
-    ) {
-        var outputMatrix: FUTransformMatrixEnum = FUTransformMatrixEnum.CCROT0
-            set(value) {
-                field = value
-                outputMatrixEnable = true
-            }
-    }
+        var outputMatrix: FUTransformMatrixEnum = FUTransformMatrixEnum.CCROT0,//数据旋转角度
+        var isRenderFaceBeautyOnly: Boolean = false,//是否只使用美颜渲染
+        var isNeedBufferReturn: Boolean = false//是否需要合成后Buffer返回
+    )
 
     fun printMsg(): String {
         val buffer = StringBuilder()
@@ -88,7 +82,6 @@ data class FURenderInputData(
         inputData.renderConfig.cameraFacing = this.renderConfig.cameraFacing
         inputData.renderConfig.inputTextureMatrix = this.renderConfig.inputTextureMatrix
         inputData.renderConfig.inputBufferMatrix = this.renderConfig.inputBufferMatrix
-        inputData.renderConfig.outputMatrixEnable= this.renderConfig.outputMatrixEnable
         inputData.renderConfig.outputMatrix = this.renderConfig.outputMatrix
         inputData.renderConfig.isRenderFaceBeautyOnly = this.renderConfig.isRenderFaceBeautyOnly
         inputData.renderConfig.isNeedBufferReturn = this.renderConfig.isNeedBufferReturn

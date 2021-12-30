@@ -12,20 +12,20 @@ import com.faceunity.core.model.prop.Prop
  *
  */
 class Animoji(controlBundle: FUBundleData) : Prop(controlBundle) {
+
+
     /* 设定是否人脸跟随 */
     var enableFaceFollow = true //true为开启 false为关闭
         set(value) {
             field = value
-            updateAttributesGL(PropParam.FACE_FOLLOW, if (value) 1.0 else 0.0)
-            updateAttributesGL(PropParam.IS_FIX_X, if (value) 0.0 else 1.0)
-            updateAttributesGL(PropParam.IS_FIX_Y, if (value) 0.0 else 1.0)
-            updateAttributesGL(PropParam.IS_FIX_Z, if (value) 0.0 else 1.0)
-            updateAttributesGL(PropParam.FIX_ROTATION, if (value) 0.0 else 1.0)
+            updateAttributesGL(PropParam.FACE_FOLLOW, value)
         }
 
     override fun buildParams(): LinkedHashMap<String, Any> {
         val params = LinkedHashMap<String, Any>()
-        params[PropParam.FACE_FOLLOW] = enableFaceFollow
+        params[PropParam.FACE_FOLLOW] = if (enableFaceFollow) 1.0 else 0.0
         return params
     }
+
+
 }
