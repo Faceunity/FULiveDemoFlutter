@@ -13,6 +13,15 @@ NS_ASSUME_NONNULL_BEGIN
 @interface FULocalDataManager : NSObject
 + (instancetype)shareManager;
 
+//美颜-滤镜
++ (NSArray *)beautyFilterJsonData;
+
+//美颜-美肤
++ (NSArray *)beautySkinJsonData;
+
+//美颜-美型
++ (NSArray *)beautyShapeJsonData;
+
 //道具贴纸
 + (NSDictionary *)stickerTipsJsonData;
 

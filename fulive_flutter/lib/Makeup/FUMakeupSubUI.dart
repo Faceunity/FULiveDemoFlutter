@@ -3,11 +3,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fulive_flutter/Makeup/FUMakeupConst.dart';
-
+import 'package:fulive_flutter/Makeup/FUMakeupSubManager.dart';
 import 'package:fulive_flutter/Makeup/Models/FUMakeupSubModel.dart';
 import 'package:fulive_flutter/Makeup/Models/FUMakeupSubTitleModel.dart';
 import 'package:provider/provider.dart';
-import 'package:fulive_flutter/Makeup/FUMakeupSubManager.dart';
 
 //change 表示切换一个title，
 typedef SelectedSubItemCallback = Function(
@@ -36,6 +35,7 @@ class FUMakeupSubUI extends StatefulWidget {
 class FUMakeupSubUIState extends State<FUMakeupSubUI> {
   final _screenWidth = window.physicalSize.width / window.devicePixelRatio;
   late final FUMakeupSubManager _manager;
+  late final FToast _fToast;
 
   //颜色组件选中具体颜色值
   void selectedColorIndex(int colorIndex) {
@@ -50,12 +50,16 @@ class FUMakeupSubUIState extends State<FUMakeupSubUI> {
   @override
   void initState() {
     super.initState();
+    _fToast = FToast().init(context);
     _manager = FUMakeupSubManager(canCustomIndex: widget.canCustomSubIndex);
   }
 
   @override
   void dispose() {
     super.dispose();
+    _fToast.removeCustomToast();
+    _fToast.removeQueuedCustomToasts();
+    Fluttertoast.cancel();
   }
 
   @override
@@ -295,12 +299,17 @@ class FUMakeupSubUIState extends State<FUMakeupSubUI> {
               GestureDetector(
                 onTap: () {
                   if (subModel.title != null) {
-                    Fluttertoast.cancel();
-                    Fluttertoast.showToast(
-                        backgroundColor: Color(0x01000000),
-                        msg: subModel.title!,
+                    _fToast.removeCustomToast();
+                    _fToast.showToast(
+                        child: Text(
+                          subModel.title!,
+                          style: const TextStyle(
+                              fontSize: 32,
+                              backgroundColor: Color(0x01000000),
+                              color: Colors.white),
+                        ),
                         gravity: ToastGravity.CENTER,
-                        fontSize: 32.0);
+                        fadeDuration: const Duration(milliseconds: 100));
                   }
 
                   manager.didSelectedSubItem(index,

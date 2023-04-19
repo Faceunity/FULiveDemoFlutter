@@ -18,7 +18,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    const bool isProfile =
+        bool.fromEnvironment('dart.vm.profile', defaultValue: false);
     return MaterialApp(
+      showPerformanceOverlay: isProfile,
       title: 'FULive Demo 特效版',
       theme: ThemeData(
         // This is the theme of your application.

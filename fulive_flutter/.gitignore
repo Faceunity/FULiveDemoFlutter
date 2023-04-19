@@ -5,6 +5,7 @@
 .pub/
 
 .idea/
+.gradle/
 .vagrant/
 .sconsign.dblite
 .svn/
@@ -36,7 +37,6 @@ Icon?
 .tags*
 
 build/
-.gradle
 .android/
 .ios/
 .flutter-plugins
@@ -47,3 +47,8 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+
+/ios/.*
+# /ios/Flutter/
+/ios/Runner.xcworkspace/
+/ios/Pods/

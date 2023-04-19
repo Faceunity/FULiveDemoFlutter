@@ -111,9 +111,9 @@ flutter:
   # maintain consistency when adding or modifying assets and plugins.
   # They also do not have any bearing on your native host application's
   # identifiers, which may be completely independent or the same as these.
-  module:
-    androidX: true
-    androidPackage: com.example.fulive_flutter
-    iosBundleIdentifier: com.example.fuliveFlutter
+#  module:
+#    androidX: true
+#    androidPackage: com.example.fulive_flutter
+#    iosBundleIdentifier: com.example.fuliveFlutter
 
 publish_to: none

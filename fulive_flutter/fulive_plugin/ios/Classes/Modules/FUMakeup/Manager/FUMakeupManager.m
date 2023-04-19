@@ -26,13 +26,14 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        NSString *path = [self loadPathWithFileName:@"face_makeup" ofType:@"bundle"];
-        self.makeup = [[FUMakeup alloc] initWithPath:path name:@"makeUp"];
-        self.makeup.isMakeupOn = YES;
-        /* 镜像设置 */
-        // self.makeup.isFlipPoints = 1;
         NSDictionary *dataParms = [NSDictionary dictionaryWithDictionary:[FULocalDataManager makeupJsonData]];
         self.dataArray = [FUMakeupModel mj_objectArrayWithKeyValuesArray:dataParms[@"data"]];
+        for (FUMakeupModel *model in self.dataArray) {
+            for (FUSingleMakeupModel *singleM in model.sgArr) {
+                //非json 数据的初始化，不修改json了，太多了
+                singleM.realValue = singleM.value;
+            }
+        }
         if (self.dataArray.count == 0) {
             NSLog(@"%@.dataArray数据出错",self.class);
         }
@@ -41,60 +42,125 @@
         if (self.supArray.count == 0) {
             NSLog(@"%@.supArray数据出错",self.class);
         }
-        [self loadItem];
     }
     return self;
 }
 
-- (void)setSupModel:(FUMakeupSupModel *)model {
-    //异步换同步，否则在快速切换组合妆时会遇到上次的组合装还没处理完，下次就开始。这样会有上次组合装闪过的影子，然后消失。
-    dispatch_sync(self.loadQueue, ^{
-        self.makeup.isClearMakeup = YES;
-        
-        /* 防止子妆调节，把口红调乱了，注意：不需要自定义 */
-        self.makeup.lipType = FUMakeupLipTypeFOG;
-        self.makeup.isTwoColor = NO;
 
-        [self loadMakeupPackageWithPathName:model.makeupBundle];
-        
-        self.makeup.isClearMakeup = NO;
-        [self setMakeupWholeModel:model];
-    });
+- (void)_createOldMakeupCompletion:(void (^)(void))completion {
+    NSString *path = [self loadPathWithFileName:@"face_makeup" ofType:@"bundle"];
+    self.makeup = [[FUMakeup alloc] initWithPath:path name:@"makeUp"];
+    self.makeup.isMakeupOn = YES;
+    [self loadItemCompletion:completion];
+}
+
+//设置加载组合妆bundle
+- (void)setSupModelBundleWithModel:(FUMakeupSupModel *)model
+                        completion:(void(^)(void))completion {
+    if ([FURenderKit shareRenderKit].makeup) {
+        [FURenderKit shareRenderKit].makeup.enable = NO;
+    }
     
+    dispatch_async(self.loadQueue, ^{
+        // @note 嗲嗲兔、冻龄、国风、混血是8.0.0新加的四个组合妆，新组合妆只需要直接加载bundle，不需要绑定到face_makeup.bundle
+        if (model.newMakeupFlag) {
+            NSString *path = [self loadPathWithFileName:model.makeupBundle ofType:@"bundle"];
+            FUMakeup *makeup = [[FUMakeup alloc] initWithPath:path name:@"makeUp"];
+            makeup.isMakeupOn = YES;
+            //先卸载其他妆容在加载新版本美妆
+            [self loadMakeupPackageWithPathName:nil];
+            self.makeup = nil;
+            [FURenderKit shareRenderKit].makeup = nil;
+            // 高端机打开全脸分割
+            makeup.makeupSegmentation = [FURenderKit devicePerformanceLevel] == FUDevicePerformanceLevelHigh;
+            [FURenderKit shareRenderKit].makeup = makeup;
+            [FURenderKit shareRenderKit].makeup.enable = YES;
+            if (completion) completion();
+        } else {
+            //make 设置过并且当前的组合妆还是新版本组合妆，此时设置旧版组合妆需要重新初始化 face_makeup
+            if (self.preSelectedIndex == -1 || !self.makeup) {
+                __weak typeof (self) weak = self;
+                [self _createOldMakeupCompletion:^{
+                    // 高端机打开全脸分割
+                    weak.makeup.makeupSegmentation = [FURenderKit devicePerformanceLevel] == FUDevicePerformanceLevelHigh;
+                    [self loadMakeupPackageWithPathName:model.makeupBundle];
+                    [FURenderKit shareRenderKit].makeup.enable = YES;
+                    if (completion) completion();
+                }];
+            } else {
+                [self loadMakeupPackageWithPathName:model.makeupBundle];
+                [FURenderKit shareRenderKit].makeup.enable = YES;
+                if (completion) completion();
+            }
+        }
+
+        NSLog(@"setSupModelBundleWithModel compeletion");
+    });
 }
 
 - (void)loadMakeupPackageWithPathName:(NSString *)pathName {
     NSString *path = [self loadPathWithFileName:pathName ofType:@"bundle"];
     if (path) {
         FUItem *item = [[FUItem alloc] initWithPath:path name:pathName];
-        [self.makeup updateMakeupPackage:item needCleanSubItem:NO];
+        [self.makeup updateMakeupPackage:item needCleanSubItem:YES];
     } else {
-        [self.makeup updateMakeupPackage:nil needCleanSubItem:NO];
+        [self.makeup updateMakeupPackage:nil needCleanSubItem:YES];
     }
+    NSLog(@"@@@@@loadMakeupPackageWithPathName compeletion");
+
+}
+
+- (void)setNewMakeupFilterIntensity:(double)intensity {
+    dispatch_async(self.loadQueue, ^{
+       [FURenderKit shareRenderKit].makeup.filterIntensity = intensity;
+    });
 }
 
 - (void)loadItem {
+    [FURenderKit shareRenderKit].makeup = self.makeup;
+    NSLog(@"@@@@@loadItem compeletion");
+}
+
+- (void)loadItemCompletion:(void (^)(void))completion {
     dispatch_async(self.loadQueue, ^{
         [FURenderKit shareRenderKit].makeup = self.makeup;
+        if (completion) completion();
+        NSLog(@"@@@@@loadItem compeletion");
     });
-    
 }
 
 - (void)releaseItem {
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+    self.makeup = nil;
+    [FURenderKit shareRenderKit].makeup = nil;
+    NSLog(@"@@@@@releaseItem compeletion");
+}
+
+- (void)releaseItemCompletion:(void (^)(void))completion {
+    dispatch_async(self.loadQueue, ^{
         self.makeup = nil;
         [FURenderKit shareRenderKit].makeup = nil;
+        if (completion) completion();
+        NSLog(@"@@@@@releaseItem compeletion");
     });
 }
+
 
 
 //修改整体妆容的数据
 - (void)setMakeupWholeModel:(FUMakeupSupModel *)model {
-    for (FUSingleMakeupModel *singleModel in model.makeups) {
-        //整体妆容设置每个子妆强度时需要乘上整体妆容程度值
-        singleModel.realValue = singleModel.value * model.value;
-        [self setMakeupSupModel:singleModel type:UIMAKEUITYPE_intensity];
-    }
+    dispatch_async(self.loadQueue, ^{
+        if (model.newMakeupFlag) {
+            // 恢复美颜滤镜为原图效果
+            [FURenderKit shareRenderKit].beauty.filterName = @"origin";
+            [FURenderKit shareRenderKit].makeup.intensity = model.value;
+        } else {
+            for (FUSingleMakeupModel *singleModel in model.makeups) {
+                //整体妆容设置每个子妆强度时需要乘上整体妆容程度值
+                singleModel.realValue = singleModel.value * model.value;
+                [self setMakeupSupModel:singleModel type:UIMAKEUITYPE_intensity];
+            }
+        }
+    });
 }
 
 ////设置子妆容数据
@@ -123,6 +189,15 @@
             self.makeup.intensityLip = model.realValue;
             self.makeup.lipType = model.lip_type;
             self.makeup.isTwoColor = model.is_two_color == 1?YES:NO;
+            if (model.lip_type == FUMakeupLipTypeMoisturizing) {
+                // 润泽Ⅱ口红时需要开启口红高光，高光暂时为固定值0.8
+                [FURenderKit shareRenderKit].makeup.isLipHighlightOn = YES;
+                [FURenderKit shareRenderKit].makeup.intensityLipHighlight = 0.8;
+            } else {
+                [FURenderKit shareRenderKit].makeup.isLipHighlightOn = NO;
+                [FURenderKit shareRenderKit].makeup.intensityLipHighlight = 0;
+            }
+            NSLog(@"@@@@@intensityLip compeletion self.makeup.intensityLip == %f",self.makeup.intensityLip);
         }
             break;
         case MAKEUPTYPE_blusher:
@@ -213,10 +288,16 @@
     if (!model.namaBundle) {
         return;
     }
+    if (!self.makeup) {
+        [self _createOldMakeupCompletion:nil];
+        // 高端机打开全脸分割
+        self.makeup.makeupSegmentation = [FURenderKit devicePerformanceLevel] == FUDevicePerformanceLevelHigh;
+    }
     NSString *path = [self loadPathWithFileName:model.namaBundle ofType:@"bundle"];
     FUItem *item = [[FUItem alloc] initWithPath:path name:model.namaBundle];
     switch (model.namaBundleType) {
         case SUBMAKEUPTYPE_foundation:
+            NSLog(@"#### 自定义粉底bundle %@",item.path);
             self.makeup.subFoundation = item;
             break;
         case SUBMAKEUPTYPE_blusher:
@@ -224,8 +305,6 @@
             break;
         case SUBMAKEUPTYPE_eyeBrow:
             self.makeup.subEyebrow = item;
-            self.makeup.browWarp = model.brow_warp;
-            self.makeup.browWarpType = model.brow_warp_type;
             break;
         case SUBMAKEUPTYPE_eyeShadow:
             self.makeup.subEyeshadow = item;
@@ -246,6 +325,9 @@
             self.makeup.subPupil = item;
             self.makeup.blendTypePupil = 1;
             break;
+        case SUBMAKEUPTYPE_lip:
+            self.makeup.subLip = item;
+            break;
         default:
             break;
     }
@@ -259,51 +341,47 @@
     BOOL isColorChange = NO;
     BOOL isSelChange = NO;
     if(index < 0 || index >= _supArray.count) return NO;
-    FUMakeupSupModel *supModle = _supArray[index];
-    for (FUSingleMakeupModel *modle0 in supModle.makeups) {
-        for (FUMakeupModel *modle1 in _dataArray) {
-            if(modle0.makeType != modle1.sgArr[0].makeType){
+    FUMakeupSupModel *supModle = _supArray[index]; //可自定义组合妆
+    for (FUSingleMakeupModel *modle0 in supModle.makeups) {//遍历当前可自定义的组合装子妆数据， ex:口红具体类型、眉毛具体类型
+        for (FUMakeupModel *modle1 in _dataArray) { //当前配置的子妆数据模型: 如口红、眉毛、等等
+            
+            if(modle0.makeType != modle1.sgArr[0].makeType) {
                 continue;
             }
-            for (FUSingleMakeupModel *modle2 in modle1.sgArr) {
-                /* 样式对应 */
-                if(modle0.makeType == MAKEUPTYPE_Lip){//口红特殊比较
-                    if (modle0.lip_type == modle2.lip_type && modle2.title && modle0.is_two_color == modle2.is_two_color){
-                        isValueChange = fabs(modle2.value - modle0.value * supModle.value) > 0.01;
-                        isSelChange   = modle1.singleSelIndex != (int)[modle1.sgArr indexOfObject:modle2];
-                    }
-                }else if(modle0.makeType == MAKEUPTYPE_foundation){
+        
+            FUSingleMakeupModel *modle2 = modle1.sgArr[modle1.singleSelIndex];
+            
+            //非粉底对比 isValueChange || isSelChange|| isColorChange
+            if(modle0.makeType !=  MAKEUPTYPE_foundation) {
+                if (modle1.singleSelIndex == modle0.singleSelIndex) {
+                    isColorChange  = modle0.defaultColorIndex != modle2.defaultColorIndex;
+                    isValueChange = fabs(modle2.realValue - modle0.realValue) > 0.01;
+                    isSelChange = modle0.singleSelIndex != modle2.singleSelIndex;
                     
-                }else if(modle0.makeType == MAKEUPTYPE_eyeBrow){
-                    if (modle0.brow_warp_type == modle2.brow_warp_type && modle2.title) {
-                        isSelChange  = modle1.singleSelIndex != [modle1.sgArr indexOfObject:modle2];
-                        isValueChange = fabs(modle2.value - modle0.value * supModle.value) > 0.01;
+                    if (isValueChange || isSelChange|| isColorChange) {
+                        self.preSelectedIndex = -1;
+                        return YES;
                     }
-                }else{
-//                    NSString *str = [modle0.namaBundle stringByReplacingOccurrencesOfString:@".bundle"withString:@""];
-                    NSString *str = [modle0.namaBundle stringByReplacingOccurrencesOfString:@".png"withString:@""];
-                    if([str isEqualToString:modle2.namaBundle]) {//样式一样
-                        isValueChange = fabs(modle2.value - modle0.value * supModle.value) > 0.01;
-                        isSelChange   = modle1.singleSelIndex != (int)[modle1.sgArr indexOfObject:modle2];
-                    }
-                }
-                
-                /* 对应的颜色 */
-                for (NSArray *color in modle2.colors) {
-                    if ([self array:modle0.colorStrV isEqualTo:color]) {
-                        isColorChange = modle2.defaultColorIndex != (int)[modle2.colors indexOfObject:color];
-                        if (modle2.makeType == MAKEUPTYPE_foundation) {
-                            /* 值 */
-                            isValueChange = fabs(modle1.sgArr[modle1.singleSelIndex].value - modle0.value * supModle.value) > 0.01;
-                            isSelChange   = modle1.singleSelIndex != (int)[modle2.colors indexOfObject:color] + 1;;
-                        }
-                    }
-                }
-                
-                if (isValueChange || isSelChange || isColorChange) {
+                } else {
+                    self.preSelectedIndex = -1;
+                    //选择的子项里面的索引对不上，说明又改动，直接返回false
                     return YES;
                 }
-                
+            } else {
+                //粉底只需要对比 isSelChange 和 isValueChange
+                if (modle1.singleSelIndex == modle0.singleSelIndex) {
+                    isValueChange = fabs(modle2.realValue - modle0.realValue) > 0.01;
+                    isSelChange = modle0.singleSelIndex != modle2.singleSelIndex;
+                    
+                    if (isValueChange || isSelChange) {
+                        self.preSelectedIndex = -1;
+                        return YES;
+                    }
+                } else {
+                    self.preSelectedIndex = -1;
+                    //选择的子项里面的索引对不上，说明又改动，直接返回false
+                    return YES;
+                }
             }
         }
     }
@@ -328,62 +406,28 @@
         return @[];
     }
     FUMakeupSupModel *supModle = _supArray[index];
-    for (FUSingleMakeupModel *modle0 in supModle.makeups) {
+    for (FUSingleMakeupModel *modle0 in supModle.makeups) { //modle0 自定义组合妆对象
         for (FUMakeupModel *modle1 in _dataArray) {
             if(modle0.makeType != modle1.sgArr[0].makeType){
                 continue;
             }
-            for (FUSingleMakeupModel *modle2 in modle1.sgArr) {
-                /* 样式对应 */
-                if(modle0.makeType == MAKEUPTYPE_Lip && modle2.title){//口红特殊比较
-                    if (modle0.lip_type == modle2.lip_type && modle0.is_two_color == modle2.is_two_color){
-                       modle1.singleSelIndex = (int)[modle1.sgArr indexOfObject:modle2];
-                        /* 值 */
-                        modle2.value = modle0.value * supModle.value;
-                    }
-                }else if(modle0.makeType == MAKEUPTYPE_foundation){
-                       /* 粉底通过颜色，计算选中 */
-                }else if(modle0.makeType == MAKEUPTYPE_eyeBrow){
-                    if (modle0.brow_warp_type == modle2.brow_warp_type && modle2.title) {
-                        modle1.singleSelIndex = (int)[modle1.sgArr indexOfObject:modle2];//   modle0.brow_warp_type + 1;
-                        modle2.value = modle0.value * supModle.value;
-                    }
-                }else{
-//                    NSString *str = [modle0.namaBundle stringByReplacingOccurrencesOfString:@".bundle"withString:@""];
-                    NSString *str = [modle0.namaBundle stringByReplacingOccurrencesOfString:@".png"withString:@""];
-                    if([str isEqualToString:modle2.namaBundle]) {//样式一样
-                        modle1.singleSelIndex = (int)[modle1.sgArr indexOfObject:modle2];
-                        /* 值 */
-                        modle2.value = modle0.value * supModle.value;
-                    } 
-                }
+            FUSingleMakeupModel *modle2 = modle1.sgArr[modle0.singleSelIndex];
+            if(modle0.makeType !=  MAKEUPTYPE_foundation){
+                modle2.singleSelIndex = modle0.singleSelIndex;
+                modle1.singleSelIndex = modle0.singleSelIndex;
+                /* 值 */
+                modle2.defaultColorIndex = modle0.defaultColorIndex;
                 
-                /* 对应的颜色 */
-                for (NSArray *color in modle2.colors) {
-                    if ([self array:modle0.colorStrV isEqualTo:color]) {
-                        modle2.defaultColorIndex = (int)[modle2.colors indexOfObject:color];
-                        
-                        if (modle2.makeType == MAKEUPTYPE_foundation) {
-                            if ([modle2.colors containsObject:color]) {
-                                modle1.singleSelIndex = (int)[modle2.colors indexOfObject:color] + 1;
-                                /* 值 */
-                                modle1.sgArr[modle1.singleSelIndex].value = modle0.value * supModle.value;
-//                                modle2.value = modle0.value * supModle.value;
-                            }
-                        }
-                        
-                        if (modle2.makeType == MAKEUPTYPE_eyeShadow){
-                            if ([modle2.colors containsObject:color]) {
-                                modle1.singleSelIndex = (int)[modle2.colors indexOfObject:color] + 1;
-                                /* 值 */
-                                modle1.sgArr[modle1.singleSelIndex].value = modle0.value * supModle.value;
-                                //                                modle2.value = modle0.value * supModle.value;
-                            }
-                        }
-                        
-                    }
-                }
-     
+//                modle2.value = modle0.value;
+                
+                //UI显示的值
+                modle2.realValue = modle0.value * supModle.value;
+            } else {
+                modle2.singleSelIndex = modle0.singleSelIndex;
+                modle1.singleSelIndex = modle0.singleSelIndex;
+//                modle2.value = modle0.value;
+                //UI显示的值
+                modle2.realValue = modle0.value * supModle.value;
             }
         }
     }

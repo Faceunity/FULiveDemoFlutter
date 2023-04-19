@@ -8,8 +8,7 @@
 		"modules": [1],
 		"items": [],
 		"imagePath": "resource/images/homeView/beautyIcon.png"
-	}, 
-	{
+	},{
 		"itemType": "FULiveModelTypeMakeUp",
 		"maxFace": 4,
 		"enable": false,
@@ -18,8 +17,7 @@
 		"modules": [524288],
 		"items": [],
 		"imagePath": "resource/images/homeView/makeUpIcon.png"
-	},
-	{
+	}, {
 		"itemType": "FULiveModelTypeItems",
 		"maxFace": 4,
 		"enable": false,

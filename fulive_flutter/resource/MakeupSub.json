@@ -239,12 +239,13 @@
 				{
 					"makeType": 0,
 					"imagePath": "demo_style_lip_01",
+					"namaBundle": "wumian",
 					"namaValueType": 1,
 					"is_two_color": 0,
 					"lip_type": 0,
 					"value": 1.0,
 					"colorStr": "makeup_lip_color",
-					"colors": [
+					"colors":  [
 						[
 							0.60,
 							0.16,
@@ -281,7 +282,8 @@
 				},
 				{
 					"makeType": 0,
-					"imagePath": "demo_style_lip_04",
+					"imagePath": "demo_style_lip_03",
+					"namaBundle": "runze",
 					"namaValueType": 1,
 					"lip_type": 2,
 					"value": 1.0,
@@ -319,50 +321,94 @@
 						]
 					],
 					"defaultColorIndex": 0,
-					"title": "润泽"
+					"title": "润泽Ⅰ"
 				},
 				{
 					"makeType": 0,
-					"imagePath": "demo_style_lip_03",
+					"imagePath": "demo_style_lip_02",
+					"namaBundle": "shuirun",
 					"namaValueType": 1,
 					"lip_type": 3,
 					"value": 1.0,
 					"colorStr": "makeup_lip_color",
-					"colors": [
-						[
-							0.60,
-							0.16,
-							0.16,
-							1.0
-						],
-						[
-							0.84,
-							0.16,
-							0.27,
-							1.0
-						],
-						[
-							0.84,
-							0.26,
-							0.16,
-							1.0
-						],
-						[
-							0.60,
-							0.11,
-							0.23,
-							1.0
-						],
-						[
-							0.81,
-							0.31,
-							0.22,
-							1.0
-						]
-					],
+					"colors":[
+                        [
+                            0.60,
+                            0.16,
+                            0.16,
+                            1.0
+                        ],
+                        [
+                            0.84,
+                            0.16,
+                            0.27,
+                            1.0
+                        ],
+                        [
+                            0.84,
+                            0.26,
+                            0.16,
+                            1.0
+                        ],
+                        [
+                            0.60,
+                            0.11,
+                            0.23,
+                            1.0
+                        ],
+                        [
+                            0.81,
+                            0.31,
+                            0.22,
+                            1.0
+                        ]
+                    ],
 					"defaultColorIndex": 0,
-					"title": "珠光"
+					"title": "润泽Ⅱ"
 				},
+				{
+                    "makeType": 0,
+                    "imagePath": "demo_style_lip_04",
+                    "namaBundle": "zhuguang",
+                    "namaValueType": 1,
+                    "lip_type": 3,
+                    "value": 1.0,
+                    "colorStr": "makeup_lip_color",
+                    "colors": [
+                        [
+                            0.60,
+                            0.16,
+                            0.16,
+                            1.0
+                        ],
+                        [
+                            0.84,
+                            0.16,
+                            0.27,
+                            1.0
+                        ],
+                        [
+                            0.84,
+                            0.26,
+                            0.16,
+                            1.0
+                        ],
+                        [
+                            0.60,
+                            0.11,
+                            0.23,
+                            1.0
+                        ],
+                        [
+                            0.81,
+                            0.31,
+                            0.22,
+                            1.0
+                        ]
+                    ],
+                    "defaultColorIndex": 0,
+                    "title": "珠光"
+                },
 				{
 					"makeType": 0,
 					"imagePath": "demo_style_lip_05",
@@ -371,38 +417,38 @@
 					"is_two_color": 1,
 					"value": 1.0,
 					"colorStr": "makeup_lip_color",
-					"colors": [
-						[
-							0.60,
-							0.16,
-							0.16,
-							1.0
-						],
-						[
-							0.84,
-							0.16,
-							0.27,
-							1.0
-						],
-						[
-							0.84,
-							0.26,
-							0.16,
-							1.0
-						],
-						[
-							0.60,
-							0.11,
-							0.23,
-							1.0
-						],
-						[
-							0.81,
-							0.31,
-							0.22,
-							1.0
-						]
-					],
+					"colors":[
+                        [
+                            0.60,
+                            0.16,
+                            0.16,
+                            1.0
+                        ],
+                        [
+                            0.84,
+                            0.16,
+                            0.27,
+                            1.0
+                        ],
+                        [
+                            0.84,
+                            0.26,
+                            0.16,
+                            1.0
+                        ],
+                        [
+                            0.60,
+                            0.11,
+                            0.23,
+                            1.0
+                        ],
+                        [
+                            0.81,
+                            0.31,
+                            0.22,
+                            1.0
+                        ]
+                    ],
 					"defaultColorIndex": 0,
 					"title": "咬唇"
 				}
@@ -648,273 +694,138 @@
 				},
 				{
 					"makeType": 2,
-					"imagePath": "demo_style_eyebrow_02",
+					"imagePath": "demo_style_eyebrow_08",
 					"namaBundleType": 2,
 					"namaValueType": 3,
-					"namaBundle": "mu_style_eyebrow_01",
+					"namaBundle": "mu_style_eyebrow_02",
 					"brow_warp": 1,
 					"brow_warp_type": 3.0,
 					"value": 1.0,
 					"colorStr": "makeup_eyeBrow_color",
 					"colors": [
 						[
-							0.36,
-							0.10,
-							0.10,
-							1.0
-						],
-						[
-							0.33,
-							0.09,
-							0.18,
-							1.0
-						],
-						[
-							0.28,
-							0.16,
-							0.08,
-							1.0
-						],
-						[
-							0.21,
-							0.05,
-							0.02,
-							1.0
-						],
-						[
-							0.31,
-							0.17,
-							0.22,
-							1.0
-						]
+                            0.36,
+                            0.10,
+                            0.10,
+                            1.0
+                        ],
+                        [
+                            0.33,
+                            0.09,
+                            0.18,
+                            1.0
+                        ],
+                        [
+                            0.28,
+                            0.16,
+                            0.08,
+                            1.0
+                        ],
+                        [
+                            0.21,
+                            0.05,
+                            0.02,
+                            1.0
+                        ],
+                        [
+                            0.31,
+                            0.17,
+                            0.22,
+                            1.0
+                        ]
 					],
 					"defaultColorIndex": 0,
-					"title": "标准眉"
+					"title": "野生眉"
 				},
 				{
 					"makeType": 2,
-					"imagePath": "demo_style_eyebrow_03",
+					"imagePath": "demo_style_eyebrow_09",
 					"namaBundleType": 2,
 					"namaValueType": 3,
-					"namaBundle": "mu_style_eyebrow_01",
+					"namaBundle": "mu_style_eyebrow_03",
 					"brow_warp": 1,
 					"brow_warp_type": 2.0,
 					"value": 1.0,
 					"colorStr": "makeup_eyeBrow_color",
 					"colors": [
 						[
-							0.36,
-							0.10,
-							0.10,
-							1.0
-						],
-						[
-							0.33,
-							0.09,
-							0.18,
-							1.0
-						],
-						[
-							0.28,
-							0.16,
-							0.08,
-							1.0
-						],
-						[
-							0.21,
-							0.05,
-							0.02,
-							1.0
-						],
-						[
-							0.31,
-							0.17,
-							0.22,
-							1.0
-						]
+                            0.36,
+                            0.10,
+                            0.10,
+                            1.0
+                        ],
+                        [
+                            0.33,
+                            0.09,
+                            0.18,
+                            1.0
+                        ],
+                        [
+                            0.28,
+                            0.16,
+                            0.08,
+                            1.0
+                        ],
+                        [
+                            0.21,
+                            0.05,
+                            0.02,
+                            1.0
+                        ],
+                        [
+                            0.31,
+                            0.17,
+                            0.22,
+                            1.0
+                        ]
 					],
 					"defaultColorIndex": 0,
-					"title": "小山眉"
+					"title": "古典眉"
 				},
 				{
 					"makeType": 2,
-					"imagePath": "demo_style_eyebrow_04",
+					"imagePath": "demo_style_eyebrow_02",
 					"namaBundleType": 2,
 					"namaValueType": 3,
-					"namaBundle": "mu_style_eyebrow_01",
+					"namaBundle": "mu_style_eyebrow_04",
 					"brow_warp": 1,
 					"brow_warp_type": 1.0,
 					"value": 1.0,
 					"colorStr": "makeup_eyeBrow_color",
 					"colors": [
 						[
-							0.36,
-							0.10,
-							0.10,
-							1.0
-						],
-						[
-							0.33,
-							0.09,
-							0.18,
-							1.0
-						],
-						[
-							0.28,
-							0.16,
-							0.08,
-							1.0
-						],
-						[
-							0.21,
-							0.05,
-							0.02,
-							1.0
-						],
-						[
-							0.31,
-							0.17,
-							0.22,
-							1.0
-						]
+                            0.36,
+                            0.10,
+                            0.10,
+                            1.0
+                        ],
+                        [
+                            0.33,
+                            0.09,
+                            0.18,
+                            1.0
+                        ],
+                        [
+                            0.28,
+                            0.16,
+                            0.08,
+                            1.0
+                        ],
+                        [
+                            0.21,
+                            0.05,
+                            0.02,
+                            1.0
+                        ],
+                        [
+                            0.31,
+                            0.17,
+                            0.22,
+                            1.0
+                        ]
 					],
 					"defaultColorIndex": 0,
-					"title": "一字眉"
-				},
-				{
-					"makeType": 2,
-					"imagePath": "demo_style_eyebrow_05",
-					"namaBundleType": 2,
-					"namaValueType": 3,
-					"namaBundle": "mu_style_eyebrow_01",
-					"brow_warp": 1,
-					"brow_warp_type": 4.0,
-					"value": 1.0,
-					"colorStr": "makeup_eyeBrow_color",
-					"colors": [
-						[
-							0.36,
-							0.10,
-							0.10,
-							1.0
-						],
-						[
-							0.33,
-							0.09,
-							0.18,
-							1.0
-						],
-						[
-							0.28,
-							0.16,
-							0.08,
-							1.0
-						],
-						[
-							0.21,
-							0.05,
-							0.02,
-							1.0
-						],
-						[
-							0.31,
-							0.17,
-							0.22,
-							1.0
-						]
-					],
-					"defaultColorIndex": 0,
-					"title": "扶形眉"
-				},
-				{
-					"makeType": 2,
-					"imagePath": "demo_style_eyebrow_06",
-					"namaBundleType": 2,
-					"namaValueType": 3,
-					"namaBundle": "mu_style_eyebrow_01",
-					"brow_warp": 1,
-					"brow_warp_type": 5.0,
-					"value": 1.0,
-					"colorStr": "makeup_eyeBrow_color",
-					"colors": [
-						[
-							0.36,
-							0.10,
-							0.10,
-							1.0
-						],
-						[
-							0.33,
-							0.09,
-							0.18,
-							1.0
-						],
-						[
-							0.28,
-							0.16,
-							0.08,
-							1.0
-						],
-						[
-							0.21,
-							0.05,
-							0.02,
-							1.0
-						],
-						[
-							0.31,
-							0.17,
-							0.22,
-							1.0
-						]
-					],
-					"defaultColorIndex": 0,
-					"title": "日常风"
-				},
-				{
-					"makeType": 2,
-					"imagePath": "demo_style_eyebrow_07",
-					"namaBundleType": 2,
-					"namaValueType": 3,
-					"namaBundle": "mu_style_eyebrow_01",
-					"brow_warp": 1,
-					"brow_warp_type": 6.0,
-					"value": 1.0,
-					"colorStr": "makeup_eyeBrow_color",
-					"colors": [
-						[
-							0.36,
-							0.10,
-							0.10,
-							1.0
-						],
-						[
-							0.33,
-							0.09,
-							0.18,
-							1.0
-						],
-						[
-							0.28,
-							0.16,
-							0.08,
-							1.0
-						],
-						[
-							0.21,
-							0.05,
-							0.02,
-							1.0
-						],
-						[
-							0.31,
-							0.17,
-							0.22,
-							1.0
-						]
-					],
-					"defaultColorIndex": 0,
-					"title": "日系风"
+					"title": "标准眉"
 				}
 			]
 		},

@@ -16,7 +16,7 @@ A new flutter plugin project.
   s.source_files = ['Classes/**/*']
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'FURenderKit', '7.4.1'
+  s.dependency 'FURenderKit', '8.5.0'
   s.dependency 'SVProgressHUD'
   s.dependency 'MJExtension', '3.0.15.1'
   s.static_framework = true
@@ -24,7 +24,7 @@ A new flutter plugin project.
     'fulive_plugin' => ['Assets/*.json','**/*.{png,bundle,json}']
   }
   
-  s.platform = :ios, '8.0'
+  s.platform = :ios, '11.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }

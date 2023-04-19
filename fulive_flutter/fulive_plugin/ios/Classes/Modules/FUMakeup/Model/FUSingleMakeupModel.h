@@ -35,6 +35,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSArray <NSArray *>* colors;
 @property (nonatomic, assign) int defaultColorIndex;
 
+//记录当前可自定义子妆的组合妆被选中的索引值
+@property (nonatomic, assign) int singleSelIndex;
 @end
 
 NS_ASSUME_NONNULL_END

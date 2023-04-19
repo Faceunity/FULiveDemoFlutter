@@ -18,11 +18,25 @@
 }
 
 - (void)releaseItem {
+    NSLog(@"releaseItem 异常，子类实现");
+    return ;
+}
+
+//释放item，内部会自动清除相关资源文件. async
+- (void)releaseItemCompletion:(void(^)(void))completion {
+    NSLog(@"releaseItemCompletion 异常，子类实现");
     return ;
 }
 
 //把当前业务模型数据加载到FURenderKit,不同子类需要根据不同模型重写
 - (void)loadItem {
+    NSLog(@"loadItem 异常，子类实现");
+    return ;
+}
+
+//把当前业务模型数据加载到FURenderKit,不同子类需要根据不同模型重写, async
+- (void)loadItemCompletion:(void(^)(void))completion {
+    NSLog(@"loadItemCompletion 异常，子类实现");
     return ;
 }
 

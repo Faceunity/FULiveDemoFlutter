@@ -6,11 +6,10 @@ part of 'FUStickerModel.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-FUStickerModel _$FUStickerModelFromJson(Map<String, dynamic> json) {
-  return FUStickerModel(
-    json['imageName'] as String,
-  );
-}
+FUStickerModel _$FUStickerModelFromJson(Map<String, dynamic> json) =>
+    FUStickerModel(
+      json['imageName'] as String,
+    );
 
 Map<String, dynamic> _$FUStickerModelToJson(FUStickerModel instance) =>
     <String, dynamic>{

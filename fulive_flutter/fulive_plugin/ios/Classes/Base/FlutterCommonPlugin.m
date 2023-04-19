@@ -13,6 +13,9 @@
 #import "NSObject+economizer.h"
 #import "SVProgressHUD.h"
 #import "FlutterBaseModel.h"
+#import "FUManager.h"
+#import "NSObject+throttle.h"
+
 @interface FlutterCommonModel : FlutterBaseModel <FUFlutterPluginModelProtocol>
 
 @end
@@ -28,7 +31,8 @@
 //是否检测到人脸
 @property (nonatomic, assign) BOOL hasFace;
 
-@property (nonatomic, copy) NSString *debugStr;
+//主线程set，异步线程发送给flutter,所以需要保持同步锁，否则有概率崩溃， 异步线程读写问题。
+@property (atomic, copy) NSString *debugStr;
 @property (nonatomic, assign) BOOL compare;
 
 
@@ -54,6 +58,12 @@
 //    [self stopCature];
 //}
 
+//flutter 通过native 来获取当前设备 所属的性能等级
+- (NSNumber *)getPerformanceLevel {
+    //同时设置一下高低点位问题
+    int performanceLevel = (int)[FURenderKit devicePerformanceLevel];
+    return [NSNumber numberWithInt:performanceLevel];
+}
 
 //目的获取channel
 - (void)startBeautyStreamListen:(NSDictionary *)params {
@@ -83,6 +93,8 @@ static NSTimeInterval startTime = 0;
     _imageW = CVPixelBufferGetWidth(renderInput.pixelBuffer);
     _imageH = CVPixelBufferGetHeight(renderInput.pixelBuffer);
     startTime = [[NSDate date] timeIntervalSince1970];
+    
+    [FUManager updateBeautyBlurEffect];
 }
 
 // 使用内部相机时，处理图像后的输出回调
@@ -232,11 +244,19 @@ static NSTimeInterval startTime = 0;
 }
 
 - (void)changeCameraFront:(NSDictionary *)params {
-    FlutterCommonModel *model = [FlutterCommonModel analysis: params];
+    [self throttleWithInterval:1.0 completion:^{
+        NSLog(@"Action");
+        FlutterCommonModel *model = [FlutterCommonModel analysis: params];
+        NSLog(@"%d",[model.value boolValue]);
+        if ([FURenderKit shareRenderKit].internalCameraSetting.position == AVCaptureDevicePositionFront) {
+            [FURenderKit shareRenderKit].internalCameraSetting.position = AVCaptureDevicePositionBack;
+        } else if([FURenderKit shareRenderKit].internalCameraSetting.position == AVCaptureDevicePositionBack) {
+            [FURenderKit shareRenderKit].internalCameraSetting.position = AVCaptureDevicePositionFront;
+        }
+        /**切换摄像头要调用此函数*/
+        [FUAIKit resetTrackedResult];
+    }];
     
-    [[FURenderKit shareRenderKit].captureCamera changeCameraInputDeviceisFront: [model.value boolValue]];
-    /**切换摄像头要调用此函数*/
-    [FUAIKit resetTrackedResult];
 }
 
 

@@ -2,8 +2,6 @@ enum FUBeautyDefine {
   FUBeautyDefineSkin, //美肤
   FUBeautyDefineShape, //美型
   FUBeautyDefineFilter, //滤镜
-  FUBeautyDefineStyle, //风格化
-
   FUBeautyMax, //作为none和最大值使用
 }
 
@@ -35,6 +33,7 @@ enum FUBeautifySkin {
   FUBeautifySkinColorLevel, //"color_level",
   FUBeautifySkinRedLevel, //"red_level",
   FUBeautifySkinSharpen, //"sharpen",
+  FUBeautifySkinFace, //
   FUBeautifySkinEyeBright, //"eye_bright",
   FUBeautifySkinToothWhiten, //"tooth_whiten",
   FUBeautifySkinRemovePouchStrength, //"remove_pouch_strength",
@@ -54,4 +53,13 @@ enum FUBeautyStyleType {
   FUBeautyStyleType7,
 
   FUBeautyStyleMax
+}
+
+/// 设备性能等级
+enum FUDevicePerformanceLevel {
+  FUDevicePerformanceLevelLow,
+  FUDevicePerformanceLevelMedium,
+  FUDevicePerformanceLevelHigh,
+
+  FUDevicePerformanceLevelMax
 }

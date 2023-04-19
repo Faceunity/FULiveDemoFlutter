@@ -32,7 +32,8 @@ typedef NS_ENUM(NSUInteger, SUBMAKEUPTYPE) {
     SUBMAKEUPTYPE_eyeLash, //睫毛
     SUBMAKEUPTYPE_highlight, //高光
     SUBMAKEUPTYPE_shadow, //阴影
-    SUBMAKEUPTYPE_pupil = 8, //美瞳
+    SUBMAKEUPTYPE_pupil, //美瞳
+    SUBMAKEUPTYPE_lip = 9, //口红
 
 };
 

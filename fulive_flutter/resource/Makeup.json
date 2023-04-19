@@ -6,6 +6,26 @@
       "value": 0.0
     },
     {
+      "title": "嗲嗲兔",
+      "imagePath": "demo_combination_rabbit",
+      "value": 0.7
+    },
+    {
+      "title": "冻龄",
+      "imagePath": "demo_combination_freezing_age",
+      "value": 0.7
+    },
+    {
+      "title": "国风",
+      "imagePath": "demo_combination_guo_feng",
+      "value": 0.7
+    },
+    {
+      "title": "混血",
+      "imagePath": "demo_combination_mixed_race",
+      "value": 0.7
+    },
+    {
       "title": "减龄",
       "imagePath": "demo_combination_age",
       "value": 0.7

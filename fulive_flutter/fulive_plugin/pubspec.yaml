@@ -27,7 +27,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.example.fulive_plugin
+        package: com.faceunity.fulive_plugin
         pluginClass: FULivePlugin
       ios:
         pluginClass: FULivePlugin

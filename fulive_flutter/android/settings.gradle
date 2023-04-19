@@ -1,9 +1,11 @@
-include ':fu_core'
 include ':app'
-rootProject.name = "FuLiveDemo"
-setBinding(new Binding([gradle: this]))
-evaluate(new File('../.android/include_flutter.groovy'))
-include ':fulive_flutter'
-project(':fulive_flutter').projectDir = new File('../../fulive_flutter')
-include ':flutter'
-project(':flutter').projectDir = new File('../.android/Flutter')
+
+def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
+def properties = new Properties()
+
+assert localPropertiesFile.exists()
+localPropertiesFile.withReader("UTF-8") { reader -> properties.load(reader) }
+
+def flutterSdkPath = properties.getProperty("flutter.sdk")
+assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"

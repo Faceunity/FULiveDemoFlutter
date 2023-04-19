@@ -91,9 +91,16 @@
         
         if ([mediaType isEqualToString:(NSString *)kUTTypeMovie]){  //视频
             NSURL *videoURL = info[UIImagePickerControllerMediaURL];
+            if (!videoURL) {
+                NSLog(@"videoURL is null");
+                return ;
+            }
             NSArray *arr = @[videoURL];
             NSData *data = [NSKeyedArchiver archivedDataWithRootObject:arr];
-            
+            if (!data) {
+                NSLog(@"data is null");
+                return ;
+            }
             [[NSUserDefaults standardUserDefaults] setObject:data forKey:@"type_1"];
             [[NSUserDefaults standardUserDefaults] synchronize];
             //通知Flutter 创建新的页面
@@ -123,7 +130,7 @@
                 
                 UIGraphicsEndImageContext();
             }
-            [[NSUserDefaults standardUserDefaults] setObject: UIImagePNGRepresentation(image) forKey:@"type_0"];
+            [[NSUserDefaults standardUserDefaults] setObject: UIImageJPEGRepresentation(image, 1.0) forKey:@"type_0"];
             [[NSUserDefaults standardUserDefaults] synchronize];
             //通知Flutter 创建新的页面
             if (self.methodChannel) {

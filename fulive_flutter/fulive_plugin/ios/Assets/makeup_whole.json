@@ -3,151 +3,211 @@
     {
       "name": "卸妆",
       "imageStr": "makeup_noitem",
-      "isSel": true,
+      "isSel": "YES",
       "value": 0.0,
-      "makeupBundle": "xiezhuan"
+      "makeupBundle": "xiezhuan",
+      "newMakeupFlag": "NO"
+    },
+    {
+      "name": "嗲嗲兔",
+      "imageStr": "demo_combination_rabbit",
+      "value": 0.7,
+      "isSel": "NO",
+      "makeupBundle": "diadiatu",
+      "newMakeupFlag": "YES",
+      "selectedFilterLevel": 0.68
+    },
+    {
+      "name": "冻龄",
+      "imageStr": "demo_combination_freezing_age",
+      "value": 0.7,
+      "isSel": "NO",
+      "makeupBundle": "dongling",
+      "newMakeupFlag": "YES",
+      "selectedFilterLevel": 0.68
+    },
+    {
+      "name": "国风",
+      "imageStr": "demo_combination_guo_feng",
+      "value": 0.7,
+      "isSel": "NO",
+      "makeupBundle": "guofeng",
+      "newMakeupFlag": "YES",
+      "selectedFilterLevel": 0.6
+    },
+    {
+      "name": "混血",
+      "imageStr": "demo_combination_mixed_race",
+      "value": 0.7,
+      "isSel": "NO",
+      "makeupBundle": "hunxue",
+      "newMakeupFlag": "YES",
+      "selectedFilterLevel": 0.6
     },
     {
       "name": "减龄",
       "imageStr": "demo_combination_age",
       "value": 0.7,
-      "isSel": false,
+      "isSel": "NO",
       "makeupBundle": "jianling",
-      "selectedFilter":"zhiganhui1"
+      "selectedFilter":"zhiganhui1",
+      "newMakeupFlag": "NO"
     },
     {
       "name": "暖冬",
       "imageStr": "demo_combination_warm_winter",
       "value": 0.7,
-      "isSel": false,
+      "isSel": "NO",
       "makeupBundle": "nuandong",
-      "selectedFilter":"zhiganhui2"
+      "selectedFilter":"zhiganhui2",
+      "newMakeupFlag": "NO",
     },
     {
       "name": "红枫",
       "imageStr": "demo_combination_red_maple",
       "value": 0.7,
-      "isSel": false,
+      "isSel": "NO",
       "makeupBundle": "hongfeng",
-      "selectedFilter":"zhiganhui3"
+      "selectedFilter":"zhiganhui3",
+      "newMakeupFlag": "NO"
     },
     {
       "name": "Rose",
       "imageStr": "demo_combination_rose",
       "value": 0.7,
-      "isSel": false,
+      "isSel": "NO",
       "makeupBundle": "Rose",
       "selectedFilter":"zhiganhui2",
-      "is_flip_points":1
+      "is_flip_points":1,
+      "newMakeupFlag": "NO"
     },
     {
       "name": "少女",
       "imageStr": "demo_combination_girl",
       "value": 0.7,
-      "isSel": false,
+      "isSel": "NO",
       "makeupBundle": "shaonv",
-      "selectedFilter":"zhiganhui4"
+      "selectedFilter":"zhiganhui4",
+      "newMakeupFlag": "NO"
     },
     {
       "name": "紫韵",
       "imageStr": "demo_combination_purple_rhyme",
       "value": 0.7,
-      "isSel": false,
+      "isSel": "NO",
       "makeupBundle": "ziyun",
-      "selectedFilter":"zhiganhui5"
+      "selectedFilter":"zhiganhui1",
+      "newMakeupFlag": "NO"
     },
     {
       "name": "厌世猫",
       "imageStr": "demo_combination_bored_cat",
       "value": 0.7,
-      "isSel": false,
+      "isSel": "NO",
       "makeupBundle": "yanshimao",
-      "selectedFilter":"zhiganhui5"
+      "selectedFilter":"zhiganhui5",
+      "newMakeupFlag": "NO"
     },
     {
       "name": "人鱼",
       "imageStr": "demo_combination_mermaid",
       "value": 0.7,
-      "isSel": false,
+      "isSel": "NO",
       "makeupBundle": "renyu",
       "selectedFilter":"zhiganhui1",
-      "is_flip_points":1
+      "is_flip_points":1,
+      "newMakeupFlag": "NO"
     },
     {
       "name": "初秋",
       "imageStr": "demo_combination_early_autumn",
       "value": 0.7,
-      "isSel": false,
+      "isSel": "NO",
       "makeupBundle": "chuqiu",
-      "selectedFilter":"zhiganhi6"
+      "selectedFilter":"zhiganhui6",
+      "newMakeupFlag": "NO"
     },
     {
       "name": "千纸鹤",
       "imageStr": "demo_combination_paper_cranes",
       "value": 0.7,
-      "isSel": false,
+      "isSel": "NO",
       "makeupBundle": "qianzhihe",
-      "selectedFilter":"zhiganhui2"
+      "selectedFilter":"zhiganhui2",
+      "newMakeupFlag": "NO"
     },
     {
       "name": "超模",
       "imageStr": "demo_combination_supermodel",
       "value": 0.7,
-      "isSel": false,
+      "isSel": "NO",
       "makeupBundle": "chaomo",
-      "selectedFilter":"zhiganhui7"
+      "selectedFilter":"zhiganhui7",
+      "newMakeupFlag": "NO"
     },
     {
       "name": "雏菊",
       "imageStr": "demo_combination_daisy",
       "value": 0.7,
-      "isSel": false,
+      "isSel": "NO",
       "makeupBundle": "chuju",
-      "selectedFilter":"zhiganhui8"
+      "selectedFilter":"zhiganhui8",
+      "newMakeupFlag": "NO"
     },
     {
       "name": "港风",
       "imageStr": "demo_combination_harbour_wind",
       "value": 0.7,
-      "isSel": false,
+      "isSel": "NO",
       "makeupBundle": "gangfeng",
       "selectedFilter":"ziran8",
-      "is_flip_points":1
+      "is_flip_points":1,
+      "newMakeupFlag": "NO"
     },
     {
       "name": "性感",
       "imageStr": "demo_combination_sexy",
       "value": 0.7,
-      "isSel": false,
-      "makeupBundle": "xinggan"
+      "isSel": "NO",
+      "makeupBundle": "xinggan",
+      "selectedFilter":"ziran4",
+      "newMakeupFlag": "NO"
     },
     {
       "name": "甜美",
       "imageStr": "demo_combination_sweet",
       "value": 0.7,
-      "isSel": false,
-      "makeupBundle": "tianmei"
+      "isSel": "NO",
+      "makeupBundle": "tianmei",
+      "selectedFilter":"ziran4",
+      "newMakeupFlag": "NO"
     },
     {
       "name": "邻家",
       "imageStr": "demo_combination_neighbor_girl",
       "value": 0.7,
-      "isSel": false,
-      "makeupBundle": "linjia"
+      "isSel": "NO",
+      "makeupBundle": "linjia",
+      "selectedFilter":"ziran4",
+      "newMakeupFlag": "NO"
     },
     {
       "name": "欧美",
       "imageStr": "demo_combination_occident",
       "value": 0.7,
-      "isSel": false,
-      "makeupBundle": "oumei"
+      "isSel": "NO",
+      "makeupBundle": "oumei",
+      "selectedFilter":"ziran4",
+      "newMakeupFlag": "NO"
     },
     {
       "name": "妩媚",
       "imageStr": "demo_combination_charming",
       "value": 0.7,
-      "isSel": false,
-      "makeupBundle": "wumei"
+      "isSel": "NO",
+      "makeupBundle": "wumei",
+      "selectedFilter":"ziran4",
+      "newMakeupFlag": "NO"
     }
     
   ]

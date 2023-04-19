@@ -13,8 +13,9 @@
 #import "FUMakeupSupModel.h"
 #import "FUBaseViewControllerManager.h"
 #import "FUMakeupModel.h"
-
 #import "FlutterCustomSubMakeupModel.h"
+#import "FUManager.h"
+#import "FULandmarkManager.h"
 
 @interface FlutterMakeupModel : FlutterBaseModel <FUFlutterPluginModelProtocol>
 @property (nonatomic, assign) int index;//选中的组合装
@@ -30,6 +31,10 @@
 @interface FlutterFUMakeupPlugin ()
 @property (nonatomic, strong) FlutterFUBeautyPlugin *beautyPlugin;
 @property (nonatomic, strong) FUMakeupManager *makeupManager;
+//记录当前操作子妆时候 是在组合妆状态下还是在卸妆状态下(因为有自定义组合妆，所以存在自定义组合妆在修改子妆)
+@property (nonatomic, assign) BOOL isCombination;
+//可自定组合妆整体程度值
+@property (nonatomic, assign) BOOL combinationIntensity;
 @end
 
 @implementation FlutterFUMakeupPlugin
@@ -39,6 +44,7 @@
         //需要美颜插件效果
         _beautyPlugin = [[FlutterFUBeautyPlugin alloc] init];
         _makeupManager = [[FUMakeupManager alloc] init];
+        _isCombination = NO;
     }
     return self;
 }
@@ -49,6 +55,11 @@
     [self startCapture];
     //美妆是在美颜基础上做，所以需要这里调用美颜配置
     [_beautyPlugin configBeauty];
+    
+    // 添加点位测试开关
+    if ([FUManager shareManager].showsLandmarks) {
+        [FULandmarkManager show];
+    }
 }
 
 
@@ -60,9 +71,34 @@
     } else {
         //组合装模型
         FUMakeupSupModel *supModel = [self.makeupManager.supArray objectAtIndex:model.index];
-        [self.makeupManager setSupModel:supModel];
-        [self.makeupManager setMakeupWholeModel:supModel];
-        [self modifyFilter:supModel];
+        if (self.makeupManager.preSelectedIndex == -1) {
+            [self.makeupManager releaseItem];
+        }
+        
+        if ([supModel.name isEqualToString:@"性感"] ||
+            [supModel.name isEqualToString:@"甜美"] ||
+            [supModel.name isEqualToString:@"邻家"] ||
+            [supModel.name isEqualToString:@"欧美"] ||
+            [supModel.name isEqualToString:@"妩媚"]) {
+            self.isCombination = YES;
+            self.combinationIntensity = supModel.value;
+        } else {
+            self.isCombination = NO;
+        }
+        
+        if (model.index == 0) {
+            [self.makeupManager releaseItem];
+            self.beautyPlugin.baseManager.beauty.filterName = @"origin";
+            self.beautyPlugin.baseManager.beauty.filterLevel = 0.0;
+            return ;
+        }
+        self.makeupManager.preSelectedIndex = model.index;
+        
+        __weak typeof(self) weak = self;
+        [self.makeupManager setSupModelBundleWithModel:supModel completion:^{
+            [weak.makeupManager setMakeupWholeModel:supModel];
+            [weak modifyFilter:supModel];
+        }];
     }
 }
 
@@ -87,7 +123,11 @@
     FlutterMakeupModel *flutterModel = [FlutterMakeupModel analysis:params];
     FUSingleMakeupModel *subModel = [self findSinleMakeupModel:flutterModel];
     //value由模型的本身值决定
-    subModel.realValue = subModel.value;
+    if (self.isCombination) {
+        subModel.realValue = subModel.realValue * self.combinationIntensity;
+    } else {
+        subModel.realValue = subModel.value;
+    }
 
     //子妆bundle(样式)
     [self.makeupManager  setMakeupSupModel:subModel type:UIMAKEUITYPE_pattern];
@@ -118,10 +158,8 @@
     FlutterMakeupModel *flutterModel = [FlutterMakeupModel analysis:params];
     FUSingleMakeupModel *subModel = [self findSinleMakeupModel:flutterModel];
     //value由滑动条值决定
-    subModel.value = [flutterModel.value doubleValue];
+    subModel.realValue = [flutterModel.value doubleValue];
     if (subModel) {
-        //设置强度值
-        subModel.realValue = subModel.value;
         [self.makeupManager setMakeupSupModel:subModel type:UIMAKEUITYPE_intensity];
     }
 }
@@ -139,6 +177,9 @@
     
     [self.makeupManager releaseItem];
 
+    if ([FUManager shareManager].showsLandmarks) {
+        [FULandmarkManager dismiss];
+    }
 }
 
 //组合妆和美妆切换，iOS 目前没做什么具体逻辑
@@ -178,7 +219,7 @@
                 FUSingleMakeupModel *m1 = m.sgArr[sub.bundleIndex];
                 sub.colorIndex = m1.defaultColorIndex;
                 //组合妆总体程度值 * 组合妆对应的具体子妆的程度值，已经在makeupTransformToSubMakeup处理好了。
-                sub.value = [NSString stringWithFormat:@"%f",m1.value];
+                sub.value = [NSString stringWithFormat:@"%f",m1.realValue];
             } else {
                 sub.colorIndex = 0;//异常情况默认第一个
                 NSLog(@"bundleIndex 越界");
@@ -194,14 +235,22 @@
 }
 
 - (void)modifyFilter:(FUMakeupSupModel *)model {
-    /* 修改美颜的滤镜 */
-    if (!model.selectedFilter || [model.selectedFilter isEqualToString:@""]) {
-        FUBeautyModel *param = self.beautyPlugin.baseManager.seletedFliter;
-        self.beautyPlugin.baseManager.beauty.filterName = [param.strValue lowercaseString];
-        self.beautyPlugin.baseManager.beauty.filterLevel = param.mValue;
-    }else {
-        self.beautyPlugin.baseManager.beauty.filterName = [model.selectedFilter lowercaseString];
-        self.beautyPlugin.baseManager.beauty.filterLevel = model.value;
+    if (model.newMakeupFlag) {
+        self.beautyPlugin.baseManager.beauty.filterName = @"orign";
+        [self.makeupManager setNewMakeupFilterIntensity:model.value * model.selectedFilterLevel];
+    } else {
+        if (!self.beautyPlugin.baseManager.beauty) {
+            return ;
+        }
+        /* 修改美颜的滤镜 */
+        if (!model.selectedFilter || [model.selectedFilter isEqualToString:@""]) {
+            FUBeautyModel *param = self.beautyPlugin.baseManager.seletedFliter;
+            self.beautyPlugin.baseManager.beauty.filterName = [param.strValue lowercaseString];
+            self.beautyPlugin.baseManager.beauty.filterLevel = param.mValue;
+        }else {
+            self.beautyPlugin.baseManager.beauty.filterName = [model.selectedFilter lowercaseString];
+            self.beautyPlugin.baseManager.beauty.filterLevel = model.value;
+        }
     }
 }
 

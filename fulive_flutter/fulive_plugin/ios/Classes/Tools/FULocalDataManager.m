@@ -9,6 +9,10 @@
 #import "FULocalDataManager.h"
 #import "NSObject+AddBundle.h"
 @interface FULocalDataManager ()
+@property (nonatomic, strong) NSArray *beautyFilterData;
+@property (nonatomic, strong) NSArray *beautySkinData;
+@property (nonatomic, strong) NSArray *beautyShapeData;
+
 @property (nonatomic, strong) NSArray *stickerData;
 @property (nonatomic, strong) NSDictionary *stickTipsData;
 @property (nonatomic, strong) NSDictionary *makeupJsonData;
@@ -34,6 +38,21 @@
         self.stickTipsData = [self stickerTipsJsonData];
     }
     return self;
+}
+
+//美颜-滤镜
++ (NSArray *)beautyFilterJsonData {
+    return [[FULocalDataManager shareManager] beautyFilterJsonData];
+}
+
+//美颜-美肤
++ (NSArray *)beautySkinJsonData {
+    return [[FULocalDataManager shareManager] beautySkinData];
+}
+
+//美颜-美型
++ (NSArray *)beautyShapeJsonData {
+    return [[FULocalDataManager shareManager] beautyShapeData];
 }
 
 + (NSDictionary *)stickerTipsJsonData {
@@ -97,6 +116,35 @@
     return _stickTipsData;
 }
 
+//美颜-滤镜
+- (NSArray *)beautyFilterJsonData {
+    if (!_beautyFilterData) {
+        NSString *path = [self loadPathWithFileName:@"beauty_filter" ofType:@"json"];
+        NSData *data = [[NSData alloc] initWithContentsOfFile:path];
+        _beautyFilterData = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+    }
+    return _beautyFilterData;
+}
+
+//美颜-美型
+- (NSArray *)beautyShapeData {
+    if (!_beautyShapeData) {
+        NSString *path = [self loadPathWithFileName:@"beauty_shape" ofType:@"json"];
+        NSData *data = [[NSData alloc] initWithContentsOfFile:path];
+        _beautyShapeData = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+    }
+    return _beautyShapeData;
+}
+
+//美颜-美肤
+- (NSArray *)beautySkinData {
+    if (!_beautySkinData) {
+        NSString *path = [self loadPathWithFileName:@"beauty_skin" ofType:@"json"];
+        NSData *data = [[NSData alloc] initWithContentsOfFile:path];
+        _beautySkinData = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+    }
+    return _beautySkinData;
+}
 
 
 //获取美妆业务数据

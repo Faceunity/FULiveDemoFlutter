@@ -13,29 +13,35 @@ typedef NS_ENUM(NSUInteger, FUBeautyDefine) {
     FUBeautyDefineSkin = 0, //美肤
     FUBeautyDefineShape = 1, //美型
     FUBeautyDefineFilter = 2, //滤镜
-    FUBeautyDefineStyle = 3 //风格化
 };
 
 typedef NS_ENUM(NSUInteger, FUBeautifyShape) {
     FUBeautifyShapeCheekThinning, //"cheek_thinning",
     FUBeautifyShapeCheekV, //"cheek_v",
     FUBeautifyShapeCheekNarrow, //"cheek_narrow",
+    FUBeautifyShapeCheekShort, //“cheekShort”
     FUBeautifyShapeCheekSmall, //"cheek_small",
-    FUBeautifyShapeIntensityCheekbones, //"intensity_cheekbones",
-    FUBeautifyShapeIntensityLowerJaw, //"intensity_lower_jaw",
+    FUBeautifyShapeCheekbones, //"intensity_cheekbones",
+    FUBeautifyShapeLowerJaw, //"intensity_lower_jaw",
     FUBeautifyShapeEyeEnlarging, //"eye_enlarging",
     FUBeautifyShapeEyeCircle, //eye_circle
-    FUBeautifyShapeIntensityChin, //"intensity_chin",
-    FUBeautifyShapeIntensityForehead, //"intensity_forehead",
-    FUBeautifyShapeIntensityNose, //"intensity_nose",
-    FUBeautifyShapeIntensityMouth, //"intensity_mouth",
-    FUBeautifyShapeIntensityCanthus, //"intensity_canthus",
-    FUBeautifyShapeIntensityEyeSpace, //"intensity_eye_space",
-    FUBeautifyShapeIntensityEyeRotate, //"intensity_eye_rotate",
-    FUBeautifyShapeIntensityLongNose, //"intensity_long_nose",
-    FUBeautifyShapeIntensityPhiltrum, //"intensity_philtrum",
-    FUBeautifyShapeIntensitySmile, //"intensity_smile",
-    FUBeautifyShapeMax = 18
+    FUBeautifyShapeChin, //"intensity_chin",
+    FUBeautifyShapeForehead, //"intensity_forehead",
+    FUBeautifyShapeNose, //"intensity_nose",
+    FUBeautifyShapeMouth, //"intensity_mouth",
+    FUBeautifyShapeLipThick,
+    FUBeautifyShapeEyeHeight,
+    FUBeautifyShapeCanthus, //"intensity_canthus",
+    FUBeautifyShapeEyeLid,
+    FUBeautifyShapeEyeSpace, //"intensity_eye_space",
+    FUBeautifyShapeEyeRotate, //"intensity_eye_rotate",
+    FUBeautifyShapeLongNose, //"intensity_long_nose",
+    FUBeautifyShapePhiltrum, //"intensity_philtrum",
+    FUBeautifyShapeSmile, //"intensity_smile",
+    FUBeautifyShapeBrowHeight,
+    FUBeautifyShapeBrowSpace,
+    FUBeautifyShapeBrowThick,
+    FUBeautifyShapeMax
 };
 
 
@@ -44,6 +50,7 @@ typedef NS_ENUM(NSUInteger, FUBeautifySkin) {
     FUBeautifySkinColorLevel, //"color_level",
     FUBeautifySkinRedLevel, //"red_level",
     FUBeautifySkinSharpen, //"sharpen",
+    FUBeautifySkinFace, // (五官立体)
     FUBeautifySkinEyeBright, //"eye_bright",
     FUBeautifySkinToothWhiten, //"tooth_whiten",
     FUBeautifySkinRemovePouchStrength, //"remove_pouch_strength",
@@ -51,16 +58,4 @@ typedef NS_ENUM(NSUInteger, FUBeautifySkin) {
     FUBeautifySkinMax
 };
 
-typedef NS_ENUM(NSUInteger, FUBeautyStyleType) {
-    FUBeautyStyleTypeNone = 0,
-    FUBeautyStyleType1,
-    FUBeautyStyleType2,
-    FUBeautyStyleType3,
-    FUBeautyStyleType4,
-    FUBeautyStyleType5,
-    FUBeautyStyleType6,
-    FUBeautyStyleType7,
-
-    FUBeautyStyleMax
-};
 #endif /* FUBeautyDefine_h */

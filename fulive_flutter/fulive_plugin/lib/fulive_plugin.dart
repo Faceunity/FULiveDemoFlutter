@@ -30,6 +30,13 @@ class FULivePlugin {
     return modules;
   }
 
+  //获取native的权限
+  static Future<int> getPerformanceLevel() async {
+    final int result =
+        await channel.invokeMethod(common, {"method": 'getPerformanceLevel'});
+    return result;
+  }
+
   ///选择视频或则图片 0, 视频，1图片
   static Future<bool?> chooseImageOrVideo(int index) async {
     final bool? result = await channel.invokeMethod(methodChannel + imagePick, {

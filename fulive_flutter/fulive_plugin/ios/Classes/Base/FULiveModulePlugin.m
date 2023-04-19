@@ -93,10 +93,10 @@
         obj = [[cls alloc] init];
         [self.moduleMap setObject:obj forKey:key];
         if ([obj isKindOfClass:[FlutterFUBasePlugin class]]) {
-            FlutterFUMakeupPlugin *plugin = (FlutterFUMakeupPlugin *)obj;
+            FlutterFUBasePlugin *plugin = (FlutterFUBasePlugin *)obj;
             plugin.delegate = self;
         } else {
-            NSLog(@"plugin:%@ 未继承基类:FlutterFUMakeupPlugin",obj);
+            NSLog(@"plugin:%@ 未继承基类:FlutterFUBasePlugin",obj);
         }
     }
    
