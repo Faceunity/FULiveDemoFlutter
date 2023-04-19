@@ -6,22 +6,21 @@ part of 'FUMakeupSubModel.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-FUMakeupSubModel _$FUMakeupSubModelFromJson(Map<String, dynamic> json) {
-  return FUMakeupSubModel(
-    json['title'] as String?,
-    json['imagePath'] as String,
-    (json['colors'] as List<dynamic>?)
-        ?.map((e) =>
-            (e as List<dynamic>).map((e) => (e as num).toDouble()).toList())
-        .toList(),
-    json['defaultColorIndex'] as int?,
-    (json['value'] as num).toDouble(),
-    colorIndex: json['colorIndex'] as int?,
-    CacheColors: (json['CacheColors'] as List<dynamic>?)
-        ?.map((e) => e as List<dynamic>)
-        .toList(),
-  );
-}
+FUMakeupSubModel _$FUMakeupSubModelFromJson(Map<String, dynamic> json) =>
+    FUMakeupSubModel(
+      json['title'] as String?,
+      json['imagePath'] as String,
+      (json['colors'] as List<dynamic>?)
+          ?.map((e) =>
+              (e as List<dynamic>).map((e) => (e as num).toDouble()).toList())
+          .toList(),
+      json['defaultColorIndex'] as int?,
+      (json['value'] as num).toDouble(),
+      colorIndex: json['colorIndex'] as int? ?? 0,
+      CacheColors: (json['CacheColors'] as List<dynamic>?)
+          ?.map((e) => e as List<dynamic>)
+          .toList(),
+    );
 
 Map<String, dynamic> _$FUMakeupSubModelToJson(FUMakeupSubModel instance) =>
     <String, dynamic>{

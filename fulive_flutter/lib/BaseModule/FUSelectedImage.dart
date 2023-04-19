@@ -117,55 +117,65 @@ class _SelectedHomeState extends State<SelectedHome> {
             Container(
               height: 44,
             ),
-            ClipRRect(
-                borderRadius: BorderRadius.circular(15.0),
-                child: GestureDetector(
-                    onTap: () {
-                      _openImage();
-                    },
-                    child: Container(
-                      width: 200,
-                      height: 48,
-                      color: Colors.purple,
-                      child: Row(
+            GestureDetector(
+                onTap: () {
+                  _openImage();
+                },
+                child: Container(
+                  width: 200,
+                  height: 48,
+                  child: Stack(
+                    alignment: AlignmentDirectional.center,
+                    children: [
+                      Image(
+                        image:
+                            AssetImage("resource/images/beauty/selectedBg.png"),
+                      ),
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Image(
                             image: AssetImage(
                                 "resource/images/beauty/chooseAlbum.png"),
                           ),
-                          Text("选择图片",
+                          Text("  选择图片",
                               style: TextStyle(
                                   color: Colors.white, fontSize: 18.0)),
                         ],
                       ),
-                    ))),
+                    ],
+                  ),
+                )),
             Container(
               height: 44,
             ),
-            ClipRRect(
-                borderRadius: BorderRadius.circular(15.0),
-                child: GestureDetector(
-                    onTap: () {
-                      _openVideo();
-                    },
-                    child: Container(
-                      width: 200,
-                      height: 48,
-                      color: Colors.purple,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image(
-                            image: AssetImage(
-                                "resource/images/beauty/chooseVideo.png"),
-                          ),
-                          Text("选择视频",
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: 18.0)),
-                        ],
-                      ),
-                    ))),
+            GestureDetector(
+                onTap: () {
+                  _openVideo();
+                },
+                child: Container(
+                  width: 200,
+                  height: 48,
+                  child:
+                      Stack(alignment: AlignmentDirectional.center, children: [
+                    Image(
+                      image:
+                          AssetImage("resource/images/beauty/selectedBg.png"),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image(
+                          image: AssetImage(
+                              "resource/images/beauty/chooseVideo.png"),
+                        ),
+                        Text("  选择视频",
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 18.0)),
+                      ],
+                    ),
+                  ]),
+                )),
           ],
         ),
       ),

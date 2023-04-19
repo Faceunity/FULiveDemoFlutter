@@ -20,15 +20,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, readonly) NSArray <FUMakeupSupModel *>*supArray;
 
+@property (nonatomic, assign) int preSelectedIndex;//记录仪上一次UI选中的组合妆索引
+
 //设置子妆容数据
 - (void)setMakeupSupModel:(FUSingleMakeupModel *)model type:(UIMAKEUITYPE)type;
 
 //设置整体妆容数据
 - (void)setMakeupWholeModel:(FUMakeupSupModel *)model;
 
-- (void)loadMakeupPackageWithPathName:(NSString *)pathName;
+- (void)setSupModelBundleWithModel:(FUMakeupSupModel *)model
+                        completion:(void(^)(void))completion;
 
-- (void)setSupModel:(FUMakeupSupModel *)model;
+- (void)setNewMakeupFilterIntensity:(double)intensity;
 
 //检测组合妆是否有变化
 -(BOOL)supValueHaveChangeWithIndex:(int)index;

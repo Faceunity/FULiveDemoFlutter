@@ -95,23 +95,27 @@ class _FUMakeupUIState extends State<FUMakeupUI> {
   }
 
   Widget _setUpUI(List<FUMakeupModel> dataList) {
-    return BackdropFilter(
+    return Container(
+      child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
-        child: Opacity(
-            opacity: 0.8,
-            child: ChangeNotifierProvider(
-                create: (context) => _manager,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    _makeupSliderView(),
-                    _makeupUI(dataList),
-                    Container(
-                      height: 5,
-                      color: Colors.black,
-                    )
-                  ],
-                ))));
+        child: Container(
+            child: Opacity(
+                opacity: 0.8,
+                child: ChangeNotifierProvider(
+                    create: (context) => _manager,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        _makeupSliderView(),
+                        _makeupUI(dataList),
+                        Container(
+                          height: 5,
+                          color: Colors.black,
+                        )
+                      ],
+                    )))),
+      ),
+    );
   }
 
   //组合装列表UI

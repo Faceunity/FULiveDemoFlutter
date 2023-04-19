@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fulive_flutter/Beauty/FUBeautyDataManager.dart';
 import 'package:fulive_flutter/Beauty/FUBeautyDefine.dart';
+import 'package:fulive_flutter/Beauty/FUBeautyModel.dart';
+import 'package:fulive_flutter/Beauty/FUBeautySubModel.dart';
+import 'package:fulive_flutter/Beauty/FUBeautySubModelUI.dart';
 import 'package:fulive_flutter/Tools/FUImagePixelRatio.dart';
 import 'package:provider/provider.dart';
-
-import 'FUBeautyDataManager.dart';
-import 'FUBeautyModel.dart';
-import 'FUBeautySubModel.dart';
 
 // ignore: must_be_immutable
 class BeautyToolsWidget extends StatefulWidget {
@@ -50,6 +51,11 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
 
   bool _prohibitCompareEnable = false;
 
+  late FToast _fToast;
+
+  //对比按钮正在被按下
+  bool _compareTouching = false;
+
   //对比按钮禁止工作
   void _prohibitCompare(bool state) {
     setState(() {
@@ -64,11 +70,17 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
     });
   }
 
+  void changeComparBtnState(bool state) {
+    setState(() {
+      _compareTouching = state;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _dataList = widget.dataList;
-
+    _fToast = FToast().init(context);
     if (widget.prohibitCompare != null) {
       _prohibitCompareSubscription =
           widget.prohibitCompare!.stream.listen((event) {
@@ -78,6 +90,12 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
     } else {
       _prohibitCompareSubscription = null;
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _fToast.removeQueuedCustomToasts();
   }
 
   @override
@@ -93,30 +111,48 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
               alignment: Alignment.topLeft,
               child: AbsorbPointer(
                 absorbing: _prohibitCompareEnable,
-                child: GestureDetector(
-                  onTapDown: (TapDownDetails details) {
-                    if (widget.compareCallback != null) {
-                      widget.compareCallback!(true);
-                    }
-                  },
-                  onTapUp: (TapUpDetails details) {
-                    if (widget.compareCallback != null) {
-                      widget.compareCallback!(false);
-                    }
-                  },
-                  onLongPress: () {
-                    if (widget.compareCallback != null) {
-                      widget.compareCallback!(true);
-                    }
-                  },
-                  onLongPressEnd: (details) {
-                    if (widget.compareCallback != null) {
-                      widget.compareCallback!(false);
-                    }
-                  },
-                  child: Image(
-                    image:
-                        AssetImage("resource/images/commonImage/compare.png"),
+                child: Opacity(
+                  opacity: _compareTouching == true ? 0.5 : 1.0,
+                  child: GestureDetector(
+                    onTapDown: (TapDownDetails details) {
+                      if (widget.compareCallback != null) {
+                        widget.compareCallback!(true);
+                      }
+                      changeComparBtnState(true);
+                      print("****onTapDown");
+                    },
+                    onTapUp: (TapUpDetails details) {
+                      if (widget.compareCallback != null) {
+                        widget.compareCallback!(false);
+                      }
+                      changeComparBtnState(false);
+                      print("****onTapUp");
+                    },
+                    onLongPress: () {
+                      if (widget.compareCallback != null) {
+                        widget.compareCallback!(true);
+                      }
+                      changeComparBtnState(true);
+                      print("****onLongPress");
+                    },
+                    onLongPressEnd: (details) {
+                      if (widget.compareCallback != null) {
+                        widget.compareCallback!(false);
+                      }
+                      changeComparBtnState(false);
+                      print("****onLongPressEnd");
+                    },
+                    onTapCancel: () {
+                      if (widget.compareCallback != null) {
+                        widget.compareCallback!(false);
+                      }
+                      changeComparBtnState(false);
+                      print("****onTapCancel");
+                    },
+                    child: Image(
+                      image:
+                          AssetImage("resource/images/commonImage/compare.png"),
+                    ),
                   ),
                 ),
               )),
@@ -139,16 +175,8 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
               child: _rectangleCell(bizType),
               color: Color(0xBC050F14),
             )));
-      } else if (bizType == FUBeautyDefine.FUBeautyDefineStyle) {
-        widgets.add(SizedBox(
-            height: 150,
-            width: double.infinity,
-            child: Container(
-              child: _styleCell(bizType),
-              color: Color(0xBC050F14),
-            )));
       }
-
+      final width = window.physicalSize.width;
       widgets.add(SizedBox(
           height: 45,
           width: double.infinity,
@@ -299,23 +327,25 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
           String imagePath = '';
           //滤镜是否显示边框
           bool showBoard = false;
+          //高低端机逻辑处理
+          bool disable = false;
           if (bizType == FUBeautyDefine.FUBeautyDefineFilter) {
             showBoard = model.selected == index ? true : false;
             imagePath = uiModel.imagePath + '.png';
           } else {
-            //风格 图片只有选中和未选中区别
-            if (bizType == FUBeautyDefine.FUBeautyDefineStyle) {
-              imagePath = model.selected == index
-                  ? uiModel.imagePath + '-1.png'
-                  : uiModel.imagePath + '-0.png';
+            FUBeautySubModel bizModel = bizList[index];
+            bool opened = false;
+            if (bizModel.midSlider) {
+              opened = (bizModel.value - 0.5).abs() > 0.01 ? true : false;
             } else {
-              FUBeautySubModel bizModel = bizList[index];
-              bool opened = false;
-              if (bizModel.midSlider) {
-                opened = (bizModel.value - 0.5).abs() > 0.01 ? true : false;
-              } else {
-                opened = (bizModel.value.abs() - 0) > 0.01 ? true : false;
-              }
+              opened = (bizModel.value.abs() - 0) > 0.01 ? true : false;
+            }
+
+            disable = bizList[index].isShowPerformanceLevelTips;
+
+            if (disable) {
+              imagePath = uiModel.imagePath + '-0.png';
+            } else {
               if (model.selected == index) {
                 imagePath = opened == true
                     ? uiModel.imagePath + '-3.png'
@@ -336,43 +366,70 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
                       child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        TextButton(
-                          child: Container(
-                            decoration: BoxDecoration(
-                                // color: Colors.green,
-                                borderRadius: BorderRadius.circular(5.0),
-                                border: Border.all(
-                                    color: showBoard == true
-                                        ? Color(0xFF5EC7FE)
-                                        : Color(0x005EC7FE),
-                                    width: 2.0)),
-                            child: Image(
-                              image: AssetImage(imagePath),
-                              // fit: BoxFit.cover,
-                              width:
-                                  bizType == FUBeautyDefine.FUBeautyDefineFilter
-                                      ? 50
-                                      : 44,
-                              height:
-                                  bizType == FUBeautyDefine.FUBeautyDefineFilter
-                                      ? 50
-                                      : 44,
+                        Opacity(
+                          opacity: disable ? 0.7 : 1.0,
+                          child: TextButton(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  // color: Colors.green,
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  border: Border.all(
+                                      color: showBoard == true
+                                          ? Color(0xFF5EC7FE)
+                                          : Color(0x005EC7FE),
+                                      width: 2.0)),
+                              child: Image(
+                                image: AssetImage(imagePath),
+                                // fit: BoxFit.cover,
+                                width: bizType ==
+                                        FUBeautyDefine.FUBeautyDefineFilter
+                                    ? 50
+                                    : 44,
+                                height: bizType ==
+                                        FUBeautyDefine.FUBeautyDefineFilter
+                                    ? 50
+                                    : 44,
+                              ),
                             ),
+                            onPressed: () {
+                              manager.updateModelIndex(bizType, index);
+                              //高中低端性能代码
+                              if (model
+                                  .bizList[index].isShowPerformanceLevelTips) {
+                                _fToast.removeCustomToast();
+                                _fToast.showToast(
+                                    child: Text(
+                                      '该功能只支持在高端机上使用',
+                                      style: const TextStyle(
+                                          fontSize: 16.0,
+                                          backgroundColor: Color(0x01000000),
+                                          color: Colors.white),
+                                    ),
+                                    gravity: ToastGravity.CENTER,
+                                    fadeDuration:
+                                        const Duration(milliseconds: 100));
+                              }
+
+                              if (widget.showFilterTips == true &&
+                                  bizType ==
+                                      FUBeautyDefine.FUBeautyDefineFilter) {
+                                _fToast.removeCustomToast();
+                                _fToast.showToast(
+                                    child: Text(
+                                      uiModel.title,
+                                      style: const TextStyle(
+                                          fontSize: 32.0,
+                                          backgroundColor: Color(0x01000000),
+                                          color: Colors.white),
+                                    ),
+                                    gravity: ToastGravity.CENTER,
+                                    fadeDuration:
+                                        const Duration(milliseconds: 100));
+                              }
+
+                              // });
+                            },
                           ),
-                          onPressed: () {
-                            if (widget.showFilterTips == true &&
-                                bizType ==
-                                    FUBeautyDefine.FUBeautyDefineFilter) {
-                              Fluttertoast.cancel();
-                              Fluttertoast.showToast(
-                                  backgroundColor: Color(0x01000000),
-                                  msg: uiModel.title,
-                                  gravity: ToastGravity.CENTER,
-                                  fontSize: 32.0);
-                            }
-                            manager.updateModelIndex(bizType, index);
-                            // });
-                          },
                         ),
                         Text(uiModel.title,
                             style: model.selected == index
@@ -396,11 +453,18 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
           //滤镜原图的时候隐藏滑动条
           bool show = manager.showSlider();
           //实际滑块值
-          double value = manager.curBizModel.value / manager.curBizModel.ratio;
-          int percent;
+          double value = 0.0;
+          if (manager.curBizModel != null) {
+            value = manager.curBizModel!.value / manager.curBizModel!.ratio;
+          }
+
           String valueStr; //百分比字符串
           //是否以中间为起始点
-          bool middle = manager.curBizModel.midSlider;
+          bool middle = false;
+          if (manager.curBizModel != null) {
+            middle = manager.curBizModel!.midSlider;
+          }
+
           //滑块滑过的轨迹颜色
           Color activeTrackColor;
           //滑块未滑过的轨迹颜色
@@ -410,16 +474,15 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
 
           if (middle) {
             activeTrackColor = Colors.white;
-            percent = ((value - 0.5) * 100).toInt();
-            valueStr = "$percent";
+            valueStr = ((value - 0.5) * 100).toStringAsFixed(0);
             if ((value - 0.5) > 0) {
               // midleContainerWidth = (value - 0.5) * 100;
             } else {
               // midleContainerWidth = (0.5 - value) * 100;
             }
           } else {
-            percent = (value * 100).toInt();
-            valueStr = "$percent";
+            valueStr = (value * 100).toStringAsFixed(0);
+            debugPrint('valueStr: $valueStr');
             activeTrackColor = Color(0xFF5EC7FE);
           }
           return show == true
@@ -459,8 +522,9 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
   GridView _beautyUI() {
     return GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 1, childAspectRatio: 0.5, mainAxisSpacing: 5.0),
+            crossAxisCount: 1, childAspectRatio: 0.37, mainAxisSpacing: 5.0),
         //主轴为横向的GridView
+
         scrollDirection: Axis.horizontal,
         itemCount: _dataList.length,
         itemBuilder: (context, index) {
@@ -477,50 +541,27 @@ class _BeautyToolsWidgetState extends State<BeautyToolsWidget> {
             Consumer<FUBeautifyDataManager>(builder: (context, manager, child) {
       //由下面的业务决定颜色
       Color titleColor;
-      //是否可以切换
-      bool canSwitchItem =
-          model.bizType != FUBeautyDefine.FUBeautyDefineStyle &&
-              manager.checkStyle();
-      if (canSwitchItem) {
-        titleColor = Colors.grey;
-      } else {
-        titleColor = model.bizType == manager.curBizType
-            ? Color(0xFF5EC7FE)
-            : Colors.white;
-      }
+      titleColor = model.bizType == manager.curBizType
+          ? Color(0xFF5EC7FE)
+          : Colors.white;
+      // }
       return TextButton(
           child: Text(
             model.title == null ? '数据有问题' : model.title!,
             style: TextStyle(color: titleColor),
           ),
           onPressed: () {
-            if (canSwitchItem) {
-              String message;
-              if (model.bizType == FUBeautyDefine.FUBeautyDefineSkin) {
-                message = "使用美肤先取消\'风格推荐\'";
-              } else if (model.bizType == FUBeautyDefine.FUBeautyDefineShape) {
-                message = "使用美型先取消\'风格推荐\'";
-              } else {
-                message = "使用滤镜先取消\'风格推荐\'";
-              }
-
-              Fluttertoast.showToast(
-                msg: message,
-                gravity: ToastGravity.CENTER,
-              );
+            if (model.bizType == manager.curBizType) {
+              manager.changeBizType(FUBeautyDefine.FUBeautyMax);
             } else {
-              if (model.bizType == manager.curBizType) {
-                manager.changeBizType(FUBeautyDefine.FUBeautyMax);
-              } else {
-                manager.changeBizType(model.bizType);
-                manager.updateModelIndex(model.bizType, model.selected);
-              }
-              if (widget.clickItemCallback != null) {
-                widget.clickItemCallback!(
-                    manager.curBizType == FUBeautyDefine.FUBeautyMax
-                        ? false
-                        : true);
-              }
+              manager.changeBizType(model.bizType);
+              manager.updateModelIndex(model.bizType, model.selected);
+            }
+            if (widget.clickItemCallback != null) {
+              widget.clickItemCallback!(
+                  manager.curBizType == FUBeautyDefine.FUBeautyMax
+                      ? false
+                      : true);
             }
           });
     }));

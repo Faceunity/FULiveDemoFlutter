@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (copy, nonatomic) NSString *imageStr;
 /* 妆容上加的滤镜名称 */
 @property (nonatomic, strong) NSString *selectedFilter;
-/* 选中滤镜的 level*/
+/* 选中滤镜的 level， // 新版本 美妆模块自带的滤镜程度值*/
 @property (nonatomic, assign) double selectedFilterLevel;
 /* cell 选中记录 */
 @property (assign, nonatomic) BOOL isSel;
@@ -41,6 +41,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, copy) NSMutableArray <FUSingleMakeupModel *>* makeups;
 
+/// 是否v8.0.0之后新组合妆（只用一个bundle）
+@property (nonatomic, assign) BOOL newMakeupFlag;
 @end
 
 

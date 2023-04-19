@@ -11,7 +11,6 @@
 #import <FURenderKit/FUBeauty.h>
 #import "FUBeautyModel.h"
 #import "FUBeautyDefine.h"
-#import "FUStyleModel.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -25,13 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) NSArray<FUBeautyModel *> *skinParams;
 /* 美型参数 */
 @property (nonatomic, strong, readonly) NSArray<FUBeautyModel *> *shapeParams;
-/* 风格参数 ，用父类，因为View 用的就是父类泛型，后续需要优化*/ 
-@property (nonatomic, strong, readonly) NSArray<FUStyleModel *> *styleParams;
 
-/**
- * 当前选中的风格
- */
-@property (nonatomic, strong) FUStyleModel *currentStyle;
 
 @property (nonatomic, strong) FUBeautyModel *seletedFliter;
 
@@ -78,8 +71,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 //更新美颜参数到缓存
 - (void)updateBeautyCache;
-
-- (void)setStyleBeautyParams:(FUStyleModel *)styleModel;
 
 //刷新数据,内部会决定从缓存还是 重新初始化数据
 - (void)reloadBeautyParams;

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fulive_flutter/BaseModule/FUBaseWidget.dart';
 import 'package:fulive_flutter/BaseModule/FUBaseWidgetArguments.dart';
 import 'package:fulive_flutter/Makeup/FUMakeupConst.dart';
@@ -78,7 +79,7 @@ class _FUMakeupState extends State<FUMakeup> {
         alignment: Alignment.bottomCenter,
         child: ClipRect(
             child: Container(
-                height: 200,
+                height: _isCustomSubMakeup == true ? 200 : 140,
                 child: _isCustomSubMakeup == true
                     ? FUMakeupSubUI(_subMakeupKey, (bool subMakeupSelected) {
                         // 子妆切换成组合妆，通知FUBaseWidget调整拍照按钮位置.

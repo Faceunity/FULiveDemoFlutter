@@ -16,17 +16,17 @@
   "tex_blusher": "zhuangrong_sh.png",
   "tex_blusher2": "zhuangrong_sh2.png",
   "makeup_intensity_blusher": 0.699999988079071,
-  "makeup_eyeBrow_color": [
+  "makeup_brow_color": [
     0.0,
     0.0,
     0.0,
     0.0
   ],
   "tex_brow": "brow.png",
-  "brow_warp": 1.0,
+  "brow_warp": 0.0,
   "brow_warp_type": 3,
   "makeup_intensity_eyeBrow": 0.699999988079071,
-  "makeup_eyelash_color": [
+  "makeup_eyeLash_color": [
     0.0,
     0.0,
     0.0,
@@ -91,6 +91,6 @@
     1.0
   ],
   "lip_type": 0,
-  "is_two_color": 0,
-  "makeup_intensity_lip": 0.800000011920929
+  "makeup_intensity_lip": 0.800000011920929,
+  "use_brow_v2": 1.0
 }

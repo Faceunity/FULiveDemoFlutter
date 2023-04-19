@@ -40,6 +40,8 @@
  */
 
 - (void)startCapture {
+    // 需要音频轨道
+    [FURenderKit shareRenderKit].internalCameraSetting.needsAudioTrack = YES;
     [[FURenderKit shareRenderKit] startInternalCamera];
     if (_curRenderView) {
         [FURenderKit shareRenderKit].glDisplayView = _curRenderView;
@@ -67,7 +69,8 @@
     //分别率还原成720 * 1080
     [FURenderKit shareRenderKit].internalCameraSetting.sessionPreset = AVCaptureSessionPreset1280x720;
     //退出页面还原成前置摄像头
-    [[FURenderKit shareRenderKit].captureCamera changeCameraInputDeviceisFront:YES];
+    [FURenderKit shareRenderKit].internalCameraSetting.position = AVCaptureDevicePositionFront;
+    
 }
 
 - (void)setOnCameraChange {

@@ -36,6 +36,8 @@
 @property (nonatomic, strong) NSArray *beautyParams;
 //缓存的选种滤镜参数
 @property (nonatomic, strong) FUBeautyModel *seletedFliter;
-//缓存的风格参数
-@property (nonatomic, strong) FUStyleModel *currentStyle;
+
+- (BOOL)showsLandmarks;
+
++ (void)updateBeautyBlurEffect;
 @end

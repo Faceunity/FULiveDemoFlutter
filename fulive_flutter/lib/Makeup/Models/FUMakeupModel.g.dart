@@ -6,13 +6,12 @@ part of 'FUMakeupModel.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-FUMakeupModel _$FUMakeupModelFromJson(Map<String, dynamic> json) {
-  return FUMakeupModel(
-    json['title'] as String,
-    json['imagePath'] as String,
-    (json['value'] as num).toDouble(),
-  )..canCustomSub = json['canCustomSub'] as bool?;
-}
+FUMakeupModel _$FUMakeupModelFromJson(Map<String, dynamic> json) =>
+    FUMakeupModel(
+      json['title'] as String,
+      json['imagePath'] as String,
+      (json['value'] as num).toDouble(),
+    )..canCustomSub = json['canCustomSub'] as bool?;
 
 Map<String, dynamic> _$FUMakeupModelToJson(FUMakeupModel instance) =>
     <String, dynamic>{

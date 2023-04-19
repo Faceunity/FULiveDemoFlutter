@@ -6,12 +6,12 @@ import 'package:fulive_flutter/Beauty/FUBeautyDefine.dart';
 import 'dart:core';
 import 'package:fulive_plugin/fulive_plugin.dart';
 import 'package:fulive_plugin/FUBeautyPlugin.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:fulive_flutter/BaseModule/FUSelectedImage.dart';
 import 'package:fulive_flutter/Main/MainRouterDefine.dart';
 import 'package:provider/provider.dart';
 import 'BeautyToolsWidget.dart';
 import 'FUBeautyDataManager.dart';
+import 'FUBeautyModel.dart';
 
 class FUBeauty extends StatefulWidget {
   static const routerName = '/FUBeautyModuleArguments';
@@ -31,6 +31,8 @@ class _FUBeautyState extends State<FUBeauty> {
   // 录屏或者拍照action时候禁止点击对比按钮
   late StreamController prohibitCompare;
 
+  late Future<List<FUBeautyModel>> _dataList;
+
   //刷新basewidget里面的流式业务数据
   final GlobalKey<FUBaseWidgetState> _baseWidgetKey = GlobalKey();
 
@@ -40,7 +42,7 @@ class _FUBeautyState extends State<FUBeauty> {
     super.initState();
     FUBeautyPlugin.configBeauty();
     _manager = FUBeautifyDataManager();
-
+    _dataList = _manager.generateDataSource();
     adjustPhotoStream = StreamController.broadcast();
     prohibitStream = StreamController.broadcast();
     prohibitCompare = StreamController.broadcast();
@@ -53,7 +55,7 @@ class _FUBeautyState extends State<FUBeauty> {
     prohibitStream.close();
     prohibitCompare.close();
     //告知native 页面消失
-    FUBeautyPlugin.flutterWillAppear();
+    FUBeautyPlugin.flutterWillDisappear();
     FUBeautyPlugin.disposeFUBeauty();
   }
 
@@ -65,10 +67,27 @@ class _FUBeautyState extends State<FUBeauty> {
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<List<FUBeautyModel>>(
+      builder: (BuildContext, AsyncSnapshot snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasError) {
+            return Text("Error: ${snapshot.error}");
+          }
+          List<FUBeautyModel> dataList = snapshot.data;
+          return _beautyWidget(dataList);
+        } else {
+          return Container();
+        }
+      },
+      future: _dataList,
+    );
+  }
+
+  Widget _beautyWidget(List<FUBeautyModel> datalist) {
     Widget child = BeautyToolsWidget(
       showFilterTips: true,
       bizType: _manager.curBizType,
-      dataList: _manager.dataList,
+      dataList: datalist,
       compareCallback: (bool compare) {
         FULivePlugin.renderOrigin(compare);
         //同时禁止录屏按钮点击
@@ -131,7 +150,7 @@ class _FUBeautyState extends State<FUBeauty> {
               prohibitStream: prohibitStream,
               adjustPhotoStream: adjustPhotoStream,
               pointYMax: 0.8,
-              pointYMin: 0.27,
+              pointYMin: 0.3,
               phototAction: (bool flag) {
                 prohibitCompare.sink.add(flag);
               },

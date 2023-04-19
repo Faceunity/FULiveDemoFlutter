@@ -1,5 +1,5 @@
 //自定义视频流的基础组件
-
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -61,7 +61,10 @@ class _CustomStreamHomeState extends State<CustomStreamHome> {
     channel = FUFlutterEventChannel(
         (message) => {
               setState(() {
-                _hasFace = message == "1" ? true : false;
+                var jsonStr = message;
+                Map<String, dynamic> par = json.decode(jsonStr);
+                message = par["hasFace"];
+                _hasFace = message;
               })
             },
         (Error error) => {});

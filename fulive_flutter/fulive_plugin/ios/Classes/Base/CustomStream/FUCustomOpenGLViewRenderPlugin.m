@@ -8,12 +8,13 @@
 #import "FUCustomOpenGLViewRenderPlugin.h"
 #import <FURenderKit/FURenderKit.h>
 #import "FUFlutterPluginModelProtocol.h"
-#import "FUVideoReader.h"
+#import "FUVideoReaderAndReocrd.h"
 #import <FURenderKit/FUAIKit.h>
 
 #import "FUFlutterEventChannel.h"
-#import "FUImageHelper.h"
+#import <FURenderKit/FUImageHelper.h>
 #import <SVProgressHUD/SVProgressHUD.h>
+#import "FUManager.h"
 @interface FUCustomOpenGLViewRenderPluginModel : NSObject <FUFlutterPluginModelProtocol>
 
 @end
@@ -34,7 +35,7 @@
 //视频音频播放
 @property (nonatomic, strong) AVPlayer *avPlayer;
 //视频解码
-@property (nonatomic, strong) FUVideoReader *videoReader;
+@property (nonatomic, strong) FUVideoReaderAndReocrd *videoReader;
 
 //视频存存储路径
 @property (nonatomic, strong) NSString *desPath;
@@ -44,6 +45,9 @@
 @property (nonatomic, strong) FlutterMethodChannel *methodChannel;
 
 @property (nonatomic, assign) BOOL takePic;
+
+//记录之前的设置模式，退出页面需要恢复
+@property (nonatomic, assign) FUFaceProcessorDetectMode preModel;
 @end
 
 @implementation FUCustomOpenGLViewRenderPlugin {
@@ -62,7 +66,6 @@
         [self addObserver];
         _compare = NO;
         _desPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:@"finalVideo.mp4"];
-        
     }
     return self;
 }
@@ -95,18 +98,16 @@
 - (void)selectedImageOrVideo:(NSDictionary *)params {
     FUCustomOpenGLViewRenderPluginModel *model = [FUCustomOpenGLViewRenderPlugin  analysis: params];
     if ([model.value isKindOfClass:[NSNumber class]]) {
+        self.preModel = [FUAIKit shareKit].faceProcessorDetectMode;
         _type = [model.value intValue];
-        
         NSString *key = [NSString stringWithFormat:@"type_%d",_type];
         if (_type == 0) {
+            [FUAIKit shareKit].faceProcessorDetectMode = FUFaceProcessorDetectModeImage;
             //图片解码
             NSData *data = [[NSUserDefaults standardUserDefaults] objectForKey:key];
-            UIImage *sourceImage =  [UIImage imageWithData:data];
-            //目的压缩成RGBA8(A 32-bit-per-pixel, fixed-point pixel format in which the red, green, and blue color components precede the alpha value.)位颜色深度的格式，目前底层库只支持处理RGBA8
-            NSData *imageData0 = UIImageJPEGRepresentation(sourceImage, 1.0);
-            UIImage *newImage = [UIImage imageWithData:imageData0];
-            _image = newImage;
+            _image =  [UIImage imageWithData:data];
         } else {
+            [FUAIKit shareKit].faceProcessorDetectMode = FUFaceProcessorDetectModeVideo;
             //视频解码
             NSData *urlsData = [[NSUserDefaults standardUserDefaults] objectForKey:key];
             NSArray *list = [NSKeyedUnarchiver unarchiveObjectWithData:urlsData];
@@ -114,6 +115,7 @@
                 _videoPath = list[0];
             }
         }
+        [FUAIKit resetTrackedResult];
     } else {
         NSLog(@"自定义图片参数类型错误: %@", params);
     }
@@ -130,10 +132,13 @@
         NSLog(@"参数不正确: %@",noti.object);
     }
     
-    if (_type == 0) {
-        [self processImage];
-    } else {
-        [self processVideo];
+    //只有app活跃状态才 继续下面逻辑，其他状态都不处理，修复不活跃或者后台状态下处理视频或者图片时候产生的页面卡死问题
+    if ([UIApplication sharedApplication].applicationState == UIApplicationStateActive ) {
+        if (_type == 0) {
+            [self processImage];
+        } else {
+            [self processVideo];
+        }
     }
 }
 
@@ -206,7 +211,7 @@
 - (void)displayLinkAction {
 
     dispatch_async(_renderQueue, ^{
-        
+        [FUManager updateBeautyBlurEffect];
         @autoreleasepool {
             UIImage *newImage = nil;
             FUImageBuffer imageBuffer = [self.image getImageBuffer];
@@ -248,7 +253,10 @@
             
             if (self.eventChannel) {
                 BOOL hasFace = [FUAIKit shareKit].trackedFacesCount > 0;
-                [self.eventChannel sendMessageEventChannel:hasFace==YES?@"1":@"0"];
+                NSDictionary *par = @{@"debug":@"", @"hasFace":@(hasFace)};
+                NSData *jsonData = [NSJSONSerialization dataWithJSONObject:par options:NSJSONWritingPrettyPrinted error:nil];
+                NSString *jsonStr = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+                [self.eventChannel sendMessageEventChannel:jsonStr];
             }
         }
         
@@ -262,7 +270,7 @@
             [self.videoReader stopReading];
             self.videoReader = nil;
         }
-        self.videoReader = [[FUVideoReader alloc] initWithVideoURL:self.videoPath];
+        self.videoReader = [[FUVideoReaderAndReocrd alloc] initWithVideoURL:self.videoPath];
         self.videoReader.delegate = self;
         self.view.origintation = (int)self.videoReader.videoOrientation;
         
@@ -297,7 +305,7 @@
     if (self.videoReader) {
         [self.videoReader setVideoURL:self.videoPath];
     }else {
-        self.videoReader = [[FUVideoReader alloc] initWithVideoURL:self.videoPath];
+        self.videoReader = [[FUVideoReaderAndReocrd alloc] initWithVideoURL:self.videoPath];
         self.videoReader.delegate = self ;
     }
     [self.videoReader startReadWithDestinationPath:self.desPath];
@@ -358,7 +366,10 @@
 //    //检测人脸,传递给Flutter 
     if (self.eventChannel) {
         BOOL hasFace = [FUAIKit shareKit].trackedFacesCount > 0;
-        [self.eventChannel sendMessageEventChannel:hasFace==YES?@"1":@"0"];
+        NSDictionary *par = @{@"debug":@"", @"hasFace":@(hasFace)};
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:par options:NSJSONWritingPrettyPrinted error:nil];
+        NSString *jsonStr = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        [self.eventChannel sendMessageEventChannel:jsonStr];
     }
 
     return outPixelBuffer;
@@ -404,6 +415,8 @@
     if ([self.delegate respondsToSelector:@selector(disposePluginWithKey:)]) {
         [self.delegate disposePluginWithKey:NSStringFromClass([self class])];
     }
+    
+    [FUAIKit shareKit].faceProcessorDetectMode = self.preModel;
 }
 
 //Flutter 监听原生回调

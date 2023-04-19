@@ -16,7 +16,6 @@
 //             @"makeups" : @"FUSingleMakeupModel"
 //             };
 //}
-
 -(void)setMakeupBundle:(NSString *)makeupBundle{
     if (!makeupBundle || [makeupBundle isEqualToString:@""]) {
         return;
@@ -131,6 +130,120 @@
     modle9.value  = [dic[@"makeup_intensity_shadow"] floatValue];
     modle9.colorStr = @"makeup_shadow_color";
     modle9.colorStrV = dic[@"makeup_shadow_color"];
+    
+    if ([path containsString:@"xinggan"]) {
+        modle0.singleSelIndex = 1;
+        modle0.defaultColorIndex = 0;
+        modle1.singleSelIndex = 2;
+        modle1.defaultColorIndex = 0;
+        modle2.singleSelIndex = 1;
+        modle2.defaultColorIndex = 0;
+        modle3.singleSelIndex = 2;
+        modle3.defaultColorIndex = 0;
+        modle4.singleSelIndex = 1;
+        modle4.defaultColorIndex = 0;
+        modle5.singleSelIndex = 4;
+        modle5.defaultColorIndex = 0;
+        
+        modle7.singleSelIndex = 1;
+        
+        modle8.singleSelIndex = 2;
+        modle8.defaultColorIndex = 0;
+        modle9.singleSelIndex = 1;
+        modle9.defaultColorIndex = 0;
+        modle6.singleSelIndex = 0;
+        modle6.defaultColorIndex = 0;
+    } else if ([path containsString:@"tianmei"]) {
+        modle0.singleSelIndex = 1;
+        modle0.defaultColorIndex = 1;
+        modle1.singleSelIndex = 4;
+        modle1.defaultColorIndex = 1;
+        modle2.singleSelIndex = 4;
+        modle2.defaultColorIndex = 0;
+        modle3.singleSelIndex = 1;
+        modle3.defaultColorIndex = 0;
+        modle4.singleSelIndex = 2;
+        modle4.defaultColorIndex = 1;
+        modle5.singleSelIndex = 2;
+        modle5.defaultColorIndex = 0;
+        
+        modle7.singleSelIndex = 2;
+        
+        modle8.singleSelIndex = 1;
+        modle8.defaultColorIndex = 1;
+        modle9.singleSelIndex = 1;
+        modle9.defaultColorIndex = 0;
+        modle6.singleSelIndex = 0;
+        modle6.defaultColorIndex = 0;
+    } else if ([path containsString:@"linjia"]) {
+        modle0.singleSelIndex = 1;
+        modle0.defaultColorIndex = 2;
+        modle1.singleSelIndex = 1;
+        modle1.defaultColorIndex = 2;
+        modle2.singleSelIndex = 2;
+        modle2.defaultColorIndex = 0;
+        modle3.singleSelIndex = 1;
+        modle3.defaultColorIndex = 0;
+        modle4.singleSelIndex = 6;
+        modle4.defaultColorIndex = 2;
+        modle5.singleSelIndex = 1;
+        modle5.defaultColorIndex = 0;
+        
+        modle7.singleSelIndex = 3;
+        
+        modle8.singleSelIndex = 0;
+        modle8.defaultColorIndex = 0;
+        modle9.singleSelIndex = 0;
+        modle9.defaultColorIndex = 0;
+        modle6.singleSelIndex = 0;
+        modle6.defaultColorIndex = 0;
+        
+    } else if ([path containsString:@"oumei"]) {
+        modle0.singleSelIndex = 1;
+        modle0.defaultColorIndex = 3;
+        modle1.singleSelIndex = 2;
+        modle1.defaultColorIndex = 3;
+        modle2.singleSelIndex = 1;
+        modle2.defaultColorIndex = 0;
+        modle3.singleSelIndex = 4;
+        modle3.defaultColorIndex = 0;
+        modle4.singleSelIndex = 5;
+        modle4.defaultColorIndex = 3;
+        modle5.singleSelIndex = 5;
+        modle5.defaultColorIndex = 0;
+        
+        modle7.singleSelIndex = 2;
+        
+        modle8.singleSelIndex = 2;
+        modle8.defaultColorIndex = 3;
+        modle9.singleSelIndex = 1;
+        modle9.defaultColorIndex = 3;
+        modle6.singleSelIndex = 0;
+        modle6.defaultColorIndex = 0;
+    } else if ([path containsString:@"wumei"]) {
+        modle0.singleSelIndex = 1;
+        modle0.defaultColorIndex = 4;
+        modle1.singleSelIndex = 3;
+        modle1.defaultColorIndex = 4;
+        modle2.singleSelIndex = 1;
+        modle2.defaultColorIndex = 0;
+        modle3.singleSelIndex = 2;
+        modle3.defaultColorIndex = 1;
+        modle4.singleSelIndex = 3;
+        modle4.defaultColorIndex = 2;
+        modle5.singleSelIndex = 3;
+        modle5.defaultColorIndex = 0;
+        
+        modle7.singleSelIndex = 4;
+        
+        modle8.singleSelIndex = 1;
+        modle8.defaultColorIndex = 4;
+        modle9.singleSelIndex = 0;
+        modle9.defaultColorIndex = 0;
+        modle6.singleSelIndex = 0;
+        modle6.defaultColorIndex = 0;
+        
+    }
         
     _makeups = [NSMutableArray arrayWithObjects:modle0,modle1,modle2,modle3,modle4,modle5,modle6,modle7,modle8,modle9, nil];
 }

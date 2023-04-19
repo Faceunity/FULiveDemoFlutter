@@ -103,13 +103,18 @@
 - (void)setFUBeautyParams:(NSDictionary *)params {
     FlutterBeautyModel *model = [FlutterBeautyModel analysis: params];
     int subBizType = [(NSNumber *)model.subBizType doubleValue];
+    
     switch (model.bizType.intValue) {
         case FUBeautyDefineSkin: {
             double value = [(NSNumber *)model.value doubleValue];
             [self.baseManager setSkin:value forKey:subBizType];
             //同步native值
-            FUBeautyModel *native = [self.baseManager.skinParams objectAtIndex:subBizType];
-            native.mValue = value;
+            if (self.baseManager.skinParams.count > subBizType) {
+                FUBeautyModel *native = [self.baseManager.skinParams objectAtIndex:subBizType];
+                native.mValue = value;
+            } else {
+                NSLog(@"🔥🔥🔥🔥美型数据越界:FlutterBeautyModel: model.bizType == %@, model.subBizType == %@, model.value == %@ 🔥🔥🔥", model.bizType, model.subBizType, model.value);
+            }
         }
             
             break;
@@ -117,16 +122,14 @@
             double value = [(NSNumber *)model.value doubleValue];
             [self.baseManager setShap:[(NSNumber *)model.value doubleValue] forKey:[(NSNumber *)model.subBizType doubleValue]];
             //同步native值
-            FUBeautyModel *native = [self.baseManager.shapeParams objectAtIndex:subBizType];
-            native.mValue = value;
+            if (self.baseManager.shapeParams.count > subBizType) {
+                FUBeautyModel *native = [self.baseManager.shapeParams objectAtIndex:subBizType];
+                native.mValue = value;
+            } else {
+                NSLog(@"🔥🔥🔥🔥美肤数据越界:FlutterBeautyModel: model.bizType == %@, model.subBizType == %@, model.value == %@ 🔥🔥🔥", model.bizType, model.subBizType, model.value);
+            }
         }
             break;
-        case FUBeautyDefineStyle: {
-            FUStyleModel *model = [self.baseManager.styleParams objectAtIndex:subBizType];
-            [self.baseManager setStyleBeautyParams:model];
-        }
-            break;
-            
         default:
             break;
     }

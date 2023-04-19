@@ -7,15 +7,14 @@ part of 'FUMakeupSubTitleModel.dart';
 // **************************************************************************
 
 FUMakeupSubTitleModel _$FUMakeupSubTitleModelFromJson(
-    Map<String, dynamic> json) {
-  return FUMakeupSubTitleModel(
-    json['name'] as String,
-    (json['subModels'] as List<dynamic>)
-        .map((e) => FUMakeupSubModel.fromJson(e as Map<String, dynamic>))
-        .toList(),
-    subIndex: json['subIndex'] as int?,
-  );
-}
+        Map<String, dynamic> json) =>
+    FUMakeupSubTitleModel(
+      json['name'] as String,
+      (json['subModels'] as List<dynamic>)
+          .map((e) => FUMakeupSubModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      subIndex: json['subIndex'] as int? ?? 0,
+    );
 
 Map<String, dynamic> _$FUMakeupSubTitleModelToJson(
         FUMakeupSubTitleModel instance) =>

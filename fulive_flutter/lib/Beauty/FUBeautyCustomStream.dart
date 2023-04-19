@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fulive_flutter/BaseModule/FUBaseCustomStream.dart';
 import 'package:fulive_flutter/Beauty/FUBeautyDefine.dart';
+import 'package:fulive_flutter/Beauty/FUBeautyModel.dart';
 import 'package:fulive_plugin/fulive_plugin.dart';
 import 'package:provider/provider.dart';
 import 'BeautyToolsWidget.dart';
@@ -48,6 +49,8 @@ class _CustomStreamHomeState extends State<CustomStreamHome> {
   //默认显示下载按钮
   late bool _downloadBtnStatus;
 
+  late Future<List<FUBeautyModel>> _dataList;
+
   void changeVideoPlayBtn(bool isPlay) {
     setState(() {
       _isVideoPlay = isPlay;
@@ -65,15 +68,15 @@ class _CustomStreamHomeState extends State<CustomStreamHome> {
     print(call);
     if (call.method == "videoPlay") {
       bool isPlay = call.arguments["isPlay"];
-      changeVideoPlayBtn(isPlay);
       if (isPlay) {
         //正在播放时
-        changeDownLoadBtnStatus(false);
+        _downloadBtnStatus = false;
       } else {
         //播放结束时
         //状态和底部美颜UI展开关闭 互逆
-        changeDownLoadBtnStatus(!_bottomStatus);
+        _downloadBtnStatus = !_bottomStatus;
       }
+      changeVideoPlayBtn(isPlay);
     }
   }
 
@@ -82,7 +85,7 @@ class _CustomStreamHomeState extends State<CustomStreamHome> {
     super.initState();
     // FUBeautyPlugin.configBeauty();
     _manager = FUBeautifyDataManager();
-
+    _dataList = _manager.generateDataSource();
     FULivePlugin.requestVideoProcess();
 
     _downloadBtnStatus = widget.type == 0 ? true : false;
@@ -97,13 +100,30 @@ class _CustomStreamHomeState extends State<CustomStreamHome> {
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<List<FUBeautyModel>>(
+      builder: (BuildContext, AsyncSnapshot snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasError) {
+            return Text("Error: ${snapshot.error}");
+          }
+          List<FUBeautyModel> dataList = snapshot.data;
+          return _customStreamMainView(dataList);
+        } else {
+          return Container();
+        }
+      },
+      future: _dataList,
+    );
+  }
+
+  Widget _customStreamMainView(List<FUBeautyModel> datalist) {
     //监听native 视频播放回调
     FULivePlugin.listenNative(listenNativeVideoPlay);
     //底部美颜组件
     Widget child = BeautyToolsWidget(
         showFilterTips: false,
         bizType: _manager.curBizType,
-        dataList: _manager.dataList,
+        dataList: datalist,
         compareCallback: (bool compare) =>
             FULivePlugin.customRenderOrigin(compare),
         clickItemCallback: (bool flag) {
@@ -123,13 +143,15 @@ class _CustomStreamHomeState extends State<CustomStreamHome> {
             color: Colors.black,
           ),
           FUBaseCustomStream(widget.type, child, () {
+            //点击空白收起美颜UI,此时 应该修改美颜UI标记位置
             _manager.changeBizType(FUBeautyDefine.FUBeautyMax);
+            _bottomStatus = false;
             //视频正在播放的时候点击屏幕空白处 不显示下载按钮
             if (widget.type == 1) {
               changeDownLoadBtnStatus(!_isVideoPlay);
             } else {
               //图片状态根据底部控件是否展开来确定下载按钮是否隐藏
-              changeDownLoadBtnStatus(true);
+              changeDownLoadBtnStatus(!_bottomStatus);
             }
           }),
           Align(

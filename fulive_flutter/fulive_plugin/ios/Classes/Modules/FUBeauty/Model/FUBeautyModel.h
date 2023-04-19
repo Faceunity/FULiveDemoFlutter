@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface FUBeautyModel : NSObject
 @property (nonatomic,copy)NSString *mTitle;
 
-@property (nonatomic, assign) NSUInteger mParam;
+@property (nonatomic, assign) NSInteger mParam;
 
 @property (nonatomic,assign) double mValue;
 
@@ -33,6 +33,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 //标识类型
 @property (nonatomic, assign) FUBeautyDefine type;
+
+@property (nonatomic, assign) BOOL differentiateDevicePerformance;
 @end
 
 NS_ASSUME_NONNULL_END
