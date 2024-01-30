@@ -1,0 +1,20 @@
+[
+    {
+        "module":0,
+        "title":"美颜",
+        "enable":true,
+        "authCode":"1-0"
+    },
+    {
+        "module":1,
+        "title":"美妆",
+        "enable":true,
+        "authCode":"524288-0"
+    },
+    {
+        "module":2,
+        "title":"道具贴纸",
+        "enable":true,
+        "authCode":"110-0"
+    }
+]

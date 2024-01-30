@@ -1,0 +1,43 @@
+PODS:
+  - Flutter (1.0.0)
+  - fluttertoast (0.0.2):
+    - Flutter
+    - Toast
+  - fulive_plugin (0.0.1):
+    - Flutter
+    - FURenderKit (= 8.8.1)
+    - YYModel (= 1.0.4)
+  - FURenderKit (8.8.1)
+  - Toast (4.0.0)
+  - YYModel (1.0.4)
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - fulive_plugin (from `.symlinks/plugins/fulive_plugin/ios`)
+
+SPEC REPOS:
+  trunk:
+    - FURenderKit
+    - Toast
+    - YYModel
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  fluttertoast:
+    :path: ".symlinks/plugins/fluttertoast/ios"
+  fulive_plugin:
+    :path: ".symlinks/plugins/fulive_plugin/ios"
+
+SPEC CHECKSUMS:
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  fluttertoast: fafc4fa4d01a6a9e4f772ecd190ffa525e9e2d9c
+  fulive_plugin: 91fb0bb3b2dd205c6ff2fdac169cad118a7dbb1a
+  FURenderKit: 38c0b1b33f4c6586b7b68eadf30b01d54bc1f4e4
+  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
+  YYModel: 2a7fdd96aaa4b86a824e26d0c517de8928c04b30
+
+PODFILE CHECKSUM: 02caaa843f6501172c0d470d80e72f61175c8b93
+
+COCOAPODS: 1.11.3
