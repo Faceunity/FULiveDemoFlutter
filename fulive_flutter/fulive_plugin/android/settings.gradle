@@ -1,2 +1,0 @@
-include ':fu_core'
-rootProject.name = 'fulive_plugin'

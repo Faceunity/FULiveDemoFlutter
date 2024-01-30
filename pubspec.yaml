@@ -1,0 +1,69 @@
+name: fulivedemo_flutter   # 项目名称
+description: A new Flutter project. # 项目描述
+homepage: https://www.faceunity.com # 项目主页
+repository: http://192.168.0.118/xiangxiaopenyou/fulivedemo_flutter # 代码仓库
+publish_to: 'none'
+version: 1.0.0+1  #项目版本号
+
+environment:
+  sdk: '>=3.1.2 <4.0.0'
+
+dependencies: # 项目的直接依赖
+  flutter:
+    sdk: flutter
+
+  provider: ^5.0.0
+  json_annotation: ^4.8.1
+  build_runner: ^2.4.6
+  json_serializable: ^6.7.1
+  fluttertoast: ^8.0.8
+  cupertino_icons: ^1.0.2
+
+  fulive_plugin: 
+    path: fulive_plugin # 本地依赖
+
+dev_dependencies: # 项目的开发依赖
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets: # 项目的资源文件
+    - lib/resource/
+    - lib/resource/jsons/
+    - lib/resource/jsons/homepage/
+    - lib/resource/jsons/beauty/
+    - lib/resource/jsons/makeup/combination/
+    - lib/resource/jsons/makeup/custom/
+    - lib/resource/images/
+    - lib/resource/images/common/
+    - lib/resource/images/common/2.0x/
+    - lib/resource/images/common/3.0x/
+    - lib/resource/images/homepage/
+    - lib/resource/images/homepage/2.0x/
+    - lib/resource/images/homepage/3.0x/
+    - lib/resource/images/render/
+    - lib/resource/images/render/2.0x/
+    - lib/resource/images/render/3.0x/
+    - lib/resource/images/beauty/
+    - lib/resource/images/beauty/filter/
+    - lib/resource/images/beauty/filter/2.0x/
+    - lib/resource/images/beauty/filter/3.0x/
+    - lib/resource/images/beauty/skin/
+    - lib/resource/images/beauty/skin/2.0x/
+    - lib/resource/images/beauty/skin/3.0x/
+    - lib/resource/images/beauty/shape/
+    - lib/resource/images/beauty/shape/2.0x/
+    - lib/resource/images/beauty/shape/3.0x/
+    - lib/resource/images/makeup/
+    - lib/resource/images/makeup/2.0x/
+    - lib/resource/images/makeup/3.0x/
+    - lib/resource/images/makeup/combination/
+    - lib/resource/images/makeup/combination/2.0x/
+    - lib/resource/images/makeup/combination/3.0x/
+    - lib/resource/images/makeup/custom/
+    - lib/resource/images/makeup/custom/2.0x/
+    - lib/resource/images/makeup/custom/3.0x/
+    - lib/resource/images/sticker/
