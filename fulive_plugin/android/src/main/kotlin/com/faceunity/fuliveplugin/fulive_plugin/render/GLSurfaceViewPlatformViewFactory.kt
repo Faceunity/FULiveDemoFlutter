@@ -28,6 +28,8 @@ class GLSurfaceViewPlatformViewFactory: PlatformViewFactory(StandardMessageCodec
     private var renderFrameListener: NotifyFlutterListener? = null
     // 缓存图片/视频路径
     private var cacheMediaPath: String? = null
+    //是否是因为离开 cameraView页面 而关闭 相机
+    private var leaveCameraPage = false
 
     override fun create(context: Context, viewId: Int, args: Any?): PlatformView {
         val identifier = args as? String ?: throw IllegalArgumentException("identifier is null")
@@ -71,10 +73,12 @@ class GLSurfaceViewPlatformViewFactory: PlatformViewFactory(StandardMessageCodec
     }
 
     fun startCamera() {
+        leaveCameraPage = false
         (platformViews[CAMERA_RENDER] as? GLCameraPlatformView)?.startCamera()
     }
 
     fun stopCamera() {
+        leaveCameraPage = true
         (platformViews[CAMERA_RENDER] as? GLCameraPlatformView)?.stopCamera()
     }
 
@@ -180,7 +184,7 @@ class GLSurfaceViewPlatformViewFactory: PlatformViewFactory(StandardMessageCodec
         FULogger.d(TAG, "Lifecycle onResume: $currentPlatformView")
         when(currentPlatformView) {
             is GLCameraPlatformView -> {
-                if (!currentPlatformView.isViewRendering && !isSelectingMedia) {
+                if (!currentPlatformView.isViewRendering && !isSelectingMedia && !leaveCameraPage) {
                     currentPlatformView.startCamera()
                 }
             }
