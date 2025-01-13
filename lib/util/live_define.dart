@@ -1,5 +1,13 @@
 import 'package:json_annotation/json_annotation.dart';
 
+class DevicePerformanceLevel {
+  static int levelMinusOne = -1;
+  static int levelOne = 1;
+  static int levelTwo = 2;
+  static int levelThree = 3;
+  static int levelFour = 4;
+}
+
 enum Module {
   @JsonValue(0)
   beauty(0),

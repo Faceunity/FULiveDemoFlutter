@@ -1,6 +1,8 @@
 package com.faceunity.fuliveplugin.fulive_plugin.modules
 
+import com.faceunity.core.controller.facebeauty.FaceBeautyParam
 import com.faceunity.core.faceunity.FUAIKit
+import com.faceunity.core.utils.DecimalUtils
 import com.faceunity.fuliveplugin.fulive_plugin.config.FaceunityKit
 import com.faceunity.fuliveplugin.fulive_plugin.utils.FULocalStorage
 import io.flutter.plugin.common.MethodChannel
@@ -27,6 +29,7 @@ class FUFaceBeautyPlugin : BaseModulePlugin {
         "getLocalShape" to ::getLocalShape,
         "saveFilterToLocal" to ::saveFilterToLocal,
         "getLocalFilter" to ::getLocalFilter,
+        "setBeautyParam" to ::setBeautyParam,
     )
 
 
@@ -48,9 +51,7 @@ class FUFaceBeautyPlugin : BaseModulePlugin {
             SkinEnum.FUBeautySkinRemoveNasolabialFoldsStrength -> renderKit.faceBeauty?.removeLawPatternIntensity =
                 value
 
-            SkinEnum.FUBeautySkinAntiAcneSpot -> {
-                // 未实现
-            }
+            SkinEnum.FUBeautySkinAntiAcneSpot -> renderKit.faceBeauty?.delspotIntensity = value
 
             SkinEnum.FUBeautySkinClarity -> renderKit.faceBeauty?.clarityIntensity = value
             else -> {}
@@ -143,6 +144,17 @@ class FUFaceBeautyPlugin : BaseModulePlugin {
         result.success(FULocalStorage.getFaceBeautyFilter())
     }
 
+    private fun setBeautyParam(params: Map<String, Any>, result: MethodChannel.Result) {
+        val key = params.getString("key") ?: return
+        val value = params.get("value") ?: return
+        setBeautyParam(key, value)
+    }
+
+    private fun setBeautyParam(key: String, value: Any) {
+        when(key) {
+            FaceBeautyParam.ENABLE_SKIN_SEG -> renderKit.faceBeauty?.enableSkinSeg = DecimalUtils.doubleEquals(value as Double, 1.0)
+        }
+    }
 
     enum class SkinEnum {
         FUBeautySkinBlurLevel,

@@ -14,6 +14,7 @@ import com.faceunity.fuliveplugin.fulive_plugin.modules.FUStickerPlugin
 import com.faceunity.fuliveplugin.fulive_plugin.modules.RenderPlugin
 import com.faceunity.fuliveplugin.fulive_plugin.render.GLSurfaceViewPlatformViewFactory
 import com.faceunity.fuliveplugin.fulive_plugin.render.NotifyFlutterListener
+import com.faceunity.fuliveplugin.fulive_plugin.utils.RestrictedSkinTool
 import io.flutter.FlutterInjector
 import io.flutter.embedding.engine.loader.FlutterLoader
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -25,6 +26,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -95,12 +97,12 @@ class FulivePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandle
     private val methods =
         mapOf(
             "getPlatformVersion" to ::getPlatformVersion,
-            "isHighPerformanceDevice" to ::isHighPerformanceDevice,
-            "isNPUSupported" to ::isNPUSupported,
+            "devicePerformanceLevel" to ::devicePerformanceLevel,
             "getModuleCode" to ::getModuleCode,
             "setFaceProcessorDetectMode" to ::setFaceProcessorDetectMode,
             "requestAlbumForType" to ::requestAlbumForType,
             "setMaxFaceNumber" to ::setMaxFaceNumber,
+            "restrictedSkinParams" to ::restrictedSkinParams
         )
     override fun methods(): Map<String, (Map<String, Any>, MethodChannel.Result) -> Any> = methods
 
@@ -109,11 +111,8 @@ class FulivePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandle
     private fun getPlatformVersion(params: Map<String, Any>, result: MethodChannel.Result) {
         result.success("Android ${android.os.Build.VERSION.RELEASE}")
     }
-    private fun isHighPerformanceDevice(params: Map<String, Any>, result: MethodChannel.Result) {
-        result.success(FaceunityKit.highLeveDeice)
-    }
-    private fun isNPUSupported(params: Map<String, Any>, result: MethodChannel.Result) {
-        result.success(false)
+    private fun devicePerformanceLevel(params: Map<String, Any>, result: MethodChannel.Result) {
+        result.success(FaceunityKit.devicePerformanceLevel)
     }
     private fun getModuleCode(params: Map<String, Any>, result: MethodChannel.Result) {
         val code = params.getInt("code") ?: return
@@ -154,6 +153,12 @@ class FulivePlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandle
     private fun setMaxFaceNumber(params: Map<String, Any>, result: MethodChannel.Result) {
         val number = params.getInt("number")?: return
         FUAIKit.getInstance().maxFaces = number.coerceIn(1, 4)
+    }
+
+    private fun restrictedSkinParams(params: Map<String, Any>, result: MethodChannel.Result) {
+        mainScope.launch(Dispatchers.IO) {
+            result.success(RestrictedSkinTool.restrictedSkinParams)
+        }
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {

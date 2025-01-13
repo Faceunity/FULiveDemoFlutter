@@ -16,13 +16,13 @@ A new Flutter plugin project.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'FURenderKit', '8.8.1'
+  s.dependency 'FURenderKit_flutter', '8.13.0'
   s.dependency 'YYModel', '1.0.4'
   s.static_framework = true
   s.resource_bundles = {
     'fulive_plugin' => ['Assets/*.json','**/*.{png,bundle,json}']
   }
-  s.platform = :ios, '11.0'
+  s.platform = :ios, '12.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }

@@ -40,6 +40,13 @@ class BeautyPlugin {
     _channel.invokeMethod("setShapeIntensity", {"module" : moduleCode, "arguments" : [{"intensity" : intensity}, {"type" : type}]});
   }
 
+  /// 设置美颜参数，依赖 key
+  /// @param key key
+  /// @param value 美颜参数
+  static Future<void> setBeautyParam(String key, dynamic value) async {
+    _channel.invokeMethod("setBeautyParam", {"module": moduleCode, "arguments" : [{"key" : key}, {"value" : value}]});
+  }
+
   /// 保存美肤数据到本地
   /// @param jsonString 由美肤模型数组转换的 json 字符串
   /// @note 原生各端自行决定数据持久化方式

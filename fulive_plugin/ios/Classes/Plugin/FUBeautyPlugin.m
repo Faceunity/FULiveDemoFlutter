@@ -58,10 +58,13 @@ typedef NS_ENUM(NSUInteger, FUBeautyShape) {
 - (void)loadBeauty {
     NSString *path = [[NSBundle mainBundle] pathForResource:@"face_beautification" ofType:@"bundle"];
     FUBeauty *beauty = [[FUBeauty alloc] initWithPath:path name:@"FUBeauty"];
+    beauty.heavyBlur = 0;
     // 默认均匀磨皮
     beauty.blurType = 3;
+    // 默认精细变形
+    beauty.faceShape = 4;
     // 高性能设备设置去黑眼圈、去法令纹、大眼、嘴型最新效果
-    if ([FURenderKit devicePerformanceLevel] == FUDevicePerformanceLevelHigh) {
+    if ([FURenderKit devicePerformanceLevel] >= FUDevicePerformanceLevelHigh) {
         [beauty addPropertyMode:FUBeautyPropertyMode2 forKey:FUModeKeyRemovePouchStrength];
         [beauty addPropertyMode:FUBeautyPropertyMode2 forKey:FUModeKeyRemoveNasolabialFoldsStrength];
         [beauty addPropertyMode:FUBeautyPropertyMode3 forKey:FUModeKeyEyeEnlarging];
@@ -125,6 +128,15 @@ typedef NS_ENUM(NSUInteger, FUBeautyShape) {
         case FUBeautySkinClarity:
             [FURenderKit shareRenderKit].beauty.clarity = value;
             break;
+    }
+}
+
+- (void)setBeautyParam:(NSString *)key value:(NSNumber *)value{
+    
+    NSLog(@"key = %@, value = %d",key,value.intValue);
+    
+    if([key isEqualToString:@"enable_skinseg"]){
+        [FURenderKit shareRenderKit].beauty.enableSkinSegmentation = value.boolValue;
     }
 }
 

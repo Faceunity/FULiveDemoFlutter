@@ -19,6 +19,7 @@ import com.faceunity.core.utils.GlUtil
 import com.faceunity.fuliveplugin.fulive_plugin.config.FaceunityConfig
 import com.faceunity.fuliveplugin.fulive_plugin.config.FaceunityKit
 import com.faceunity.fuliveplugin.fulive_plugin.utils.FileUtils
+import com.faceunity.fuliveplugin.fulive_plugin.utils.FuDeviceUtils
 import io.flutter.plugin.platform.PlatformView
 import java.io.File
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -222,8 +223,9 @@ abstract class BasePlatformView(private val context: Context): PlatformView, OnG
 
 
     override fun onRenderBefore(inputData: FURenderInputData?) {
+        FULogger.d(tag(), "onRenderBefore: inputData：${inputData?.printMsg()}")
         mEnableFaceRender = true
-        if (FaceunityKit.highLeveDeice) //高性能设备 -> 才会走磨皮策略
+        if (FaceunityKit.devicePerformanceLevel >= FuDeviceUtils.DEVICE_LEVEL_TWO) //高性能设备 -> 才会走磨皮策略
             cheekFaceConfidenceScore()
         mFuCallStartTime = System.nanoTime()
     }

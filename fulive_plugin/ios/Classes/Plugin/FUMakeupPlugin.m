@@ -30,11 +30,11 @@
             NSString *path = [FUUtility pluginBundlePathWithName:model.bundleName];
             FUMakeup *makeup = [[FUMakeup alloc] initWithPath:path name:@"makeup"];
             // 高端机打开全脸分割
-            makeup.makeupSegmentation = [FURenderKit devicePerformanceLevel] == FUDevicePerformanceLevelHigh;
+            makeup.makeupSegmentation = [FURenderKit devicePerformanceLevel] >= FUDevicePerformanceLevelHigh;
             [FURenderKit shareRenderKit].makeup = makeup;
         } else {
             FUMakeup *makeup = [FUMakeup itemWithPath:[[NSBundle mainBundle] pathForResource:@"face_makeup" ofType:@"bundle"] name:@"face_makeup"];
-            makeup.makeupSegmentation = [FURenderKit devicePerformanceLevel] == FUDevicePerformanceLevelHigh;
+            makeup.makeupSegmentation = [FURenderKit devicePerformanceLevel] >= FUDevicePerformanceLevelHigh;
             [FURenderKit shareRenderKit].makeup = makeup;
             [self bindCombinationMakeupWithBundleName:model.bundleName];
         }
@@ -60,7 +60,7 @@
     FUSubMakeupModel *model = [FUSubMakeupModel yy_modelWithJSON:subMakeup];
     if (![FURenderKit shareRenderKit].makeup) {
         FUMakeup *makeup = [FUMakeup itemWithPath:[[NSBundle mainBundle] pathForResource:@"face_makeup" ofType:@"bundle"] name:@"face_makeup"];
-        makeup.makeupSegmentation = [FURenderKit devicePerformanceLevel] == FUDevicePerformanceLevelHigh;
+        makeup.makeupSegmentation = [FURenderKit devicePerformanceLevel] >= FUDevicePerformanceLevelHigh;
         [FURenderKit shareRenderKit].makeup = makeup;
     }
     NSString *subPath = [FUUtility pluginBundlePathWithName:model.bundleName];

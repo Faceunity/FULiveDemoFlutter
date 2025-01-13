@@ -5,10 +5,10 @@ PODS:
     - Toast
   - fulive_plugin (0.0.1):
     - Flutter
-    - FURenderKit (= 8.8.1)
+    - FURenderKit_flutter (= 8.13.0)
     - YYModel (= 1.0.4)
-  - FURenderKit (8.8.1)
-  - Toast (4.0.0)
+  - FURenderKit_flutter (8.13.0)
+  - Toast (4.1.1)
   - YYModel (1.0.4)
 
 DEPENDENCIES:
@@ -17,8 +17,8 @@ DEPENDENCIES:
   - fulive_plugin (from `.symlinks/plugins/fulive_plugin/ios`)
 
 SPEC REPOS:
-  trunk:
-    - FURenderKit
+  https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git:
+    - FURenderKit_flutter
     - Toast
     - YYModel
 
@@ -32,12 +32,12 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  fluttertoast: fafc4fa4d01a6a9e4f772ecd190ffa525e9e2d9c
-  fulive_plugin: 91fb0bb3b2dd205c6ff2fdac169cad118a7dbb1a
-  FURenderKit: 38c0b1b33f4c6586b7b68eadf30b01d54bc1f4e4
-  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
+  fluttertoast: 76fea30fcf04176325f6864c87306927bd7d2038
+  fulive_plugin: 3154fd2e9126802e1a68a3afd9f8882304e978a3
+  FURenderKit_flutter: 8645d93561b8ae3e24baef4c467ec45064b10d97
+  Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e
   YYModel: 2a7fdd96aaa4b86a824e26d0c517de8928c04b30
 
-PODFILE CHECKSUM: 02caaa843f6501172c0d470d80e72f61175c8b93
+PODFILE CHECKSUM: 5376207ff59ad46e8b6acc533610a5c782717d27
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.16.2
