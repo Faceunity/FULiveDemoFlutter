@@ -13,14 +13,8 @@ class FaceunityPlugin {
   }
 
   // 设备是否高端机型
-  static Future<bool> isHighPerformanceDevice() async {
-    final bool result = await methodChannel.invokeMethod("isHighPerformanceDevice");
-    return result;
-  }
-
-  // 设备是否支持 NPU
-  static Future<bool> isNPUSupported() async {
-    final bool result = await methodChannel.invokeMethod("isNPUSupported");
+  static Future<int> devicePerformanceLevel() async {
+    final int result = await methodChannel.invokeMethod("devicePerformanceLevel");
     return result;
   }
 
@@ -55,5 +49,17 @@ class FaceunityPlugin {
   /// @note 原生端回调结构：method(photoSelected或videoSelected)、arguments(成功true和失败false)
   static Future<void> requestAlbumCallBack(Function callBack) async {
     methodChannel.setMethodCallHandler((call) => callBack(call));
+  }
+
+    // 被限制的skin功能
+  static Future<List<int>> restrictedSkinParams() async {
+    final List<dynamic> result = await methodChannel.invokeMethod("restrictedSkinParams");
+    try {
+      // Ensure the list contains integers
+      final List<int> intList = result.cast<int>();
+      return intList;
+    } on PlatformException catch (_) {
+      return [];
+    }
   }
 }

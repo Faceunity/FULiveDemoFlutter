@@ -9,7 +9,7 @@
 #import "UIImage+FU.h"
 #import <FURenderKitManager.h>
 
-#define FUPicturePixelMaxSize ([FURenderKitManager sharedManager].devicePerformanceLevel == FUDevicePerformanceLevelHigh ? 12746752 : 5760000)
+#define FUPicturePixelMaxSize ([FURenderKitManager sharedManager].devicePerformanceLevel >= FUDevicePerformanceLevelHigh ? 12746752 : 5760000)
 
 @implementation UIImage (FU)
 

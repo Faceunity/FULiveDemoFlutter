@@ -23,6 +23,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)setShapeIntensity:(NSNumber *)intensity type:(NSNumber *)type;
 
+- (void)setBeautyParam:(NSString *)key value:(NSNumber *)value;
+
 - (void)saveSkinToLocal:(NSString *)jsonString;
 
 - (void)saveShapeToLocal:(NSString *)jsonString;

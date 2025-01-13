@@ -11,6 +11,9 @@ import java.io.File
  */
 object FaceunityConfig {
 
+    @JvmField
+    var BLACK_LIST: String = "config" + File.separator + "blackList.json"
+
     val BUNDLE_AI_FACE = "model" + File.separator + "ai_face_processor.bundle"
     val BUNDLE_AI_HUMAN = "model" + File.separator + "ai_human_processor.bundle"
 

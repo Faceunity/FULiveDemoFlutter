@@ -75,8 +75,8 @@
     }
 }
 
-- (NSNumber *)isHighPerformanceDevice {
-    return [NSNumber numberWithBool:[FURenderKitManager sharedManager].devicePerformanceLevel == FUDevicePerformanceLevelHigh];
+- (NSNumber *)devicePerformanceLevel {
+    return [NSNumber numberWithInt:(int)[FURenderKitManager sharedManager].devicePerformanceLevel];
 }
 
 - (NSNumber *)isNPUSupported {
@@ -98,12 +98,14 @@
 #pragma mark - Camera
 
 - (void)startCamera {
-    [self setFaceProcessorDetectMode:FUFaceProcessorDetectModeVideo];
-    [FURenderKit shareRenderKit].internalCameraSetting.needsAudioTrack = YES;
-    [[FURenderKit shareRenderKit] startInternalCamera];
-    if ([FURenderKitManager sharedManager].cameraRenderView) {
-        [FURenderKit shareRenderKit].glDisplayView = [FURenderKitManager sharedManager].cameraRenderView;
-    }
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [self setFaceProcessorDetectMode:FUFaceProcessorDetectModeVideo];
+        [FURenderKit shareRenderKit].internalCameraSetting.needsAudioTrack = YES;
+        [[FURenderKit shareRenderKit] startInternalCamera];
+        if ([FURenderKitManager sharedManager].cameraRenderView) {
+            [FURenderKit shareRenderKit].glDisplayView = [FURenderKitManager sharedManager].cameraRenderView;
+        }
+    });
 }
 
 - (void)stopCamera {
@@ -326,7 +328,7 @@
 
 - (void)startPlayingVideo {
     // 设置方向视频方向
-    [FURenderKitManager sharedManager].videoRenderView.origintation = (FUGLDisplayViewOrientation)self.videoReader.videoOrientation;
+    [FURenderKitManager sharedManager].videoRenderView.orientation = (FUGLDisplayViewOrientation)self.videoReader.videoOrientation;
     [self stopPreviewingVideo];
     // 视频解码
     [self.videoReader start];
@@ -448,8 +450,8 @@
             videoPixelBuffer = output.pixelBuffer;
         }
         if ([FURenderKitManager sharedManager].videoRenderView) {
-            if ([FURenderKitManager sharedManager].videoRenderView.origintation != self.videoOrientation) {
-                [FURenderKitManager sharedManager].videoRenderView.origintation = self.videoOrientation;
+            if ([FURenderKitManager sharedManager].videoRenderView.orientation != self.videoOrientation) {
+                [FURenderKitManager sharedManager].videoRenderView.orientation = self.videoOrientation;
             }
             [[FURenderKitManager sharedManager].videoRenderView displayPixelBuffer:videoPixelBuffer];
         }

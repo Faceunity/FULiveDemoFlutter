@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSNumber *)getModuleCode:(NSNumber *)code;
 
 /// 设备是否高端机型
-- (NSNumber *)isHighPerformanceDevice;
+- (NSNumber *)devicePerformanceLevel;
 
 /// 设备是否支持 NPU
 - (NSNumber *)isNPUSupported;

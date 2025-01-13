@@ -13,6 +13,7 @@ import com.faceunity.fuliveplugin.fulive_plugin.model.FUCombinationMakeupModel
 import com.faceunity.fuliveplugin.fulive_plugin.model.FUMakeupModel
 import com.faceunity.fuliveplugin.fulive_plugin.model.FUSubMakeupModel
 import com.faceunity.fuliveplugin.fulive_plugin.model.FUSubMakeupType
+import com.faceunity.fuliveplugin.fulive_plugin.utils.FuDeviceUtils
 import io.flutter.plugin.common.MethodChannel
 import org.json.JSONArray
 
@@ -42,12 +43,12 @@ class FUMakeupPlugin(private val context: Context) : BaseModulePlugin {
         val makeup = if (makeupModel.isCombined) {
             val makeup =
                 Makeup(FUBundleData(FaceunityConfig.makeupCombinationBundlePath(makeupModel.bundleName)))
-            makeup.machineLevel = FaceunityKit.highLeveDeice
+            makeup.machineLevel = FaceunityKit.devicePerformanceLevel >= FuDeviceUtils.DEVICE_LEVEL_TWO
             makeup
         } else {
             val makeup = Makeup(FUBundleData(FaceunityConfig.BUNDLE_FACE_MAKEUP))
             makeup.setCombinedConfig(FUBundleData(FaceunityConfig.makeupCombinationBundlePath(makeupModel.bundleName)))
-            makeup.machineLevel = FaceunityKit.highLeveDeice
+            makeup.machineLevel = FaceunityKit.devicePerformanceLevel >= FuDeviceUtils.DEVICE_LEVEL_TWO
             makeup
         }
         loadMakeupParams(makeup, makeupModel)
@@ -70,7 +71,7 @@ class FUMakeupPlugin(private val context: Context) : BaseModulePlugin {
         val makeupModel = FUSubMakeupModel.mapToSubMakeupModel(subMakeupParams) ?: return
         if (renderKit.makeup == null) {
             val makeup = Makeup(FUBundleData(FaceunityConfig.BUNDLE_FACE_MAKEUP))
-            makeup.machineLevel = FaceunityKit.highLeveDeice
+            makeup.machineLevel = FaceunityKit.devicePerformanceLevel >= FuDeviceUtils.DEVICE_LEVEL_TWO
             renderKit.makeup = makeup
         }
         val makeup = renderKit.makeup as? Makeup ?: return

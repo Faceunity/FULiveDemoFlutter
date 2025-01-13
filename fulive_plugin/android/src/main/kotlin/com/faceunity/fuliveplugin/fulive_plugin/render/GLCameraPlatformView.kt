@@ -1,12 +1,15 @@
 package com.faceunity.fuliveplugin.fulive_plugin.render
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import com.faceunity.core.entity.FUCameraConfig
 import com.faceunity.core.entity.FURenderInputData
 import com.faceunity.core.renderer.CameraRenderer
 import com.faceunity.core.utils.FULogger
 import com.faceunity.fuliveplugin.fulive_plugin.config.FaceunityKit
+import com.faceunity.fuliveplugin.fulive_plugin.render.renderer.CameraRenderer2
 
 /**
  *
@@ -16,12 +19,18 @@ import com.faceunity.fuliveplugin.fulive_plugin.config.FaceunityKit
  */
 class GLCameraPlatformView(context: Context, private val callback: ()-> Unit): BasePlatformView(context) {
 
-    private val cameraRenderer: CameraRenderer = CameraRenderer(glSurfaceView, FUCameraConfig(), this)
+    private val cameraRenderer: CameraRenderer2 = CameraRenderer2(context, glSurfaceView, FUCameraConfig(), this)
     private var isFrontCamera = true
     private var cameraRenderType = 0 // 0 单输入 1 双输入
     private var cameraWidth = 0
     private var cameraHeight = 0
 
+    private var isWaitingCameraFrame = false
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val reopenCameraAction = Runnable {
+        cameraRenderer.reopenCamera()
+        FULogger.d(tag(), "reopenCameraAction call")
+    }
 
     override fun getView(): View {
         return glSurfaceView
@@ -33,9 +42,18 @@ class GLCameraPlatformView(context: Context, private val callback: ()-> Unit): B
         callback.invoke()
     }
 
+    override fun onFlutterViewAttached(flutterView: View) {
+        super.onFlutterViewAttached(flutterView)
+        cameraRenderer.onResume()
+    }
+
     fun startCamera(){
         FULogger.d(tag(), "startCamera: ")
         cameraRenderer.onResume()
+        FaceunityKit.restoreFaceUnityConfig()
+
+        isWaitingCameraFrame = true
+        mainHandler.postDelayed(reopenCameraAction, 2000)
     }
 
     fun stopCamera(){
@@ -102,8 +120,16 @@ class GLCameraPlatformView(context: Context, private val callback: ()-> Unit): B
         mRenderFrameListener?.notifyFlutter(data)
     }
 
+    override fun onSurfaceCreated() {
+        super.onSurfaceCreated()
+    }
+
     override fun onRenderBefore(inputData: FURenderInputData?) {
         super.onRenderBefore(inputData)
+        if (isWaitingCameraFrame) {
+            mainHandler.removeCallbacks(reopenCameraAction)
+            isWaitingCameraFrame = false
+        }
         cameraWidth = inputData?.width ?: 0
         cameraHeight = inputData?.height ?: 0
         if (mFURenderKit.makeup == null) {

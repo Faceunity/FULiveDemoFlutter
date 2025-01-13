@@ -30,17 +30,19 @@
 }
 
 - (void)setupRenderKit {
-    [FURenderKit setLogLevel:FU_LOG_LEVEL_ERROR];
-    
     FUSetupConfig *setupConfig = [[FUSetupConfig alloc] init];
     setupConfig.authPack = FUAuthPackMake(g_auth_package, sizeof(g_auth_package));
-    NSString *controllerPath = [[NSBundle mainBundle] pathForResource:@"controller_cpp" ofType:@"bundle"];
-    if (controllerPath) {
-        setupConfig.controllerPath = controllerPath;
-    }
+//    NSString *controllerPath = [[NSBundle mainBundle] pathForResource:@"controller_cpp" ofType:@"bundle"];
+//    if (controllerPath) {
+//        setupConfig.controllerPath = controllerPath;
+//    }
     // 初始化 FURenderKit
     [FURenderKit setupWithSetupConfig:setupConfig];
     
+    // 设置日志
+    [FURenderKit setLogLevel:FU_LOG_LEVEL_INFO];
+//    NSString *logPath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
+//    [FURenderKit setLogFilePath:[logPath stringByAppendingPathComponent:@"xaingxin/log.txt"]];
     // 设置缓存目录
     [FURenderKit setCacheDirectory:FUDocumentPath];
     // 算法耗时统计
@@ -50,16 +52,21 @@
 //    [FURenderKit setFrameTimeProfileAutoReportToConsole];
 //    // 算法耗时统计输出到文件
 //    [FURenderKit setFrameTimeProfileAutoReportToFile:[FUDocumentPath stringByAppendingPathComponent:[NSString stringWithFormat:@"FUFrameTime %@.txt", FUCurrentDateString()]]];
-    
-    [FURenderKitManager loadFaceAIModel];
-    
     // 舌头
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"tongue" ofType:@"bundle"];
-    [FUAIKit loadTongueMode:path];
+//    NSString *path = [[NSBundle mainBundle] pathForResource:@"tongue" ofType:@"bundle"];
+//    [FUAIKit loadTongueMode:path];
     
     self.devicePerformanceLevel = [FURenderKit devicePerformanceLevel];
+    if (self.devicePerformanceLevel <= FUDevicePerformanceLevelLow) {
+        // 打开动态质量
+        [FURenderKit setDynamicQualityControlEnabled:YES];
+    }
     
     [self setDevicePerformanceDetails];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [FURenderKitManager loadFaceAIModel];
+    });
 }
 
 - (void)destoryRenderKit {
@@ -68,12 +75,24 @@
 
 - (void)setDevicePerformanceDetails {
     // 设置人脸算法质量
-    [FUAIKit shareKit].faceProcessorFaceLandmarkQuality = self.devicePerformanceLevel == FUDevicePerformanceLevelHigh ? FUFaceProcessorFaceLandmarkQualityHigh : FUFaceProcessorFaceLandmarkQualityMedium;
+    [FUAIKit shareKit].faceProcessorFaceLandmarkQuality = self.devicePerformanceLevel >= FUDevicePerformanceLevelHigh ? FUFaceProcessorFaceLandmarkQualityHigh : FUFaceProcessorFaceLandmarkQualityMedium;
     // 设置小脸检测是否打开
-    [FUAIKit shareKit].faceProcessorDetectSmallFace = self.devicePerformanceLevel == FUDevicePerformanceLevelHigh;
+    [FUAIKit shareKit].faceProcessorDetectSmallFace = self.devicePerformanceLevel >= FUDevicePerformanceLevelHigh;
 }
 
 + (void)loadFaceAIModel {
+    FUDevicePerformanceLevel level = [FURenderKitManager sharedManager].devicePerformanceLevel;
+    FUFaceAlgorithmConfig config = FUFaceAlgorithmConfigEnableAll;
+    if (level < FUDevicePerformanceLevelHigh) {
+        // 关闭所有效果
+        config = FUFaceAlgorithmConfigDisableAll;
+    } else if (level < FUDevicePerformanceLevelVeryHigh) {
+        // 关闭皮肤分割、祛斑痘和 ARMeshV2
+        config = FUFaceAlgorithmConfigDisableSkinSegAndDelSpot | FUFaceAlgorithmConfigDisableARMeshV2;
+    } else if (level < FUDevicePerformanceLevelExcellent) {
+        config = FUFaceAlgorithmConfigDisableSkinSeg;
+    }
+    [FUAIKit setFaceAlgorithmConfig:config];
     NSString *faceAIPath = [[NSBundle mainBundle] pathForResource:@"ai_face_processor" ofType:@"bundle"];
     [FUAIKit loadAIModeWithAIType:FUAITYPE_FACEPROCESSOR dataPath:faceAIPath];
 }
@@ -104,7 +123,7 @@
     if (![FURenderKit shareRenderKit].beauty || ![FURenderKit shareRenderKit].beauty.enable) {
         return;
     }
-    if ([FURenderKitManager sharedManager].devicePerformanceLevel == FUDevicePerformanceLevelHigh) {
+    if ([FURenderKitManager sharedManager].devicePerformanceLevel >= FUDevicePerformanceLevelHigh) {
         // 根据人脸置信度设置不同磨皮效果
         CGFloat score = [FUAIKit fuFaceProcessorGetConfidenceScore:0];
         if (score > 0.95) {
